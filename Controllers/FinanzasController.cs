@@ -284,9 +284,7 @@ namespace SVV.Controllers
             return View(cotizacion);
         }
 
-        // ============================================
         // SECCIÓN COTIZACIONES - MÉTODOS POST
-        // ============================================
 
         // CREA UNA NUEVA COTIZACIÓN EN LA BASE DE DATOS
         [HttpPost]
@@ -797,7 +795,6 @@ namespace SVV.Controllers
 
         // ============================================
         // EXPORTACIÓN DE COTIZACIONES A EXCEL
-        // ============================================
 
         // GENERA REPORTE EN EXCEL CON TODAS LAS COTIZACIONES
         [HttpGet]
@@ -1022,7 +1019,6 @@ namespace SVV.Controllers
 
         // ============================================
         // SECCIÓN FACTURAS Y VALIDACIONES
-        // ============================================
 
         // MUESTRA LISTADO DE FACTURAS PENDIENTES DE VALIDACIÓN
         public async Task<IActionResult> Facturas()
@@ -1308,8 +1304,7 @@ namespace SVV.Controllers
 
                     var finanzasUsers = await _context.Empleados
                         .Include(e => e.Rol)
-                        .Where(e => (e.Rol.Nombre.Contains("Finanzas") || e.Rol.Nombre.Contains("FINANZAS")) &&
-                                   e.Activo == true)
+                        .Where(e => e.Rol.Codigo == "FINANZAS" && e.Activo == true)
                         .ToListAsync();
 
                     foreach (var finanzas in finanzasUsers)
@@ -1342,7 +1337,6 @@ namespace SVV.Controllers
 
         // ============================================
         // SECCIÓN REVISIÓN DE CORRECCIONES
-        // ============================================
 
         // REVISA CORRECCIONES REALIZADAS POR EMPLEADOS
         [Authorize(Roles = "FINANZAS,ADMIN")]
@@ -1667,7 +1661,6 @@ namespace SVV.Controllers
 
         // ============================================
         // SECCIÓN REVISIÓN JP (JEFE DE PROCESO)
-        // ============================================
 
         // MUESTRA COMPROBACIONES PENDIENTES DE REVISIÓN POR JP
         [Authorize(Roles = "JP,ADMIN")]
@@ -1800,8 +1793,7 @@ namespace SVV.Controllers
 
                 var finanzasUsers = await _context.Empleados
                     .Include(e => e.Rol)
-                    .Where(e => (e.Rol.Nombre.Contains("Finanzas") || e.Rol.Nombre.Contains("FINANZAS")) &&
-                               e.Activo == true)
+                    .Where(e => e.Rol.Codigo == "FINANZAS" && e.Activo == true)
                     .ToListAsync();
 
                 foreach (var finanzas in finanzasUsers)
@@ -2692,7 +2684,7 @@ namespace SVV.Controllers
                 {
                     jefe = await _context.Empleados
                         .Include(e => e.Rol)
-                        .Where(e => e.Rol.Nombre.Contains("JP") && e.Activo == true)
+                        .Where(e => e.Rol.Codigo == "JP" && e.Activo == true)
                         .FirstOrDefaultAsync();
                 }
 
@@ -2731,10 +2723,9 @@ namespace SVV.Controllers
             try
             {
                 var finanzasUsers = await _context.Empleados
-                    .Include(e => e.Rol)
-                    .Where(e => (e.Rol.Nombre.Contains("Finanzas") || e.Rol.Nombre.Contains("FINANZAS")) &&
-                               e.Activo == true)
-                    .ToListAsync();
+                        .Include(e => e.Rol)
+                        .Where(e => e.Rol.Codigo == "FINANZAS" && e.Activo == true)
+                        .ToListAsync();
 
                 var url = $"{Request.Scheme}://{Request.Host}/Finanzas/AutorizacionesPago";
 
@@ -2785,18 +2776,14 @@ namespace SVV.Controllers
         }
 
         // ENVÍA CORREO DE APROBACIÓN A FINANZAS
-        private async Task EnviarCorreoAprobacionFinanzas(
-       ComprobacionesViaje comprobacion,
-       Empleados jefe,
-       string comentarios
-   )
+        private async Task EnviarCorreoAprobacionFinanzas(ComprobacionesViaje comprobacion, Empleados jefe, string comentarios)
         {
             try
             {
                 var finanzasUsers = await _context.Empleados
-                    .Include(e => e.Rol)
-                    .Where(e => e.Activo == true && (e.Rol.Nombre.Contains("FINANZAS")))
-                    .ToListAsync();
+                 .Include(e => e.Rol)
+                 .Where(e => e.Activo == true && e.Rol.Codigo == "FINANZAS")
+                 .ToListAsync();
 
                 var urlFinanzas = $"{Request.Scheme}://{Request.Host}/Finanzas/AutorizacionesPago";
 
@@ -3159,7 +3146,6 @@ namespace SVV.Controllers
 
         // ============================================
         // MÉTODOS AUXILIARES GENERALES
-        // ============================================
 
         // VERIFICA EXISTENCIA DE COTIZACIÓN
         private bool CotizacionExists(int id)

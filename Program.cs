@@ -1,9 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
 using SVV.Models;
 using SVV.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+ExcelPackage.License.SetNonCommercialOrganization("SVV");
+
 
 // Agregar controladores y vistas (MVC)
 builder.Services.AddControllersWithViews()
@@ -41,6 +45,7 @@ builder.Services.AddScoped<EmailSender, MailKitEmailSender>();
 // Registrar servicios de notificación
 builder.Services.AddSingleton<INotificationQueue, InMemoryNotificationQueue>();
 builder.Services.AddHostedService<NotificationWorker>();
+//PRUEBA
 
 // CONFIGURACIÓN DE AUTENTICACIÓN 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

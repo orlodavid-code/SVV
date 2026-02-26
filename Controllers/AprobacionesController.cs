@@ -416,7 +416,7 @@ namespace SVV.Controllers
                 await _context.SaveChangesAsync();
 
                 // NOTIFICACIÓN A DIRECCIÓN PARA CONTINUAR EL FLUJO
-                await EnviarNotificacionSiguienteEtapa(solicitud, "Dirección");
+                await EnviarNotificacionSiguienteEtapa(solicitud, "DIRECCION");
 
                 return RedirectToAction(nameof(Pendientes));
             }
@@ -494,7 +494,7 @@ namespace SVV.Controllers
                             }
                             solicitud.EstadoId = 6; // ENVIADA_FINANZAS
                             TempData["Success"] = "Solicitud aprobada y enviada a Finanzas.";
-                            await EnviarNotificacionSiguienteEtapa(solicitud, "Finanzas");
+                            await EnviarNotificacionSiguienteEtapa(solicitud, "FINANZAS");
                             break;
 
                         case 4: // Finanzas - redirige a método específico
@@ -589,16 +589,15 @@ namespace SVV.Controllers
             else if (empleado.RolId == 6 && solicitud.EstadoId == 8)
                 return "DIRECCION";
             else
-                return empleado.Rol.Nombre switch
+                return empleado.Rol.Codigo switch
                 {
-                    "Autorizador/Jefe Directo" => "JEFE_INMEDIATO",
-                    "Finanzas" => "FINANZAS",
-                    "Dirección" => "DIRECCION",
-                    "Administrador" => "DIRECCION",
+                    "JP" => "JEFE_INMEDIATO",
+                    "FINANZAS" => "FINANZAS",
+                    "DIRECCION" => "DIRECCION",
+                    "ADMIN" => "DIRECCION",
                     _ => "JEFE_INMEDIATO"
                 };
         }
-
         // VALIDACIÓN DE PERMISOS DE APROBACIÓN SEGÚN ROL Y ESTADO
         private async Task<bool> PuedeAprobarAsync(Empleados empleado, SolicitudesViaje solicitud)
         {
@@ -761,7 +760,7 @@ namespace SVV.Controllers
         {
             try
             {
-                var emailsFinanzas = await ObtenerEmailsPorRol("Finanzas");
+                var emailsFinanzas = await ObtenerEmailsPorRol("FINANZAS");
                 if (!emailsFinanzas.Any())
                 {
                     _logger.LogWarning("No se encontraron emails para Finanzas al notificar aprobación de Dirección.");
@@ -799,52 +798,27 @@ namespace SVV.Controllers
         }
 
         // OBTIENE LISTA DE EMAILS POR ROL SEGÚN CONFIGURACIÓN
-        private async Task<List<string>> ObtenerEmailsPorRol(string rolNombre)
+        private async Task<List<string>> ObtenerEmailsPorRol(string rolCodigo)
         {
             var emails = new List<string>();
 
             try
             {
                 var empleados = await _context.Empleados
-                    .Include(e => e.Rol)
-                    .Where(e => e.Activo == true &&
-                               !string.IsNullOrEmpty(e.Email) &&
-                               e.Rol.Nombre == rolNombre)
-                    .ToListAsync();
+           .Include(e => e.Rol)
+           .Where(e => e.Activo == true &&
+                      !string.IsNullOrEmpty(e.Email) &&
+                      e.Rol.Codigo == rolCodigo)
+           .ToListAsync();
 
                 emails = empleados.Select(e => e.Email).Distinct().ToList();
 
-                // FALLBACK A CONFIGURACIÓN DE APPSETTINGS SI NO HAY EMPLEADOS CON ESE ROL
-                if (!emails.Any())
-                {
-                    var fallbackKey = rolNombre switch
-                    {
-                        "Finanzas" => "FinanzasEmails",
-                        "Dirección" => "DireccionEmails",
-                        "Autorizador/Jefe Directo" => "JPEmails",
-                        "Recursos Humanos" => "RHEmails",
-                        _ => null
-                    };
 
-                    if (fallbackKey != null)
-                    {
-                        var csv = _configuration.GetSection("NotificationDefaults")?.GetValue<string>(fallbackKey);
-                        if (!string.IsNullOrWhiteSpace(csv))
-                        {
-                            emails = csv.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
-                                        .Select(e => e.Trim())
-                                        .Where(e => !string.IsNullOrWhiteSpace(e))
-                                        .Distinct()
-                                        .ToList();
-                        }
-                    }
-                }
-
-                _logger.LogInformation("Encontrados {Count} emails para rol {Rol}", emails.Count, rolNombre);
+                _logger.LogInformation("Encontrados {Count} emails para rol {Rol}", emails.Count, rolCodigo);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener emails para rol {Rol}", rolNombre);
+                _logger.LogError(ex, "Error al obtener emails para rol {Rol}", rolCodigo);
             }
 
             return emails;

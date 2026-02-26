@@ -494,8 +494,6 @@ namespace SVV.Controllers
         }
 
         // ==================== MÉTODOS AUXILIARES ====================
-
-        // MODIFICADO: ahora recibe baseUrl y construye un modelo completo
         private async Task EnviarCorreoSinBloquear(SolicitudesViaje solicitud, string baseUrl, bool esParaFinanzas = false)
         {
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
@@ -522,80 +520,50 @@ namespace SVV.Controllers
 
                     if (esParaFinanzas)
                     {
+                        // Caso: sin jefe directo → enviar a todos los de FINANZAS
                         var emailsFinanzas = await ObtenerEmailsPorRolConContexto(newContext, "FINANZAS");
-                        if (emailsFinanzas.Any())
-                        {
-                            foreach (var email in emailsFinanzas)
-                            {
-                                _queue.Enqueue(new ServicesNotificationItem
-                                {
-                                    ToEmail = email,
-                                    Subject = $"Solicitud de Viáticos (Sin Jefe) - {solicitud.CodigoSolicitud}",
-                                    TemplateName = "/Views/Emails/SolicitudCreada.cshtml",
-                                    Model = new
-                                    {
-                                        Solicitud = solicitud,
-                                        Url = urlSolic,
-                                        // Propiedades requeridas por la vista
-                                        EsBorrador = false,
-                                        EsEnvioAprobacion = true,
-                                        EsParaRH = false,
-                                        EsParaJP = false,
-                                        EsParaFinanzas = true,
-                                        EsSinJefe = true,
-                                        EsNotificacionMultiple = true,
-                                        EmpleadoSolicitante = ObtenerNombreCompletoEmpleado(empleadoSolicitante),
-                                        JefeDestinatario = "",
-                                        Mensaje = "Se ha enviado una solicitud de viáticos que requiere su aprobación (el empleado no tiene jefe directo asignado)."
-                                    }
-                                });
-                            }
-                            _logger.LogInformation("Notificación enviada a Finanzas para solicitud sin jefe: {Codigo}", solicitud.CodigoSolicitud);
-                        }
-                        else
+                        if (!emailsFinanzas.Any())
                         {
                             _logger.LogWarning("No se encontraron emails para Finanzas para la solicitud {SolicitudId}", solicitud.Id);
+                            return;
                         }
+
+                        foreach (var email in emailsFinanzas)
+                        {
+                            _queue.Enqueue(new ServicesNotificationItem
+                            {
+                                ToEmail = email,
+                                Subject = $"Solicitud de Viáticos (Sin Jefe) - {solicitud.CodigoSolicitud}",
+                                TemplateName = "/Views/Emails/SolicitudCreada.cshtml",
+                                Model = new
+                                {
+                                    Solicitud = solicitud,
+                                    Url = urlSolic,
+                                    EsBorrador = false,
+                                    EsEnvioAprobacion = true,
+                                    EsParaRH = false,
+                                    EsParaJP = false,
+                                    EsParaFinanzas = true,
+                                    EsSinJefe = true,
+                                    EsNotificacionMultiple = true,
+                                    EmpleadoSolicitante = ObtenerNombreCompletoEmpleado(empleadoSolicitante),
+                                    JefeDestinatario = "",
+                                    Mensaje = "Se ha enviado una solicitud de viáticos que requiere su aprobación (el empleado no tiene jefe directo asignado)."
+                                }
+                            });
+                        }
+                        _logger.LogInformation("Notificación enviada a Finanzas para solicitud sin jefe: {Codigo}", solicitud.CodigoSolicitud);
                     }
                     else
                     {
+                        // Caso normal: hay jefe directo
                         if (empleadoSolicitante?.JefeDirecto == null || string.IsNullOrEmpty(empleadoSolicitante.JefeDirecto.Email))
                         {
-                            _logger.LogWarning("No se encontró jefe directo para el empleado {EmpleadoId}", solicitud.EmpleadoId);
-
-                            var emailsJP = await ObtenerEmailsPorRolConContexto(newContext, "JP");
-                            if (emailsJP.Any())
-                            {
-                                foreach (var email in emailsJP)
-                                {
-                                    _queue.Enqueue(new ServicesNotificationItem
-                                    {
-                                        ToEmail = email,
-                                        Subject = $"Solicitud de Viáticos (Jefe No Asignado) - {solicitud.CodigoSolicitud}",
-                                        TemplateName = "/Views/Emails/SolicitudCreada.cshtml",
-                                        Model = new
-                                        {
-                                            Solicitud = solicitud,
-                                            Url = urlSolic,
-                                            EsBorrador = false,
-                                            EsEnvioAprobacion = true,
-                                            EsParaRH = false,
-                                            EsParaJP = true,      // Indicamos que es para JP aunque sea fallback
-                                            EsParaFinanzas = false,
-                                            EsSinJefe = false,
-                                            EsNotificacionMultiple = true,
-                                            EmpleadoSolicitante = ObtenerNombreCompletoEmpleado(empleadoSolicitante),
-                                            JefeDestinatario = "",
-                                            Mensaje = "Se ha enviado una solicitud de viáticos que requiere su aprobación (jefe directo no asignado en el sistema)."
-                                        }
-                                    });
-                                }
-                            }
+                            _logger.LogError("Error de lógica: se esperaba jefe directo pero no se encontró para solicitud {Id}", solicitud.Id);
                             return;
                         }
 
                         var jefeDirecto = empleadoSolicitante.JefeDirecto;
-
                         _queue.Enqueue(new ServicesNotificationItem
                         {
                             ToEmail = jefeDirecto.Email,
@@ -617,7 +585,6 @@ namespace SVV.Controllers
                                 Mensaje = "Se ha enviado una solicitud de viáticos que requiere su aprobación."
                             }
                         });
-
                         _logger.LogInformation("Correo encolado para JP {JefeEmail}", jefeDirecto.Email);
                     }
                 }
@@ -627,46 +594,27 @@ namespace SVV.Controllers
                 }
             }
         }
-
-        private async Task<List<string>> ObtenerEmailsPorRolConContexto(SvvContext context, string rolNombre)
+        private async Task<List<string>> ObtenerEmailsPorRolConContexto(SvvContext context, string rolCodigo)
         {
             var emails = new List<string>();
             try
             {
                 var empleados = await context.Empleados
                     .Include(e => e.Rol)
-                    .Where(e => e.Activo == true && !string.IsNullOrEmpty(e.Email) && e.Rol.Nombre == rolNombre)
+                    .Where(e => e.Activo == true && !string.IsNullOrEmpty(e.Email) && e.Rol.Codigo == rolCodigo)
                     .ToListAsync();
                 emails = empleados.Select(e => e.Email).Distinct().ToList();
 
                 if (!emails.Any())
                 {
-                    var fallbackKey = rolNombre switch
-                    {
-                        "RH" => "RHEmails",
-                        "FINANZAS" => "FinanzasEmails",
-                        "DIRECCION" => "DireccionEmails",
-                        "JP" => "JPEmails",
-                        _ => null
-                    };
-                    if (fallbackKey != null)
-                    {
-                        var csv = _configuration.GetSection("NotificationDefaults")?.GetValue<string>(fallbackKey);
-                        if (!string.IsNullOrWhiteSpace(csv))
-                        {
-                            emails = csv.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
-                                        .Select(e => e.Trim())
-                                        .Where(e => !string.IsNullOrWhiteSpace(e))
-                                        .Distinct()
-                                        .ToList();
-                        }
-                    }
+                    _logger.LogWarning("No se encontraron empleados activos con rol {RolCodigo}", rolCodigo);
+                    // Opcional: puedes agregar un fallback a configuración, pero se recomienda tener los datos en BD
                 }
-                _logger.LogInformation("Encontrados {Count} emails para rol {Rol}", emails.Count, rolNombre);
+                _logger.LogInformation("Encontrados {Count} emails para rol {RolCodigo}", emails.Count, rolCodigo);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener emails para rol {Rol}", rolNombre);
+                _logger.LogError(ex, "Error al obtener emails para rol {RolCodigo}", rolCodigo);
             }
             return emails;
         }
@@ -793,7 +741,7 @@ namespace SVV.Controllers
             {
                 var emailsFinanzas = await _context.Empleados
                     .Include(e => e.Rol)
-                    .Where(e => e.Activo == true && !string.IsNullOrEmpty(e.Email) && e.Rol.Nombre == "FINANZAS")
+                    .Where(e => e.Activo == true && !string.IsNullOrEmpty(e.Email) && e.Rol.Codigo == "FINANZAS")
                     .Select(e => e.Email)
                     .Distinct()
                     .ToListAsync();
@@ -840,7 +788,6 @@ namespace SVV.Controllers
                 _logger.LogError(ex, "Error al enviar notificación a Finanzas para solicitud {Id}", solicitud.Id);
             }
         }
-
         private async Task EnviarNotificacionRH(SolicitudesViaje solicitud, Empleados empleadoSolicitante, string tipoNotificacion)
         {
             try
