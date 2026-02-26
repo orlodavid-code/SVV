@@ -713,7 +713,7 @@ public partial class SvvContext : DbContext
                 .HasColumnName("medio_traslado_principal");
             entity.Property(e => e.MontoAnticipo)
                 .HasColumnType("decimal(18, 2)")
-                .HasColumnName("MontoAnticipo");
+                .HasColumnName("monto_anticipo");
             entity.Property(e => e.Motivo)
                 .HasColumnType("text")
                 .HasColumnName("motivo");
@@ -721,9 +721,9 @@ public partial class SvvContext : DbContext
                 .HasDefaultValue(0)
                 .HasColumnName("noches_hospedaje");
             entity.Property(e => e.NombreProyecto)
-                .HasMaxLength(200)
+                .HasMaxLength(400)
                 .HasDefaultValue("Proyecto General")
-                .HasColumnName("NombreProyecto");
+                .HasColumnName("nombre_proyecto");
             entity.Property(e => e.NumeroPersonas)
                 .HasDefaultValue(1)
                 .HasColumnName("numero_personas");
