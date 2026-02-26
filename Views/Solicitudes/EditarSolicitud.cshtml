@@ -1,0 +1,925 @@
+﻿@model SVV.ViewModels.CrearSolicitudViewModel
+
+@{
+    ViewData["Title"] = "Editar Solicitud de Viáticos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4 form-solicitud-container">
+    <div class="solicitud-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="solicitud-title"><i class="fas fa-edit me-2"></i>Editar Solicitud de Viáticos</h1>
+                <p class="solicitud-subtitle">Modifica los datos de la solicitud existente</p>
+            </div>
+            <a asp-action="Index" class="btn btn-solicitud-outline">
+                <i class="fas fa-arrow-left me-1"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <div class="solicitud-card">
+        <div class="solicitud-card-body">
+            @using (Html.BeginForm("Editar", "Solicitudes", FormMethod.Post, new { id = "formSolicitud", autocomplete = "off" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.Id)
+
+                <!-- ========== INFORMACIÓN BÁSICA ========== -->
+                <div class="mb-4">
+                    <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i>Información Básica</h5>
+                    <div class="row gx-3">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="NombreProyecto" class="form-label">Nombre del Proyecto *</label>
+                            <input asp-for="NombreProyecto" class="form-control" placeholder="Ej: Proyecto de Infraestructura 2024" required />
+                            <span asp-validation-for="NombreProyecto" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TipoViaticoId" class="form-label">Tipo de Viático *</label>
+                            <select asp-for="TipoViaticoId" id="estiloSelect" asp-items="@(new SelectList(Model.TiposViatico, "Id", "Nombre"))" class="form-select" required>
+                                <option value="">-- Seleccione un tipo --</option>
+                            </select>
+                            <span asp-validation-for="TipoViaticoId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+
+                <!-- ========== ANTICIPO ========== -->
+                <div class="mb-4">
+                    <h5 class="mb-3"><i class="fas fa-money-bill-wave me-2"></i>Anticipo</h5>
+                    <div class="row gx-3">
+                        <div class="col-12 mb-4">
+                            <div class="form-check form-switch mb-3">
+                                <input asp-for="requiere_anticipo" class="form-check-input" id="RequiereAnticipo" type="checkbox" />
+                                <label asp-for="requiere_anticipo" class="form-check-label fw-bold">¿Requiere anticipo?</label>
+                            </div>
+                            <div class="alert alert-info mt-2">
+                                <i class="fas fa-info-circle me-2"></i> Si selecciona "Sí", el departamento de Finanzas determinará el monto del anticipo.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+
+                <!-- ========== DESTINO Y FECHAS ========== -->
+                <div class="mb-4">
+                    <h5 class="mb-3"><i class="fas fa-map-marked-alt me-2"></i>Destino y Fechas</h5>
+                    <div class="row gx-3">
+                        <!-- Estado con Select2 -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Estado *</label>
+                            <select id="estadoSelect" class="form-select" data-placeholder="Escribe para buscar estado...">
+                                <option value=""></option>
+                            </select>
+                            <div class="invalid-feedback">Por favor selecciona un estado</div>
+                        </div>
+                        <!-- Municipio con Select2 -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Municipio *</label>
+                            <select id="municipioSelect" class="form-select" disabled data-placeholder="Primero selecciona un estado...">
+                                <option value=""></option>
+                            </select>
+                            <div class="invalid-feedback">Por favor selecciona un municipio</div>
+                        </div>
+
+                        <!-- Campo Destino oculto -->
+                        <input type="hidden" asp-for="Destino" id="DestinoHidden" />
+
+                        <!-- Vista previa del destino -->
+                        <div class="col-12 mb-3">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Destino seleccionado: <strong id="destinoPreview">No seleccionado</strong>
+                            </div>
+                        </div>
+
+                        <!-- Dirección específica -->
+                        <div class="col-12 mb-3">
+                            <label asp-for="DireccionEmpresa" class="form-label">Dirección específica del destino</label>
+                            <input asp-for="DireccionEmpresa" class="form-control" placeholder="Calle, número, colonia, referencia..." />
+                            <span asp-validation-for="DireccionEmpresa" class="text-danger"></span>
+                            <small class="form-text text-muted">Dirección exacta de la empresa o lugar a visitar</small>
+                        </div>
+
+                        <!-- Fechas -->
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FechaSalida" class="form-label">Fecha de Salida *</label>
+                            <input asp-for="FechaSalida" id="FechaSalida" type="date" class="form-control" required />
+                            <span asp-validation-for="FechaSalida" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FechaRegreso" class="form-label">Fecha de Regreso *</label>
+                            <input asp-for="FechaRegreso" id="FechaRegreso" type="date" class="form-control" required />
+                            <span asp-validation-for="FechaRegreso" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="HoraSalida" class="form-label">Hora de Salida</label>
+                            <input asp-for="HoraSalida" type="time" class="form-control" />
+                            <span asp-validation-for="HoraSalida" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="HoraRegreso" class="form-label">Hora de Regreso</label>
+                            <input asp-for="HoraRegreso" type="time" class="form-control" />
+                            <span asp-validation-for="HoraRegreso" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+
+                <!-- ========== TRANSPORTE ========== -->
+                <div class="mb-4">
+                    <h5 class="mb-3"><i class="fas fa-car me-2"></i>Transporte</h5>
+                    <div class="row gx-3">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="MedioTrasladoPrincipal" class="form-label">Medio de traslado</label>
+                            <select id="MedioTraslado" asp-for="MedioTrasladoPrincipal" class="form-select">
+                                <option value="">-- Seleccione --</option>
+                                <option>Vehículo Utilitario</option>
+                                <option>Vehículo Personal</option>
+                                <option>Transporte Público</option>
+                                <option>Taxi</option>
+                                <option>Uber/Didi</option>
+                                <option>Avión</option>
+                                <option>Autobús</option>
+                            </select>
+                            <span asp-validation-for="MedioTrasladoPrincipal" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3 d-flex align-items-center">
+                            <div class="form-check form-switch w-100">
+                                <input asp-for="RequiereTaxiDomicilio" class="form-check-input" id="RequiereTaxiDomicilio" type="checkbox" />
+                                <label asp-for="RequiereTaxiDomicilio" class="form-check-label ms-2">¿Requiere taxi desde domicilio?</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 mb-3" id="direccionTaxiGroup" style="@(Model.RequiereTaxiDomicilio ? "" : "display:none;")">
+                        <div class="row gx-3">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="DireccionTaxiOrigen" class="form-label">Dirección de origen (domicilio)</label>
+                                <input asp-for="DireccionTaxiOrigen" class="form-control" placeholder="Calle, número, colonia de donde partirá el taxi..." />
+                                <span asp-validation-for="DireccionTaxiOrigen" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="DireccionTaxiDestino" class="form-label">Dirección de destino</label>
+                                <input asp-for="DireccionTaxiDestino" class="form-control" placeholder="Calle, número, colonia a donde irá el taxi..." />
+                                <span asp-validation-for="DireccionTaxiDestino" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+
+                <!-- ========== EMPRESA Y ACTIVIDADES ========== -->
+                <div class="mb-4">
+                    <h5 class="mb-3"><i class="fas fa-building me-2"></i>Empresa y Actividades</h5>
+                    <div class="mb-3">
+                        <label asp-for="EmpresaVisitada" class="form-label">Empresa visitada *</label>
+                        <input asp-for="EmpresaVisitada" class="form-control" required />
+                        <span asp-validation-for="EmpresaVisitada" class="text-danger"></span>
+                        <small class="form-text text-muted">Nombre de la empresa o cliente a visitar</small>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="LugarComisionDetallado" class="form-label">Lugar de comisión detallado *</label>
+                        <textarea asp-for="LugarComisionDetallado" class="form-control" rows="3" required></textarea>
+                        <span asp-validation-for="LugarComisionDetallado" class="text-danger"></span>
+                        <small class="form-text text-muted">Dirección específica, oficina, departamento, etc.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Motivo" class="form-label">Motivo del viaje *</label>
+                        <textarea asp-for="Motivo" class="form-control" rows="4" required></textarea>
+                        <span asp-validation-for="Motivo" class="text-danger"></span>
+                        <small class="form-text text-muted">Describe las actividades, objetivos y resultados esperados del viaje</small>
+                    </div>
+                </div>
+                <hr />
+
+                <!-- ========== INFORMACIÓN DE PERSONAS ========== -->
+                <div class="mb-4">
+                    <h5 class="mb-3"><i class="fas fa-users me-2"></i>Información de Personas</h5>
+                    <div class="row gx-3">
+                        <div class="col-md-6 mb-3 d-flex align-items-center">
+                            <div class="form-check form-switch w-100">
+                                <input asp-for="RequiereHospedaje" class="form-check-input" id="RequiereHospedaje" type="checkbox" />
+                                <label asp-for="RequiereHospedaje" class="form-check-label ms-2">¿Requiere hospedaje?</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3" id="nochesHospedajeGroup" style="@(Model.RequiereHospedaje ? "" : "display:none;")">
+                            <label asp-for="NochesHospedaje" class="form-label">Noches de Hospedaje</label>
+                            <input asp-for="NochesHospedaje" type="number" class="form-control" min="1" />
+                            <span asp-validation-for="NochesHospedaje" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-dark text-white">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-users me-2"></i>
+                                            <h6 class="mb-0">Personas que Viajarán</h6>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <label class="mb-0 text-light">Número:</label>
+                                            <input asp-for="NumeroPersonas" class="form-control form-control-sm" style="width:80px;" type="number" min="1" max="50" id="NumeroPersonasInput" />
+                                            <button type="button" class="btn btn-sm btn-success" onclick="agregarFilaPersonaManual()">
+                                                <i class="fas fa-plus me-1"></i>Agregar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-info mb-3">
+                                        <i class="fas fa-info-circle me-2"></i> Ingresa los nombres completos de todas las personas que viajarán. <strong>El primer nombre debe ser el tuyo.</strong>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th width="60" class="text-center">#</th>
+                                                    <th>Nombre Completo *</th>
+                                                    <th width="80" class="text-center">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="personas-body">
+                                                @if (Model.NombresPersonas != null && Model.NombresPersonas.Any())
+                                                {
+                                                    for (int i = 0; i < Model.NombresPersonas.Count; i++)
+                                                    {
+                                                        <tr class="fila-persona align-middle">
+                                                            <td class="text-center"><span class="badge bg-secondary numero-fila">@(i+1)</span></td>
+                                                            <td>
+                                                                <div class="input-group input-group-sm">
+                                                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                                                    <input type="text" class="form-control nombre-input" name="NombresPersonas[@i]" value="@Model.NombresPersonas[i]" placeholder="@(i==0?"Tu nombre completo":$"Nombre del colaborador {i+1}")" required maxlength="100" />
+                                                                </div>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                @if (i > 0)
+                                                                {
+                                                                    <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-persona"><i class="fas fa-times"></i></button>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <button type="button" class="btn btn-sm btn-outline-danger" disabled><i class="fas fa-times"></i></button>
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <tr class="fila-persona align-middle">
+                                                        <td class="text-center"><span class="badge bg-primary numero-fila">1</span></td>
+                                                        <td>
+                                                            <div class="input-group input-group-sm">
+                                                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                                                <input type="text" class="form-control nombre-input" name="NombresPersonas[0]" placeholder="Tu nombre completo" required maxlength="100" />
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger" disabled><i class="fas fa-times"></i></button></td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                            <tfoot class="table-secondary">
+                                                <tr>
+                                                    <td colspan="3" class="text-end py-2">
+                                                        <strong class="text-dark">Total de Personas: <span class="badge bg-success" id="total-personas">@(Model.NombresPersonas?.Count ?? 1)</span></strong>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+
+                <!-- ========== BOTONES ========== -->
+                <div class="d-flex gap-2">
+                    <button type="submit" id="btnEditarSolicitud" class="btn btn-warning">
+                        <i class="fas fa-save me-1"></i> Actualizar Borrador
+                    </button>
+                    <button type="button" id="btnEnviarAprobacion" class="btn btn-success" onclick="enviarAprobacion(@Model.Id)">
+                        <i class="fas fa-paper-plane me-1"></i> Enviar a Aprobación
+                    </button>
+                    <button type="reset" class="btn btn-outline-secondary">Limpiar</button>
+                    <a asp-action="Index" class="btn btn-outline-danger">Cancelar</a>
+                </div>
+
+                <!-- Nota informativa -->
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Nota:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li><strong>Actualizar Borrador:</strong> Guarda los cambios pero mantiene la solicitud en estado BORRADOR.</li>
+                        <li><strong>Enviar a Aprobación:</strong> - Si tienes jefe directo, se enviará a él primero<br> - Si NO tienes jefe directo, se enviará directamente a Finanzas<br> <strong>Una vez enviada, NO podrás editarla.</strong></li>
+                    </ul>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Formulario oculto para enviar a aprobación -->
+<form id="formEnviarAprobacion" asp-action="EnviarAprobacion" method="post" style="display: none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.Id" />
+</form>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/solicitudes.css" asp-append-version="true" />
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+    <style>
+        .form-label::after { content: none !important; }
+        .select2-container .select2-selection {
+            background: rgba(30,40,50,0.9) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            border-radius: 8px;
+            min-height: 45px;
+        }
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+            color: white !important;
+        }
+        .select2-search__field { color: white !important; }
+        .select2-container--bootstrap-5.select2-container--focus .select2-selection,
+        .select2-container--bootstrap-5.select2-container--open .select2-selection {
+            border-color: #5cc87b !important;
+            box-shadow: 0 0 0 3px rgba(92,200,123,0.25) !important;
+        }
+        .select2-container--bootstrap-5 .select2-dropdown {
+            background: rgba(25,35,45,0.95) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+        }
+        .select2-container--bootstrap-5 .select2-results__option {
+            color: white !important;
+            padding: 0.5rem 1rem !important;
+        }
+        .select2-container--bootstrap-5 .select2-results__option--selected {
+            background-color: rgba(92,200,123,0.3) !important;
+            color: white !important;
+        }
+        .select2-container--bootstrap-5 .select2-results__option--highlighted {
+            background-color: rgba(92,200,123,0.5) !important;
+            color: white !important;
+        }
+        .select2-container--disabled .select2-selection {
+            background: rgba(30,40,50,0.5) !important;
+            opacity: 0.6;
+        }
+        .error { border-color: #dc3545 !important; }
+        label.error {
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+            display: block;
+        }
+        .valid { border-color: #28a745 !important; }
+        .select2-container--bootstrap-5 .select2-search--dropdown .select2-search__field {
+            background: #1e2832 !important;
+            color: #fff !important;
+            border: 1px solid rgba(255,255,255,0.15) !important;
+        }
+        .select2-search__field::placeholder { color: rgba(255,255,255,0.6) !important; }
+        .select2-container--bootstrap-5 .select2-selection__rendered { color: #fff !important; }
+        .select2-container--bootstrap-5 .select2-selection__arrow b {
+            border-color: #fff transparent transparent transparent !important;
+        }
+        .select2-results__option { background: #19232d !important; color: #fff !important; }
+        .select2-results__option--highlighted { background: #2c7be5 !important; color: #fff !important; }
+    </style>
+}
+
+@section Scripts {
+    <!-- jQuery (ya está en _Layout, pero por si acaso) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- jQuery Validation -->
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <!-- Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        // ============================================
+        // VARIABLES GLOBALES
+        // ============================================
+        let estadosData = [];
+        const LIMITE_PERSONAS = 30;
+
+        // Elementos del DOM
+        const estadoSelect = document.getElementById('estadoSelect');
+        const municipioSelect = document.getElementById('municipioSelect');
+        const destinoHidden = document.getElementById('DestinoHidden');
+        const destinoPreview = document.getElementById('destinoPreview');
+        const requiereHospedaje = document.getElementById('RequiereHospedaje');
+        const nochesHospedajeGroup = document.getElementById('nochesHospedajeGroup');
+        const requiereTaxi = document.getElementById('RequiereTaxiDomicilio');
+        const direccionTaxiGroup = document.getElementById('direccionTaxiGroup');
+        const numeroPersonasInput = document.getElementById('NumeroPersonasInput');
+        const cuerpoTablaPersonas = document.getElementById('personas-body');
+        const totalPersonasSpan = document.getElementById('total-personas');
+        const form = document.getElementById('formSolicitud');
+        const btnEditar = document.getElementById('btnEditarSolicitud');
+
+        // Destino existente desde el modelo
+        const destinoExistente = '@Model.Destino';
+        let estadoExistente = '', municipioExistente = '';
+        if (destinoExistente) {
+            const partes = destinoExistente.split(', ');
+            if (partes.length === 2) {
+                municipioExistente = partes[0];
+                estadoExistente = partes[1];
+            } else {
+                estadoExistente = destinoExistente;
+            }
+        }
+
+        // ============================================
+        // INICIALIZACIÓN CON JQUERY (para Select2)
+        // ============================================
+        $(async function () {
+            console.log('Inicializando formulario de edición...');
+
+            // 1. Inicializar Select2
+            $('#estadoSelect').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Escribe para buscar estado...',
+                allowClear: true,
+                width: '100%'
+            });
+
+            $('#municipioSelect').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Primero selecciona un estado',
+                allowClear: true,
+                width: '100%'
+            });
+
+            // 2. Cargar estados
+            await cargarEstados();
+
+            // 3. Configurar campos condicionales (hospedaje, taxi)
+            configurarCamposCondicionales();
+
+            // 4. Configurar validación de fechas y números
+            configurarValidacionFechas();
+            configurarValidacionNumeros();
+
+            // 5. Inicializar validación jQuery
+            inicializarValidacion();
+
+            // 6. Inicializar tabla de personas
+            if (numeroPersonasInput) {
+                actualizarTablaPersonas();
+            }
+
+            console.log('Formulario de edición inicializado correctamente');
+        });
+
+        // ============================================
+        // FUNCIONES DE ESTADOS/MUNICIPIOS
+        // ============================================
+        async function cargarEstados() {
+            try {
+                const response = await fetch('/data/estados-mexico.json');
+                if (!response.ok) throw new Error('No se pudo cargar el JSON');
+                const data = await response.json();
+                estadosData = data.estados || [];
+
+                // Llenar select de estados
+                $('#estadoSelect').empty().append('<option value=""></option>');
+                estadosData.forEach(estado => {
+                    $('#estadoSelect').append(new Option(estado.nombre, estado.nombre));
+                });
+
+                // Si hay estado existente, seleccionarlo y disparar cambio
+                if (estadoExistente) {
+                    $('#estadoSelect').val(estadoExistente).trigger('change');
+                }
+
+                console.log(`Estados cargados: ${estadosData.length}`);
+            } catch (error) {
+                console.error('Error cargando estados:', error);
+            }
+        }
+
+        $('#estadoSelect').on('change', function () {
+            const estadoNombre = $(this).val();
+            const $municipio = $('#municipioSelect');
+            $municipio.empty().append('<option value=""></option>').prop('disabled', true);
+
+            if (!estadoNombre) {
+                actualizarDestino();
+                return;
+            }
+
+            const estado = estadosData.find(e => e.nombre === estadoNombre);
+            if (!estado) {
+                console.warn('Estado no encontrado');
+                return;
+            }
+
+            // Ordenar municipios
+            const municipiosOrdenados = estado.municipios.slice().sort((a, b) => a.localeCompare(b, 'es'));
+            municipiosOrdenados.forEach(m => {
+                $municipio.append(new Option(m, m));
+            });
+
+            $municipio.prop('disabled', false).trigger('change.select2');
+
+            // Si hay municipio existente, seleccionarlo después de poblar
+            if (municipioExistente) {
+                $municipio.val(municipioExistente).trigger('change');
+                municipioExistente = ''; // para que no se vuelva a seleccionar en futuros cambios
+            }
+
+            actualizarDestino();
+        });
+
+        $('#municipioSelect').on('change', actualizarDestino);
+
+        function actualizarDestino() {
+            const estado = $('#estadoSelect').val();
+            const municipio = $('#municipioSelect').val();
+            if (estado && municipio) {
+                const destino = `${municipio}, ${estado}`;
+                destinoHidden.value = destino;
+                destinoPreview.textContent = destino;
+                destinoPreview.style.color = '#28a745';
+            } else if (estado) {
+                destinoHidden.value = estado;
+                destinoPreview.textContent = estado;
+                destinoPreview.style.color = '#ffc107';
+            } else {
+                destinoHidden.value = '';
+                destinoPreview.textContent = 'No seleccionado';
+                destinoPreview.style.color = '#dc3545';
+            }
+        }
+
+        // ============================================
+        // CAMPOS CONDICIONALES
+        // ============================================
+        function configurarCamposCondicionales() {
+            if (requiereHospedaje && nochesHospedajeGroup) {
+                requiereHospedaje.addEventListener('change', function () {
+                    nochesHospedajeGroup.style.display = this.checked ? 'block' : 'none';
+                    if (!this.checked) document.querySelector('[name="NochesHospedaje"]').value = '';
+                });
+                nochesHospedajeGroup.style.display = requiereHospedaje.checked ? 'block' : 'none';
+            }
+
+            if (requiereTaxi && direccionTaxiGroup) {
+                requiereTaxi.addEventListener('change', function () {
+                    direccionTaxiGroup.style.display = this.checked ? 'block' : 'none';
+                    if (!this.checked) {
+                        document.querySelector('[name="DireccionTaxiOrigen"]').value = '';
+                        document.querySelector('[name="DireccionTaxiDestino"]').value = '';
+                    }
+                });
+                direccionTaxiGroup.style.display = requiereTaxi.checked ? 'block' : 'none';
+            }
+        }
+
+        // ============================================
+        // TABLA DE PERSONAS
+        // ============================================
+        function actualizarTablaPersonas() {
+            let numeroPersonas = parseInt(numeroPersonasInput.value) || 1;
+            if (numeroPersonas < 1) numeroPersonas = 1;
+            if (numeroPersonas > LIMITE_PERSONAS) {
+                mostrarErrorPersonas(`No se permiten más de ${LIMITE_PERSONAS} personas.`);
+                numeroPersonas = LIMITE_PERSONAS;
+                numeroPersonasInput.value = LIMITE_PERSONAS;
+            } else {
+                limpiarErrorPersonas();
+            }
+
+            const filasActuales = cuerpoTablaPersonas.querySelectorAll('.fila-persona').length;
+
+            if (numeroPersonas > filasActuales) {
+                for (let i = filasActuales; i < numeroPersonas; i++) {
+                    agregarFilaPersona(i);
+                }
+            } else if (numeroPersonas < filasActuales) {
+                for (let i = filasActuales - 1; i >= numeroPersonas; i--) {
+                    if (i > 0) eliminarFilaPersona(i);
+                }
+            }
+
+            reindexarFilas();
+            actualizarContadorPersonas();
+        }
+
+        function agregarFilaPersona(index) {
+            const fila = document.createElement('tr');
+            fila.className = 'fila-persona align-middle';
+            const esSolicitante = index === 0;
+            fila.innerHTML = `
+                <td class="text-center"><span class="badge ${esSolicitante ? 'bg-primary' : 'bg-secondary'} numero-fila">${index+1}</span></td>
+                <td>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        <input type="text" class="form-control nombre-input" name="NombresPersonas[${index}]" placeholder="${esSolicitante ? 'Tu nombre completo' : 'Nombre del colaborador'}" maxlength="100" />
+                    </div>
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-persona" ${esSolicitante ? 'disabled' : ''}><i class="fas fa-times"></i></button>
+                </td>
+            `;
+            cuerpoTablaPersonas.appendChild(fila);
+        }
+
+        function eliminarFilaPersona(index) {
+            const filas = cuerpoTablaPersonas.querySelectorAll('.fila-persona');
+            if (filas[index] && index > 0) filas[index].remove();
+        }
+
+        function reindexarFilas() {
+            const filas = cuerpoTablaPersonas.querySelectorAll('.fila-persona');
+            filas.forEach((fila, index) => {
+                fila.querySelector('.numero-fila').textContent = index + 1;
+                const input = fila.querySelector('.nombre-input');
+                input.name = `NombresPersonas[${index}]`;
+                input.placeholder = index === 0 ? 'Tu nombre completo' : 'Nombre del colaborador';
+                const badge = fila.querySelector('.numero-fila');
+                badge.className = `badge ${index === 0 ? 'bg-primary' : 'bg-secondary'} numero-fila`;
+                const btn = fila.querySelector('.btn-eliminar-persona');
+                if (btn) btn.disabled = index === 0;
+            });
+            numeroPersonasInput.value = filas.length;
+        }
+
+        function actualizarContadorPersonas() {
+            const total = cuerpoTablaPersonas.querySelectorAll('.fila-persona').length;
+            if (totalPersonasSpan) totalPersonasSpan.textContent = total;
+        }
+
+        function mostrarErrorPersonas(mensaje) {
+            let errorSpan = document.getElementById('error-personas');
+            if (!errorSpan) {
+                errorSpan = document.createElement('div');
+                errorSpan.id = 'error-personas';
+                errorSpan.className = 'text-danger mt-1';
+                numeroPersonasInput.parentNode.appendChild(errorSpan);
+            }
+            errorSpan.textContent = mensaje;
+        }
+
+        function limpiarErrorPersonas() {
+            const errorSpan = document.getElementById('error-personas');
+            if (errorSpan) errorSpan.textContent = '';
+        }
+
+        numeroPersonasInput?.addEventListener('input', actualizarTablaPersonas);
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-eliminar-persona');
+            if (!btn || btn.disabled) return;
+            const fila = btn.closest('tr');
+            if (fila) {
+                const index = Array.from(fila.parentNode.children).indexOf(fila);
+                eliminarFilaPersona(index);
+                reindexarFilas();
+                actualizarContadorPersonas();
+            }
+        });
+
+        window.agregarFilaPersonaManual = function () {
+            const nuevaCantidad = parseInt(numeroPersonasInput.value) + 1;
+            if (nuevaCantidad <= LIMITE_PERSONAS) {
+                numeroPersonasInput.value = nuevaCantidad;
+                actualizarTablaPersonas();
+            }
+        };
+
+        // ============================================
+        // VALIDACIÓN DE FECHAS
+        // ============================================
+        if ($.validator) {
+            $.extend($.validator.messages, {
+                required: "Este campo es obligatorio.",
+                date: "Por favor, introduce una fecha válida (AAAA-MM-DD).",
+                number: "Por favor, introduce un número válido."
+            });
+        }
+
+        $.validator.addMethod("fechaRealista", function (value, element) {
+            if (!value) return true;
+            const regex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!regex.test(value)) return false;
+            const fecha = new Date(value);
+            if (isNaN(fecha.getTime())) return false;
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            const maxFecha = new Date();
+            maxFecha.setFullYear(hoy.getFullYear() + 5);
+            return fecha >= hoy && fecha <= maxFecha;
+        }, "La fecha debe ser a partir de hoy y no mayor a 5 años en el futuro.");
+
+        $.validator.addMethod("entero", function (value, element) {
+            if (!value) return true;
+            return /^\d+$/.test(value) && !value.includes('.');
+        }, "Por favor, introduce un número entero.");
+
+        function configurarValidacionFechas() {
+            const fechaSalida = $('#FechaSalida');
+            const fechaRegreso = $('#FechaRegreso');
+            const hoy = new Date().toISOString().split('T')[0];
+
+            if (fechaSalida.length) {
+                fechaSalida.attr('min', hoy);
+                fechaSalida.on('change', function () {
+                    if (fechaRegreso.val() && fechaRegreso.val() < this.value) {
+                        fechaRegreso.val(this.value);
+                    }
+                    fechaRegreso.attr('min', this.value);
+                });
+            }
+            if (fechaRegreso.length) {
+                fechaRegreso.attr('min', hoy);
+            }
+        }
+
+        // ============================================
+        // VALIDACIÓN NUMÉRICA
+        // ============================================
+        function configurarValidacionNumeros() {
+            const inputNoches = document.querySelector('[name="NochesHospedaje"]');
+            function soloNumeros(e) {
+                if (!/[0-9]|Backspace|Delete|ArrowLeft|ArrowRight|Tab/.test(e.key)) e.preventDefault();
+            }
+            if (numeroPersonasInput) {
+                numeroPersonasInput.addEventListener('keydown', soloNumeros);
+            }
+            if (inputNoches) {
+                inputNoches.addEventListener('keydown', soloNumeros);
+                inputNoches.addEventListener('input', function () {
+                    if (!requiereHospedaje.checked) {
+                        this.value = '';
+                    } else {
+                        let valor = parseInt(this.value) || 1;
+                        if (valor < 1) valor = 1;
+                        if (valor > 30) valor = 30;
+                        this.value = valor;
+                    }
+                });
+            }
+        }
+
+        // ============================================
+        // CONFIGURAR JQUERY VALIDATION
+        // ============================================
+        function inicializarValidacion() {
+            if (!$.validator) return;
+
+            $('#formSolicitud').validate({
+                rules: {
+                    NombreProyecto: { required: true },
+                    TipoViaticoId: { required: true },
+                    FechaSalida: { required: true, date: true, fechaRealista: true },
+                    FechaRegreso: { required: true, date: true, fechaRealista: true },
+                    EmpresaVisitada: { required: true },
+                    LugarComisionDetallado: { required: true },
+                    Motivo: { required: true },
+                    NochesHospedaje: {
+                        required: function () { return requiereHospedaje && requiereHospedaje.checked; },
+                        entero: true,
+                        range: [1, 30]
+                    },
+                    NumeroPersonas: {
+                        required: true,
+                        entero: true,
+                        range: [1, LIMITE_PERSONAS]
+                    },
+                    DireccionTaxiOrigen: {
+                        required: function () { return requiereTaxi && requiereTaxi.checked; }
+                    },
+                    DireccionTaxiDestino: {
+                        required: function () { return requiereTaxi && requiereTaxi.checked; }
+                    }
+                },
+                messages: {
+                    FechaSalida: {
+                        fechaRealista: "La fecha debe ser a partir de hoy y no mayor a 5 años."
+                    },
+                    FechaRegreso: {
+                        fechaRealista: "La fecha debe ser a partir de hoy y no mayor a 5 años."
+                    },
+                    NochesHospedaje: { range: "Las noches deben estar entre 1 y 30" },
+                    NumeroPersonas: { range: `El número de personas debe estar entre 1 y ${LIMITE_PERSONAS}` }
+                },
+                errorElement: 'span',
+                errorPlacement: function (error, element) {
+                    error.addClass('invalid-feedback');
+                    element.closest('.mb-3').append(error);
+                },
+                highlight: function (element) {
+                    $(element).addClass('is-invalid').removeClass('is-valid');
+                },
+                unhighlight: function (element) {
+                    $(element).removeClass('is-invalid').addClass('is-valid');
+                },
+                submitHandler: function (formEl) {
+                    // Validaciones adicionales antes de enviar
+                    const estado = $('#estadoSelect').val();
+                    const municipio = $('#municipioSelect').val();
+
+                    if (!estado) {
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'Debes seleccionar un estado' });
+                        $('#estadoSelect').focus();
+                        return false;
+                    }
+                    if (!municipio) {
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'Debes seleccionar un municipio' });
+                        $('#municipioSelect').focus();
+                        return false;
+                    }
+                    const nombresValidos = validarNombresPersonas();
+                    if (!nombresValidos) {
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'Debes completar todos los nombres de las personas' });
+                        return false;
+                    }
+                    const fechaSalida = new Date($('#FechaSalida').val());
+                    const fechaRegreso = new Date($('#FechaRegreso').val());
+                    if (fechaRegreso < fechaSalida) {
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'La fecha de regreso debe ser posterior a la fecha de salida' });
+                        return false;
+                    }
+
+                    // Deshabilitar botón y enviar
+                    $('#btnEditarSolicitud').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Guardando...');
+                    formEl.submit();
+                }
+            });
+        }
+
+        // ============================================
+        // FUNCIONES AUXILIARES
+        // ============================================
+        function validarNombresPersonas() {
+            const inputs = document.querySelectorAll('.nombre-input');
+            let ok = true;
+            inputs.forEach(i => {
+                if (!i.value.trim()) {
+                    i.classList.add('is-invalid');
+                    ok = false;
+                } else {
+                    i.classList.remove('is-invalid');
+                }
+            });
+            return ok;
+        }
+
+        // ============================================
+        // ENVÍO A APROBACIÓN
+        // ============================================
+        window.enviarAprobacion = function (solicitudId) {
+            if (!validarDestino() || !validarNombresPersonas() || !validarFechas()) return;
+
+            Swal.fire({
+                title: '¿Enviar a aprobación?',
+                html: '<p><strong>Una vez enviada no podrás editarla.</strong></p><p>Se enviará a tu jefe directo (si tienes) o directamente a Finanzas.</p>',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, enviar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const btn = document.getElementById('btnEnviarAprobacion');
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enviando...';
+                    document.getElementById('formEnviarAprobacion').submit();
+                }
+            });
+        };
+
+        function validarDestino() {
+            if (!estadoSelect.value) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Debes seleccionar un estado.' });
+                estadoSelect.focus();
+                return false;
+            }
+            if (!municipioSelect.value) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Debes seleccionar un municipio.' });
+                municipioSelect.focus();
+                return false;
+            }
+            return true;
+        }
+
+        function validarFechas() {
+            const salida = new Date(document.getElementById('FechaSalida').value);
+            const regreso = new Date(document.getElementById('FechaRegreso').value);
+            if (regreso < salida) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'La fecha de regreso debe ser posterior a la salida.' });
+                return false;
+            }
+            return true;
+        }
+    </script>
+}

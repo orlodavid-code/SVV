@@ -1,0 +1,1182 @@
+﻿@model SVV.ViewModels.RevisionCorreccionViewModel
+@{
+    ViewData["Title"] = "Revisar Correcciones - " + Model.CodigoComprobacion;
+}
+
+@section Styles {
+    <style>
+        /* VARIABLES GLOBALES - COHERENTES CON FACTURAS.CSS */
+        :root {
+            --viamtek-green: #5cc87b;
+            --viamtek-dark-green: #308184;
+            --color-white: #ffffff;
+            --color-black: #000000;
+            --main-bg-color: #0f1419;
+            --panel-bg: rgba(15, 20, 25, 0.85);
+            --card-bg: rgba(25, 35, 45, 0.9);
+            --card-bg-light: rgba(35, 45, 55, 0.95);
+            --border-color: rgba(92, 200, 123, 0.3);
+            --border-light: rgba(255, 255, 255, 0.1);
+            --primary-text: #ffffff;
+            --secondary-text: #a0aec0;
+            --accent-text: #5cc87b;
+            --bg-gradient: linear-gradient(135deg, #0a0f14 0%, #1a2a35 50%, #0f1419 100%);
+            --button-gradient: linear-gradient(180deg, var(--viamtek-dark-green), var(--viamtek-green));
+            --accent-glow: rgba(92, 200, 123, 0.3);
+            --input-bg: rgba(255, 255, 255, 0.08);
+            --input-focus-bg: rgba(255, 255, 255, 0.12);
+            --card-bg-transparent: rgba(43, 46, 56, 0.95);
+            --estado-pendiente: #63b3ed;
+            --estado-completa: #f6ad55;
+            --estado-validada: #5cc87b;
+            --estado-incompleta: #fc8181;
+        }
+
+        /* ESTILOS BASE */
+        body {
+            background: var(--bg-gradient);
+            color: var(--primary-text);
+            min-height: 100vh;
+        }
+
+        .revision-container {
+            padding: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* HEADER PRINCIPAL - ESTILO COHERENTE CON FACTURAS */
+        .revision-header {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            margin-bottom: 1.8rem;
+            animation: slideDown 0.6s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .revision-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 3px;
+                background: var(--button-gradient);
+            }
+
+        .revision-title {
+            font-weight: 650;
+            color: var(--primary-text);
+            margin-bottom: 0.25rem;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-text), var(--accent-text));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .revision-subtitle {
+            color: var(--secondary-text);
+            font-size: 1rem;
+            font-weight: 400;
+            margin-bottom: 0;
+        }
+
+        /* MÉTRICAS - ESTILO COHERENTE CON RESÚMENES DE FACTURAS */
+        .metricas-revision {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .metrica-card {
+            background: var(--card-bg-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid var(--border-light);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .metrica-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                border-color: var(--viamtek-green);
+            }
+
+            .metrica-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 4px;
+                background: var(--viamtek-green);
+            }
+
+        .metrica-label {
+            color: var(--secondary-text);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .metrica-valor {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-text);
+            margin-bottom: 0.25rem;
+            line-height: 1;
+        }
+
+        /* TARJETA DE GASTOS - ESTILO COHERENTE */
+        .gastos-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+            margin-bottom: 1.5rem;
+            animation: slideUp 0.6s ease-out 0.2s both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gastos-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 2rem;
+            border-radius: 12px 12px 0 0;
+            border-bottom: 2px solid var(--border-light);
+            background: rgba(30, 40, 50, 0.8);
+            position: relative;
+        }
+
+        .gastos-title {
+            color: var(--primary-text);
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .gastos-body {
+            padding: 2rem;
+        }
+
+        /* ITEMS DE GASTO - ESTILO 2 COLUMNAS COMO EN FACTURAS */
+        .gasto-item {
+            background: linear-gradient(135deg, rgba(35, 45, 55, 0.9), rgba(25, 35, 45, 0.7));
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+        }
+
+            .gasto-item:hover {
+                border-color: var(--viamtek-green);
+                transform: translateY(-3px);
+                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+            }
+
+            .gasto-item::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 4px;
+                background: var(--viamtek-green);
+                border-radius: 4px 0 0 4px;
+            }
+
+        .gasto-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .gasto-info {
+            flex: 1;
+        }
+
+        .gasto-concepto {
+            color: var(--primary-text);
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .gasto-datos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2rem;
+            margin-top: 1rem;
+        }
+
+        .gasto-dato {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .gasto-dato-label {
+            color: var(--secondary-text);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .gasto-dato-valor {
+            color: var(--primary-text);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .gasto-monto {
+            color: var(--viamtek-green);
+            font-weight: 700;
+            background: rgba(92, 200, 123, 0.15);
+            padding: 0.4rem 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(92, 200, 123, 0.3);
+        }
+
+        /* ESTADOS - COHERENTES CON FACTURAS.CSS */
+        .estado-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(10px);
+            border: 1px solid transparent;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .estado-corregido {
+            background: rgba(92, 200, 123, 0.2);
+            color: var(--viamtek-green);
+            border: 1px solid rgba(92, 200, 123, 0.3);
+        }
+
+        .estado-devuelto {
+            background: rgba(252, 129, 129, 0.2);
+            color: #fc8181;
+            border: 1px solid rgba(252, 129, 129, 0.3);
+        }
+
+        .estado-pendiente {
+            background: rgba(246, 173, 85, 0.2);
+            color: #f6ad55;
+            border: 1px solid rgba(246, 173, 85, 0.3);
+        }
+
+        /* DOCUMENTOS - ESTILO COHERENTE */
+        .documentos-section {
+            margin-top: 1.8rem;
+            padding: 1.5rem;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+        }
+
+        .documentos-title {
+            color: var(--primary-text);
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .documentos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .documento-group {
+            background: rgba(30, 40, 50, 0.8);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .documento-group-title {
+            color: var(--secondary-text);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .documentos-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .documento-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+            .documento-item:hover {
+                background: rgba(255, 255, 255, 0.08);
+                transform: translateX(4px);
+            }
+
+        .documento-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .documento-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+            .documento-icon.pdf {
+                background: rgba(239, 68, 68, 0.15);
+                color: #ef4444;
+            }
+
+            .documento-icon.xml {
+                background: rgba(92, 200, 123, 0.15);
+                color: var(--viamtek-green);
+            }
+
+        .documento-nombre {
+            color: var(--primary-text);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .documento-acciones {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-documento {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            border: 1px solid transparent;
+        }
+
+        .btn-ver {
+            background: rgba(59, 130, 246, 0.15);
+            color: #63b3ed;
+            border: 1px solid rgba(99, 179, 237, 0.3);
+        }
+
+            .btn-ver:hover {
+                background: rgba(99, 179, 237, 0.25);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(99, 179, 237, 0.2);
+            }
+
+        /* COMENTARIOS */
+        .comentario-section {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: rgba(246, 173, 85, 0.1);
+            border: 1px solid rgba(246, 173, 85, 0.2);
+            border-radius: 12px;
+        }
+
+        .comentario-title {
+            color: #f6ad55;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .comentario-texto {
+            color: #fde68a;
+            line-height: 1.6;
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        /* ACCIONES DE REVISIÓN */
+        .acciones-revision {
+            background: var(--card-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2.5rem;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .acciones-title {
+            color: var(--primary-text);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .acciones-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .accion-card {
+            background: rgba(15, 20, 25, 0.8);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+            .accion-card:hover {
+                border-color: var(--viamtek-green);
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(92, 200, 123, 0.2);
+            }
+
+        .accion-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 1.8rem;
+            background: rgba(92, 200, 123, 0.1);
+            border: 2px solid rgba(92, 200, 123, 0.3);
+            color: var(--viamtek-green);
+        }
+
+        .accion-card.devolver .accion-icon {
+            background: rgba(246, 173, 85, 0.1);
+            border-color: rgba(246, 173, 85, 0.3);
+            color: #f6ad55;
+        }
+
+        .accion-titulo {
+            color: var(--primary-text);
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        .accion-descripcion {
+            color: var(--secondary-text);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .btn-accion {
+            padding: 0.85rem 2rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            width: 100%;
+            text-decoration: none;
+        }
+
+        .btn-aprobar {
+            background: linear-gradient(180deg, var(--viamtek-dark-green), var(--viamtek-green));
+            color: white;
+        }
+
+            .btn-aprobar:hover {
+                background: linear-gradient(180deg, var(--viamtek-green), var(--viamtek-dark-green));
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(92, 200, 123, 0.4);
+            }
+
+        .btn-devolver {
+            background: linear-gradient(180deg, #f6ad55, #ed8936);
+            color: #1a202c;
+        }
+
+            .btn-devolver:hover {
+                background: linear-gradient(180deg, #ed8936, #f6ad55);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(246, 173, 85, 0.4);
+            }
+
+        /* BOTONES BOOTSTRAP AJUSTADOS */
+        .btn-outline-light {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border-light);
+            color: var(--secondary-text);
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            padding: 0.6rem 1.2rem;
+            text-decoration: none;
+        }
+
+            .btn-outline-light:hover {
+                background: rgba(92, 200, 123, 0.15);
+                border-color: var(--viamtek-green);
+                color: var(--accent-text);
+                transform: translateY(-2px);
+            }
+
+        .badge {
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--border-light);
+        }
+
+            .badge.bg-primary {
+                background: rgba(99, 179, 237, 0.15) !important;
+                color: #63b3ed !important;
+                border-color: rgba(99, 179, 237, 0.3) !important;
+            }
+
+            .badge.bg-secondary {
+                background: rgba(160, 174, 192, 0.15) !important;
+                color: var(--secondary-text) !important;
+                border-color: rgba(160, 174, 192, 0.3) !important;
+            }
+
+            .badge.bg-success {
+                background: rgba(92, 200, 123, 0.15) !important;
+                color: var(--viamtek-green) !important;
+                border-color: rgba(92, 200, 123, 0.3) !important;
+            }
+
+        /* ESTADO DE CORRECCIÓN */
+        .estado-correccion {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .corregido {
+            background: rgba(92, 200, 123, 0.15);
+            color: var(--viamtek-green);
+            border: 1px solid rgba(92, 200, 123, 0.3);
+        }
+
+        .pendiente {
+            background: rgba(246, 173, 85, 0.15);
+            color: #f6ad55;
+            border: 1px solid rgba(246, 173, 85, 0.3);
+        }
+
+        /* ANIMACIONES COHERENTES */
+        @@keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* RESPONSIVE */
+        @@media (max-width: 1200px) {
+            .metricas-revision {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .revision-container {
+                padding: 1rem;
+            }
+
+            .revision-header {
+                padding: 1.5rem;
+            }
+
+            .metricas-revision {
+                grid-template-columns: 1fr;
+            }
+
+            .gasto-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .documentos-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .acciones-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .gasto-datos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+}
+
+<div class="revision-container">
+    <!-- Header Principal -->
+    <div class="revision-header">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h1 class="revision-title">Revisión de Correcciones</h1>
+                <p class="revision-subtitle">
+                    <i class="fas fa-file-invoice me-2"></i>Comprobación: <strong>@Model.CodigoComprobacion</strong> |
+                    <i class="fas fa-user me-2"></i>Empleado: <strong>@Model.NombreEmpleado</strong>
+                </p>
+                <div class="mt-3">
+                    <span class="badge bg-primary me-2">
+                        <i class="fas fa-calendar me-1"></i> @Model.FechaCorreccion.ToString("dd/MM/yyyy HH:mm")
+                    </span>
+                    <span class="badge bg-secondary">
+                        <i class="fas fa-percentage me-1"></i> Completitud: @Model.PorcentajeCompletitud.ToString("N1")%
+                    </span>
+                </div>
+            </div>
+            <div>
+                <a asp-controller="Finanzas" asp-action="Facturas" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left me-2"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Métricas Principales -->
+    <div class="metricas-revision">
+        <div class="metrica-card">
+            <div class="metrica-label">
+                <i class="fas fa-receipt"></i> Total Gastos
+            </div>
+            <div class="metrica-valor">@Model.TotalGastos</div>
+            <small class="text-muted">Total de gastos en la comprobación</small>
+        </div>
+
+        <div class="metrica-card">
+            <div class="metrica-label">
+                <i class="fas fa-file-code"></i> XML Válidos
+            </div>
+            <div class="metrica-valor">@Model.GastosConXmlValido</div>
+            <small class="text-muted">Documentación XML correctamente validada</small>
+        </div>
+
+        <div class="metrica-card">
+            <div class="metrica-label">
+                <i class="fas fa-chart-line"></i> Completitud
+            </div>
+            <div class="metrica-valor">@Model.PorcentajeCompletitud.ToString("N1")%</div>
+            <small class="text-muted">Progreso de documentación completa</small>
+        </div>
+
+        <div class="metrica-card">
+            <div class="metrica-label">
+                <i class="fas fa-bullseye"></i> Acción Recomendada
+            </div>
+            <div class="metrica-valor mt-2">
+                @if (Model.AccionRecomendada == "APROBAR_CORRECCION")
+                {
+                    <span class="estado-badge estado-corregido">
+                        <i class="fas fa-check-circle"></i> APROBAR
+                    </span>
+                }
+                else if (Model.AccionRecomendada == "DEVOLVER_CORRECCION")
+                {
+                    <span class="estado-badge estado-devuelto">
+                        <i class="fas fa-undo"></i> DEVOLVER
+                    </span>
+                }
+                else
+                {
+                    <span class="estado-badge estado-pendiente">
+                        <i class="fas fa-eye"></i> OBSERVAR
+                    </span>
+                }
+            </div>
+            <small class="text-muted">Basado en análisis automático del sistema</small>
+        </div>
+    </div>
+
+    <!-- Lista de Gastos para Revisión -->
+    <div class="gastos-container">
+        <div class="gastos-header">
+            <h5 class="gastos-title">
+                <i class="fas fa-list-check"></i> Gastos para Revisión (@Model.GastosDevueltos.Count)
+            </h5>
+        </div>
+
+        <div class="gastos-body">
+            @if (!Model.GastosDevueltos.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-check-circle fa-4x mb-4" style="color: var(--viamtek-green);"></i>
+                    <h4 class="text-light mb-3">No hay gastos para revisar</h4>
+                    <p class="text-muted">Todos los gastos han sido aprobados correctamente.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var gasto in Model.GastosDevueltos)
+                {
+                    <div class="gasto-item">
+                        <div class="gasto-header">
+                            <div class="gasto-info">
+                                <h5 class="gasto-concepto">
+                                    <i class="fas fa-money-bill-wave"></i> @gasto.Concepto
+                                </h5>
+
+                                <div class="gasto-datos-grid">
+                                    <div class="gasto-dato">
+                                        <span class="gasto-dato-label">Monto</span>
+                                        <span class="gasto-dato-valor gasto-monto">@gasto.DisplayMonto</span>
+                                    </div>
+                                    <div class="gasto-dato">
+                                        <span class="gasto-dato-label">Categoría</span>
+                                        <span class="gasto-dato-valor">@gasto.Categoria</span>
+                                    </div>
+                                    <div class="gasto-dato">
+                                        <span class="gasto-dato-label">Fecha</span>
+                                        <span class="gasto-dato-valor">@gasto.DisplayFecha</span>
+                                    </div>
+                                    <div class="gasto-dato">
+                                        <span class="gasto-dato-label">Proveedor</span>
+                                        <span class="gasto-dato-valor">@gasto.Proveedor</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <span class="estado-badge @(gasto.EstadoGastoCodigo == "APROBADO" ? "estado-corregido" :
+                                                                                                gasto.EstadoGastoCodigo == "DEVUELTO_CORRECCION" ? "estado-devuelto" : "estado-pendiente")">
+                            <i class="fas fa-@(gasto.EstadoGastoCodigo == "APROBADO" ? "check" :
+                                                                                    gasto.EstadoGastoCodigo == "DEVUELTO_CORRECCION" ? "undo" : "clock")"></i>
+                            @gasto.EstadoGasto
+                        </span>
+
+                        @if (gasto.TieneCorrecciones)
+                                {
+                                    <div class="estado-correccion corregido mt-2">
+                                        <i class="fas fa-sync-alt"></i> Corregido por empleado
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Documentos del Gasto -->
+                        <div class="documentos-section">
+                            <h6 class="documentos-title">
+                                <i class="fas fa-file-alt"></i> Documentación del Gasto
+                            </h6>
+
+                            <div class="documentos-grid">
+                                <!-- Archivos Originales -->
+                                <div class="documento-group">
+                                    <div class="documento-group-title">
+                                        <i class="fas fa-history me-2"></i> Archivos Originales
+                                    </div>
+                                    <div class="documentos-lista">
+                                        @if (!string.IsNullOrEmpty(gasto.FacturaPDFActual))
+                                        {
+                                            <div class="documento-item">
+                                                <div class="documento-info">
+                                                    <div class="documento-icon pdf">
+                                                        <i class="fas fa-file-pdf"></i>
+                                                    </div>
+                                                    <span class="documento-nombre">Factura PDF Original</span>
+                                                </div>
+                                                <div class="documento-acciones">
+                                                    <a href="~/@gasto.FacturaPDFActual" target="_blank" class="btn-documento btn-ver">
+                                                        <i class="fas fa-eye"></i> Ver
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        @if (!string.IsNullOrEmpty(gasto.FacturaXMLActual))
+                                        {
+                                            <div class="documento-item">
+                                                <div class="documento-info">
+                                                    <div class="documento-icon xml">
+                                                        <i class="fas fa-file-code"></i>
+                                                    </div>
+                                                    <span class="documento-nombre">Factura XML Original</span>
+                                                </div>
+                                                <div class="documento-acciones">
+                                                    <a href="~/@gasto.FacturaXMLActual" target="_blank" class="btn-documento btn-ver">
+                                                        <i class="fas fa-eye"></i> Ver
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Archivos Corregidos -->
+                                <div class="documento-group">
+                                    <div class="documento-group-title">
+                                        <i class="fas fa-sync-alt me-2"></i> Archivos Corregidos
+                                    </div>
+                                    <div class="documentos-lista">
+                                        @if (!string.IsNullOrEmpty(gasto.FacturaPDFCorregido))
+                                        {
+                                            <div class="documento-item">
+                                                <div class="documento-info">
+                                                    <div class="documento-icon pdf">
+                                                        <i class="fas fa-file-pdf"></i>
+                                                    </div>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="documento-nombre">Factura PDF Corregido</span>
+                                                        <span class="badge bg-success ms-2">
+                                                            <i class="fas fa-check"></i> Nuevo
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="documento-acciones">
+                                                    <a href="~/@gasto.FacturaPDFCorregido" target="_blank" class="btn-documento btn-ver">
+                                                        <i class="fas fa-eye"></i> Ver
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        }
+                                        else if (gasto.TieneCorrecciones)
+                                        {
+                                            <div class="documento-item">
+                                                <div class="documento-info">
+                                                    <div class="documento-icon pdf">
+                                                        <i class="fas fa-file-pdf"></i>
+                                                    </div>
+                                                    <span class="documento-nombre">PDF ya aprobado</span>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        @if (!string.IsNullOrEmpty(gasto.FacturaXMLCorregido))
+                                        {
+                                            <div class="documento-item">
+                                                <div class="documento-info">
+                                                    <div class="documento-icon xml">
+                                                        <i class="fas fa-file-code"></i>
+                                                    </div>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="documento-nombre">Factura XML Corregido</span>
+                                                        <span class="badge bg-success ms-2">
+                                                            <i class="fas fa-check"></i> Nuevo
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="documento-acciones">
+                                                    <a href="~/@gasto.FacturaXMLCorregido" target="_blank" class="btn-documento btn-ver">
+                                                        <i class="fas fa-eye"></i> Ver
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        }
+                                        else if (gasto.TieneCorrecciones)
+                                        {
+                                            <div class="documento-item">
+                                                <div class="documento-info">
+                                                    <div class="documento-icon xml">
+                                                        <i class="fas fa-file-code"></i>
+                                                    </div>
+                                                    <span class="documento-nombre">XML ya aprobado</span>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        @if (!gasto.TieneCorrecciones && string.IsNullOrEmpty(gasto.FacturaPDFCorregido) && string.IsNullOrEmpty(gasto.FacturaXMLCorregido))
+                                        {
+                                            <div class="documento-item">
+                                                <div class="documento-info">
+                                                    <i class="fas fa-clock me-2" style="color: #f6ad55;"></i>
+                                                    <span class="documento-nombre">Pendiente de corrección</span>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Comentarios de Finanzas -->
+                        @if (!string.IsNullOrEmpty(gasto.ComentarioFinanzas))
+                        {
+                            <div class="comentario-section">
+                                <h6 class="comentario-title">
+                                    <i class="fas fa-comment-dots"></i> Observaciones de Finanzas
+                                </h6>
+                                <p class="comentario-texto">@gasto.ComentarioFinanzas</p>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- Acciones de Revisión -->
+    <div class="acciones-revision">
+        <h4 class="acciones-title">
+            <i class="fas fa-cogs me-2"></i> Acciones de Revisión
+        </h4>
+
+        <div class="acciones-grid">
+            <!-- Aprobar Correcciones -->
+            <div class="accion-card">
+                <div class="accion-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h5 class="accion-titulo">Aprobar Correcciones</h5>
+                <p class="accion-descripcion">
+                    Aprueba todas las correcciones realizadas por el empleado.
+                    La comprobación continuará con el proceso normal de validación.
+                </p>
+                <button type="button" class="btn-accion btn-aprobar" id="btn-aprobar-todo">
+                    <i class="fas fa-check-circle"></i> Aprobar Todas las Correcciones
+                </button>
+            </div>
+
+            <!-- Devolver para Corrección -->
+            <div class="accion-card devolver">
+                <div class="accion-icon">
+                    <i class="fas fa-undo"></i>
+                </div>
+                <h5 class="accion-titulo">Devolver para Corrección</h5>
+                <p class="accion-descripcion">
+                    Devuelve los gastos seleccionados al empleado para correcciones adicionales.
+                    Puedes especificar qué documentos requieren atención.
+                </p>
+                <button type="button" class="btn-accion btn-devolver" id="btn-devolver-seleccion">
+                    <i class="fas fa-undo"></i> Devolver para Corrección
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#btn-aprobar-todo').click(function () {
+                Swal.fire({
+                    title: '¿Aprobar Todas las Correcciones?',
+                    html: `
+                        <div style="text-align: center; color: var(--secondary-text);">
+                            <div style="margin-bottom: 20px;">
+                                <i class="fas fa-check-circle fa-3x" style="color: var(--viamtek-green);"></i>
+                            </div>
+                            <p style="font-size: 16px; margin-bottom: 20px;">
+                                ¿Estás seguro de aprobar <strong>todas las correcciones</strong> de esta comprobación?
+                            </p>
+                            <div style="background: rgba(48, 129, 132, 0.2); border: 1px solid var(--viamtek-dark-green); padding: 16px; border-radius: 8px; margin-top: 20px;">
+                                <i class="fas fa-info-circle" style="color: var(--viamtek-dark-green); margin-right: 10px;"></i>
+                                <span>La comprobación continuará con el proceso normal de validación.</span>
+                            </div>
+                        </div>
+                    `,
+                    background: 'var(--card-bg)',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, aprobar todo',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: 'var(--viamtek-green)',
+                    cancelButtonColor: 'var(--secondary-text)',
+                    width: '550px',
+
+                    input: 'textarea',
+                    inputLabel: 'Comentarios (opcional):',
+                    inputPlaceholder: 'Agregue comentarios para el empleado...',
+                    inputAttributes: {
+                        style: 'background: var(--input-bg); border: 1px solid var(--border-light); color: var(--primary-text);'
+                    },
+
+                    showLoaderOnConfirm: true,
+
+                    preConfirm: (comentarios) => {
+                        return new Promise((resolve, reject) => {
+                            $.ajax({
+                                url: '@Url.Action("AprobarCorreccion", "Finanzas")',
+                                type: 'POST',
+                                data: {
+                                    id: @Model.ComprobacionId,
+                                    comentarios: comentarios || ''
+                                },
+                                headers: {
+                                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                                },
+                                success: function (response) {
+                                    resolve(response);
+                                },
+                                error: function () {
+                                    reject('Error de conexión con el servidor');
+                                }
+                            });
+                        });
+                    },
+
+                    allowOutsideClick: () => !Swal.isLoading()
+                })
+                .then((result) => {
+                    if (result.isConfirmed) {
+                        const response = result.value || {};
+
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            html: `
+                                <div style="text-align: center; color: var(--secondary-text);">
+                                    <div style="margin-bottom: 20px;">
+                                        <i class="fas fa-check-circle fa-3x" style="color: var(--viamtek-green);"></i>
+                                    </div>
+                                    <p style="font-weight: 600; color: var(--primary-text);">
+                                        ${response.message || 'Las correcciones fueron aprobadas correctamente.'}
+                                    </p>
+                                    <div style="margin-top: 30px;">
+                                        <button onclick="location.reload()" class="btn"
+                                            style="background: var(--viamtek-green); color: var(--color-white); padding: 10px 20px; margin-right: 10px; border-radius: 6px;">
+                                            <i class="fas fa-redo"></i> Actualizar
+                                        </button>
+                                        <a href="@Url.Action("Facturas", "Finanzas")" class="btn"
+                                            style="background: var(--border-light); color: var(--primary-text); padding: 10px 20px; border-radius: 6px; text-decoration: none;">
+                                            <i class="fas fa-list"></i> Volver a Facturas
+                                        </a>
+                                    </div>
+                                </div>
+                            `,
+                            background: 'var(--card-bg)',
+                            showConfirmButton: false,
+                            width: '500px'
+                        });
+                    }
+                });
+            });
+
+            $('#btn-devolver-seleccion').click(function () {
+                Swal.fire({
+                    title: 'Devolver Gastos para Corrección',
+                    html: `
+                        <div style="text-align: left; color: var(--secondary-text);">
+                            <p>Esta funcionalidad permite seleccionar gastos específicos para devolver.</p>
+                            <div style="background: var(--card-bg-light); border: 1px solid var(--border-light); padding: 16px; border-radius: 8px; margin-top: 20px;">
+                                <i class="fas fa-info-circle" style="color: #f6ad55; margin-right: 10px;"></i>
+                                <span>Redirigiendo a la vista de facturas para seleccionar gastos...</span>
+                            </div>
+                        </div>
+                    `,
+                    icon: 'info',
+                    confirmButtonText: 'Continuar',
+                    confirmButtonColor: '#f6ad55',
+                    background: 'var(--card-bg)'
+                }).then(() => {
+                    window.location.href = '@Url.Action("DetallesFactura", "Finanzas", new { id = Model.ComprobacionId })';
+                });
+            });
+
+            $('.metrica-card, .gasto-item, .accion-card').each(function (index) {
+                $(this)
+                    .css({ opacity: 0, transform: 'translateY(20px)' })
+                    .delay(index * 100)
+                    .animate({ opacity: 1, transform: 'translateY(0)' }, 600, 'swing');
+            });
+
+        });
+    </script>
+}

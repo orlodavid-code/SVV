@@ -1,0 +1,1166 @@
+﻿@model SVV.ViewModels.ComprobacionCorreccionViewModel
+@{
+    ViewData["Title"] = "Corregir Gastos - " + Model.CodigoComprobacion;
+}
+
+@section Styles {
+    <style>
+        /* ESTILOS GENERALES PARA LA INTERFAZ DE CORRECCIÓN */
+        .corregir-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .corregir-header {
+            background: linear-gradient(135deg, rgba(30, 40, 50, 0.95), rgba(20, 30, 40, 0.98));
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .corregir-title {
+            font-weight: 700;
+            color: var(--primary-text);
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-text), var(--accent-text));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.8rem;
+        }
+
+        .corregir-subtitle {
+            color: var(--secondary-text);
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+
+        /* TARJETAS DE CONTENIDO */
+        .corregir-card {
+            background: linear-gradient(135deg, rgba(35, 45, 55, 0.95), rgba(25, 35, 45, 0.9));
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            margin-bottom: 2rem;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .corregir-card-header {
+            background: rgba(40, 50, 60, 0.9);
+            padding: 1.25rem 2rem;
+            border-bottom: 2px solid var(--border-light);
+            backdrop-filter: blur(10px);
+        }
+
+        .corregir-card-title {
+            color: var(--primary-text);
+            font-weight: 600;
+            margin: 0;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .corregir-card-body {
+            padding: 2rem;
+        }
+
+        /* ITEMS DE GASTOS PARA CORRECCIÓN */
+        .gasto-correccion-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+            .gasto-correccion-item:hover {
+                background: rgba(255, 255, 255, 0.08);
+                border-color: rgba(92, 200, 123, 0.3);
+            }
+
+        .gasto-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .gasto-info {
+            flex: 1;
+        }
+
+        .gasto-concepto {
+            color: var(--primary-text);
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .gasto-datos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .dato-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .dato-label {
+            color: var(--secondary-text);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dato-valor {
+            color: var(--primary-text);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        /* COMENTARIOS DE FINANZAS */
+        .comentario-finanzas {
+            background: rgba(246, 173, 85, 0.15);
+            border-left: 4px solid #f6ad55;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            color: #f6ad55;
+        }
+
+            .comentario-finanzas i {
+                margin-right: 0.5rem;
+            }
+
+        /* SECCIÓN DE ARCHIVOS ACTUALES */
+        .archivos-actuales {
+            background: rgba(40, 50, 60, 0.6);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .archivos-label {
+            color: var(--secondary-text);
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .archivos-botones {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .archivo-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-pdf {
+            background: rgba(220, 53, 69, 0.15);
+            color: #e53e3e;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+            .btn-pdf:hover {
+                background: rgba(220, 53, 69, 0.25);
+                color: #e53e3e;
+                transform: translateY(-2px);
+            }
+
+        .btn-xml {
+            background: rgba(56, 161, 105, 0.15);
+            color: #38a169;
+            border: 1px solid rgba(56, 161, 105, 0.3);
+        }
+
+            .btn-xml:hover {
+                background: rgba(56, 161, 105, 0.25);
+                color: #38a169;
+                transform: translateY(-2px);
+            }
+
+        /* FORMULARIO DE CORRECCIÓN DE ARCHIVOS */
+        .archivos-correccion {
+            background: rgba(40, 50, 60, 0.6);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1.5rem;
+        }
+
+        .correccion-label {
+            color: var(--primary-text);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .form-control-correccion {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border-light);
+            color: var(--primary-text);
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+            .form-control-correccion:focus {
+                border-color: var(--viamtek-green);
+                box-shadow: 0 0 0 3px rgba(92, 200, 123, 0.2);
+                background: rgba(255, 255, 255, 0.12);
+                outline: none;
+            }
+
+        .form-text-correccion {
+            color: var(--secondary-text);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        /* BOTONES DE ACCIÓN PRINCIPALES */
+        .botones-accion {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-corregir {
+            background: linear-gradient(135deg, #f6ad55, #ed8936);
+            border: none;
+            color: #1a202c;
+            font-weight: 700;
+            padding: 0.85rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .btn-corregir:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(246, 173, 85, 0.3);
+                color: #1a202c;
+            }
+
+        .btn-cancelar {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border-light);
+            color: var(--secondary-text);
+            font-weight: 600;
+            padding: 0.85rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .btn-cancelar:hover {
+                background: rgba(255, 255, 255, 0.15);
+                color: var(--primary-text);
+                transform: translateY(-2px);
+            }
+
+        /* ESTADO SIN CORRECCIONES */
+        .sin-correcciones {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--secondary-text);
+        }
+
+            .sin-correcciones i {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+                color: var(--viamtek-green);
+            }
+
+        .sin-correcciones-title {
+            color: var(--primary-text);
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        /* VALIDACIÓN DE ARCHIVOS XML */
+        .xml-validation-result {
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+
+        .alert-comprobacion-success {
+            background: rgba(56, 161, 105, 0.15);
+            border: 1px solid rgba(56, 161, 105, 0.3);
+            color: #38a169;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+
+        .alert-comprobacion-danger {
+            background: rgba(220, 53, 69, 0.15);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            color: #e53e3c;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+
+        .alert-comprobacion-warning {
+            background: rgba(246, 173, 85, 0.15);
+            border: 1px solid rgba(246, 173, 85, 0.3);
+            color: #f6ad55;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+
+        /* ZONA DE ARRASTRE DE ARCHIVOS */
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+            .upload-area:hover {
+                border-color: var(--viamtek-green);
+                background: rgba(92, 200, 123, 0.05);
+            }
+
+        .dragover {
+            border-color: var(--viamtek-green);
+            background: rgba(92, 200, 123, 0.1);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            color: var(--secondary-text);
+            font-size: 0.85rem;
+        }
+
+        .validation-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .validation-success {
+            background: rgba(56, 161, 105, 0.2);
+            color: #38a169;
+        }
+
+        .validation-error {
+            background: rgba(220, 53, 69, 0.2);
+            color: #e53e3c;
+        }
+
+        .validation-pending {
+            background: rgba(246, 173, 85, 0.2);
+            color: #f6ad55;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @@media (max-width: 768px) {
+            .corregir-container {
+                padding: 1rem;
+            }
+
+            .corregir-header {
+                padding: 1.25rem;
+            }
+
+            .corregir-card-body {
+                padding: 1.25rem;
+            }
+
+            .gasto-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .gasto-datos {
+                grid-template-columns: 1fr;
+            }
+
+            .archivos-botones {
+                flex-direction: column;
+            }
+
+            .archivo-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .botones-accion {
+                flex-direction: column;
+            }
+
+                .botones-accion .btn {
+                    width: 100%;
+                    justify-content: center;
+                }
+
+            .upload-area {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+}
+
+<div class="corregir-container">
+    <!-- CABECERA PRINCIPAL CON INFORMACIÓN DE COMPROBACIÓN -->
+    <div class="corregir-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="corregir-title">Corregir Gastos Devueltos</h1>
+                <p class="corregir-subtitle">Comprobación: @Model.CodigoComprobacion</p>
+            </div>
+            <div>
+                <a asp-controller="Comprobaciones" asp-action="Index" class="btn-cancelar">
+                    <i class="fas fa-arrow-left me-1"></i> Volver a Comprobaciones
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN DE COMENTARIOS DE FINANZAS -->
+    @if (!string.IsNullOrEmpty(Model.ComentariosFinanzas))
+    {
+        <div class="corregir-card">
+            <div class="corregir-card-header">
+                <h6 class="corregir-card-title">
+                    <i class="fas fa-comment-dots me-2"></i>Comentarios de Finanzas
+                </h6>
+            </div>
+            <div class="corregir-card-body">
+                <div class="comentario-finanzas">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Observaciones de Finanzas:</strong>
+                    <p class="mb-0 mt-2">@Model.ComentariosFinanzas</p>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- INSTRUCCIONES PARA EL PROCESO DE CORRECCIÓN -->
+    <div class="corregir-card">
+        <div class="corregir-card-header">
+            <h6 class="corregir-card-title">
+                <i class="fas fa-info-circle me-2"></i>Instrucciones para Corrección
+            </h6>
+        </div>
+        <div class="corregir-card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="d-flex align-items-start gap-2">
+                        <span class="badge bg-warning rounded-circle p-2">1</span>
+                        <div>
+                            <h6 class="mb-1">Revisa los comentarios</h6>
+                            <small class="text-muted">Lee cuidadosamente los comentarios de Finanzas sobre cada gasto.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-start gap-2">
+                        <span class="badge bg-warning rounded-circle p-2">2</span>
+                        <div>
+                            <h6 class="mb-1">Sube archivos correctos</h6>
+                            <small class="text-muted">Adjunta los archivos PDF y XML correctos según lo solicitado.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-start gap-2">
+                        <span class="badge bg-warning rounded-circle p-2">3</span>
+                        <div>
+                            <h6 class="mb-1">Envia las correcciones</h6>
+                            <small class="text-muted">Al enviar, los gastos serán reenviados a Finanzas para revisión.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FORMULARIO PRINCIPAL DE CORRECCIÓN DE GASTOS -->
+    @if (Model.GastosDevueltos.Any())
+    {
+        <form id="formCorreccion" method="post" enctype="multipart/form-data" class="corregir-card">
+            <div class="corregir-card-header">
+                <h6 class="corregir-card-title">
+                    <i class="fas fa-edit me-2"></i>Gastos para Corregir (@Model.GastosDevueltos.Count)
+                </h6>
+            </div>
+            <div class="corregir-card-body">
+                <!-- CAMPOS OCULTOS PARA DATOS DE COMPROBACIÓN -->
+                <input type="hidden" name="ComprobacionId" value="@Model.ComprobacionId" />
+                <input type="hidden" name="CodigoComprobacion" value="@Model.CodigoComprobacion" />
+                @Html.AntiForgeryToken()
+
+                <!-- ITERACIÓN DE GASTOS DEVUELTOS PARA CORRECCIÓN -->
+                @for (int i = 0; i < Model.GastosDevueltos.Count; i++)
+                {
+                    var gasto = Model.GastosDevueltos[i];
+
+                    <div class="gasto-correccion-item" data-gasto-id="@gasto.GastoId">
+                        <!-- CAMPOS OCULTOS CON DATOS DEL GASTO -->
+                        <input type="hidden" name="GastosDevueltos[@i].GastoId" value="@gasto.GastoId" />
+                        <input type="hidden" name="GastosDevueltos[@i].Concepto" value="@gasto.Concepto" />
+                        <input type="hidden" name="GastosDevueltos[@i].Monto" value="@gasto.Monto" />
+                        <input type="hidden" name="GastosDevueltos[@i].Categoria" value="@gasto.Categoria" />
+                        <input type="hidden" name="GastosDevueltos[@i].FechaGasto" value="@gasto.FechaGasto.ToString("yyyy-MM-dd")" />
+                        <input type="hidden" name="GastosDevueltos[@i].Proveedor" value="@gasto.Proveedor" />
+                        <input type="hidden" name="GastosDevueltos[@i].FacturaPDFActual" value="@gasto.FacturaPDFActual" />
+                        <input type="hidden" name="GastosDevueltos[@i].FacturaXMLActual" value="@gasto.FacturaXMLActual" />
+
+                        <!-- CABECERA CON INFORMACIÓN DEL GASTO -->
+                        <div class="gasto-header">
+                            <div class="gasto-info">
+                                <h5 class="gasto-concepto">@gasto.Concepto</h5>
+                                <div class="gasto-datos">
+                                    <div class="dato-item">
+                                        <span class="dato-label">Monto</span>
+                                        <span class="dato-valor text-success fw-bold">@gasto.Monto.ToString("C")</span>
+                                    </div>
+                                    <div class="dato-item">
+                                        <span class="dato-label">Categoría</span>
+                                        <span class="dato-valor">@gasto.Categoria</span>
+                                    </div>
+                                    <div class="dato-item">
+                                        <span class="dato-label">Fecha</span>
+                                        <span class="dato-valor">@gasto.FechaGasto.ToString("dd/MM/yyyy")</span>
+                                    </div>
+                                    <div class="dato-item">
+                                        <span class="dato-label">Proveedor</span>
+                                        <span class="dato-valor">@gasto.Proveedor</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- COMENTARIO ESPECÍFICO DE FINANZAS SOBRE ESTE GASTO -->
+                        <div class="comentario-finanzas">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Requiere corrección:</strong>
+                            <p class="mb-0 mt-1">@gasto.ComentarioFinanzas</p>
+                        </div>
+
+                        <!-- ENLACES A ARCHIVOS ACTUALES (SI EXISTEN) -->
+                        @if (!string.IsNullOrEmpty(gasto.FacturaPDFActual) || !string.IsNullOrEmpty(gasto.FacturaXMLActual))
+                        {
+                            <div class="archivos-actuales">
+                                <div class="archivos-label">
+                                    <i class="fas fa-file me-1"></i>Archivos actuales:
+                                </div>
+                                <div class="archivos-botones">
+                                    @if (!string.IsNullOrEmpty(gasto.FacturaPDFActual))
+                                    {
+                                        <a href="~/@gasto.FacturaPDFActual" target="_blank" class="archivo-btn btn-pdf">
+                                            <i class="fas fa-file-pdf"></i> Ver PDF Actual
+                                        </a>
+                                    }
+                                    @if (!string.IsNullOrEmpty(gasto.FacturaXMLActual))
+                                    {
+                                        <a href="~/@gasto.FacturaXMLActual" target="_blank" class="archivo-btn btn-xml">
+                                            <i class="fas fa-file-code"></i> Ver XML Actual
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- FORMULARIO PARA SUBIR ARCHIVOS CORREGIDOS -->
+                        <div class="archivos-correccion">
+                            <div class="correccion-label">
+                                <i class="fas fa-upload me-1"></i>Subir archivos corregidos:
+                            </div>
+
+                            <!-- CAMPO PARA SUBIR PDF -->
+                            <div class="mb-3">
+                                <label class="form-label">Factura PDF</label>
+                                <div class="upload-area" data-target="pdf-@i">
+                                    <i class="fas fa-file-pdf fa-2x mb-2" style="color: #e53e3e;"></i>
+                                    <p class="mb-1">Arrastra tu archivo PDF aquí o haz clic para seleccionar</p>
+                                    <small class="text-muted">Tamaño máximo: 5MB</small>
+                                    <input type="file" name="GastosDevueltos[@i].ArchivoPDF"
+                                           class="form-control-correccion archivo-pdf d-none"
+                                           accept=".pdf"
+                                           data-index="@i"
+                                           data-tipo="pdf">
+                                </div>
+                                <div class="file-info" id="file-info-pdf-@i"></div>
+                            </div>
+
+                            <!-- CAMPO PARA SUBIR XML -->
+                            <div class="mb-3">
+                                <label class="form-label">Factura XML</label>
+                                <div class="upload-area" data-target="xml-@i">
+                                    <i class="fas fa-file-code fa-2x mb-2" style="color: #38a169;"></i>
+                                    <p class="mb-1">Arrastra tu archivo XML aquí o haz clic para seleccionar</p>
+                                    <small class="text-muted">Tamaño máximo: 2MB</small>
+                                    <input type="file" name="GastosDevueltos[@i].ArchivoXML"
+                                           class="form-control-correccion archivo-xml d-none"
+                                           accept=".xml"
+                                           data-index="@i"
+                                           data-tipo="xml">
+                                </div>
+                                <div class="file-info" id="file-info-xml-@i"></div>
+                                <div class="xml-validation-result" id="xml-validation-result-@i"></div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- BOTONES DE ACCIÓN FINAL -->
+                <div class="botones-accion">
+                    <a asp-controller="Comprobaciones" asp-action="Index" class="btn-cancelar">
+                        <i class="fas fa-times me-1"></i> Cancelar
+                    </a>
+                    <button type="button" class="btn-corregir" id="btn-enviar-correcciones">
+                        <i class="fas fa-paper-plane me-1"></i> Enviar Correcciones
+                    </button>
+                </div>
+            </div>
+        </form>
+    }
+    else
+    {
+        <!-- VISTA CUANDO NO HAY GASTOS PARA CORREGIR -->
+        <div class="corregir-card">
+            <div class="corregir-card-body">
+                <div class="sin-correcciones">
+                    <i class="fas fa-check-circle"></i>
+                    <h5 class="sin-correcciones-title">No hay gastos para corregir</h5>
+                    <p>Todos los gastos de esta comprobación han sido aprobados o no requieren corrección.</p>
+                    <a asp-controller="Comprobaciones" asp-action="Index" class="btn-cancelar mt-3">
+                        <i class="fas fa-arrow-left me-1"></i> Volver a Comprobaciones
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            console.log("Inicializando sistema de corrección de gastos");
+
+            // ============================================
+            // 1. VALIDACIÓN BÁSICA DE ARCHIVOS (TAMAÑO Y EXTENSIÓN)
+            // ============================================
+            function validarArchivoBasico(input, maxSizeMB, tipo) {
+                if (!input.files[0]) return false;
+
+                const file = input.files[0];
+                const fileSize = file.size / 1024 / 1024;
+
+                if (fileSize > maxSizeMB) {
+                    mostrarAlerta(`El archivo ${tipo} excede el tamaño máximo de ${maxSizeMB}MB`);
+                    input.value = '';
+                    return false;
+                }
+
+                const extensiones = {
+                    'PDF': ['.pdf', 'application/pdf'],
+                    'XML': ['.xml', 'text/xml', 'application/xml']
+                };
+
+                const [extension, tipoMIME] = extensiones[tipo];
+                const tieneExtension = file.name.toLowerCase().endsWith(extension);
+                const tieneTipo = file.type.includes(tipoMIME.split('/')[1]);
+
+                if (!tieneExtension && !tieneTipo) {
+                    mostrarAlerta(`Solo se permiten archivos ${tipo} (${extension})`);
+                    input.value = '';
+                    return false;
+                }
+
+                return true;
+            }
+
+            // ============================================
+            // 2. VALIDACIÓN ESTRUCTURAL DE ARCHIVOS XML (CFDI)
+            // ============================================
+            function validarXML(input, index) {
+                const file = input.files[0];
+                if (!file) return;
+
+                console.log(`Iniciando validación XML para: ${file.name}`);
+
+                if (file.size > 2 * 1024 * 1024) {
+                    mostrarResultadoValidacionXML(index, {
+                        valido: false,
+                        errores: ['El archivo excede el tamaño máximo de 2MB']
+                    });
+                    input.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const parser = new DOMParser();
+                        const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
+
+                        if (xmlDoc.getElementsByTagName("parsererror").length > 0) {
+                            mostrarResultadoValidacionXML(index, {
+                                valido: false,
+                                errores: ['El archivo XML no es válido o está mal formado']
+                            });
+                            return;
+                        }
+
+                        const resultado = validarCFDIBasico(xmlDoc);
+                        mostrarResultadoValidacionXML(index, resultado);
+                    } catch (error) {
+                        console.error("Error procesando XML:", error);
+                        mostrarResultadoValidacionXML(index, {
+                            valido: false,
+                            errores: ['Error al procesar el archivo XML']
+                        });
+                    }
+                };
+
+                reader.onerror = function() {
+                    mostrarResultadoValidacionXML(index, {
+                        valido: false,
+                        errores: ['Error al leer el archivo']
+                    });
+                };
+
+                reader.readAsText(file);
+            }
+
+            // ============================================
+            // 3. VALIDACIÓN BÁSICA DE ESTRUCTURA CFDI 4.0
+            // ============================================
+            function validarCFDIBasico(xmlDoc) {
+                const resultados = {
+                    valido: true,
+                    errores: [],
+                    datos: {},
+                    advertencias: []
+                };
+
+                try {
+                    const comprobante = xmlDoc.documentElement;
+                    if (!comprobante || comprobante.tagName.indexOf('Comprobante') === -1) {
+                        resultados.errores.push("No es un CFDI válido");
+                        resultados.valido = false;
+                        return resultados;
+                    }
+
+                    const total = comprobante.getAttribute("Total") || "0";
+                    const fecha = comprobante.getAttribute("Fecha") || "";
+                    const folio = comprobante.getAttribute("Folio") || "";
+                    const serie = comprobante.getAttribute("Serie") || "";
+
+                    const emisor = xmlDoc.getElementsByTagName("cfdi:Emisor")[0] ||
+                                   xmlDoc.getElementsByTagName("Emisor")[0];
+
+                    if (emisor) {
+                        resultados.datos.emisor = {
+                            rfc: emisor.getAttribute("Rfc") || "",
+                            nombre: emisor.getAttribute("Nombre") || "No especificado"
+                        };
+                    }
+
+                    const timbre = xmlDoc.getElementsByTagName("tfd:TimbreFiscalDigital")[0] ||
+                                  xmlDoc.getElementsByTagName("TimbreFiscalDigital")[0];
+
+                    if (timbre) {
+                        resultados.datos.uuid = timbre.getAttribute("UUID") || "";
+                        resultados.datos.fechaTimbrado = timbre.getAttribute("FechaTimbrado") || "";
+                    }
+
+                    resultados.datos.principal = {
+                        total: parseFloat(total) || 0,
+                        fecha: fecha,
+                        folio: folio,
+                        serie: serie
+                    };
+
+                } catch (error) {
+                    resultados.errores.push(`Error al validar XML: ${error.message}`);
+                    resultados.valido = false;
+                }
+
+                return resultados;
+            }
+
+            // ============================================
+            // 4. MOSTRAR RESULTADOS DE VALIDACIÓN XML EN INTERFAZ
+            // ============================================
+            function mostrarResultadoValidacionXML(index, resultado) {
+                const validationResult = document.getElementById(`xml-validation-result-${index}`);
+                if (!validationResult) return;
+
+                const fileInfo = document.getElementById(`file-info-xml-${index}`);
+                if (fileInfo) {
+                    const input = document.querySelector(`.archivo-xml[data-index="${index}"]`);
+                    const file = input ? input.files[0] : null;
+
+                    if (file) {
+                        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                        const iconClass = resultado.valido ? 'fa-check-circle validation-success' : 'fa-times-circle validation-error';
+
+                        fileInfo.innerHTML = `
+                            <div class="validation-indicator ${resultado.valido ? 'validation-success' : 'validation-error'}">
+                                <i class="fas ${iconClass}"></i>
+                                <span>${file.name} (${fileSize} MB)</span>
+                            </div>
+                        `;
+                    }
+                }
+
+                if (resultado.valido) {
+                    validationResult.innerHTML = `
+                        <div class="alert-comprobacion-success">
+                            <i class="fas fa-check-circle"></i> <strong>XML VÁLIDO</strong>
+                            <div class="mt-2 small">
+                                ${resultado.datos.emisor ?
+                                    `<div><strong>Emisor:</strong> ${resultado.datos.emisor.nombre} (${resultado.datos.emisor.rfc})</div>` : ''}
+                                ${resultado.datos.principal.total > 0 ?
+                                    `<div><strong>Total:</strong> $${resultado.datos.principal.total.toFixed(2)}</div>` : ''}
+                                ${resultado.datos.principal.fecha ?
+                                    `<div><strong>Fecha:</strong> ${resultado.datos.principal.fecha.split('T')[0]}</div>` : ''}
+                                ${resultado.datos.uuid ?
+                                    `<div><strong>UUID:</strong> ${resultado.datos.uuid.substring(0, 8)}...</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    let erroresHTML = '';
+                    resultado.errores.forEach(error => erroresHTML += `<li>${error}</li>`);
+
+                    validationResult.innerHTML = `
+                        <div class="alert-comprobacion-danger">
+                            <i class="fas fa-times-circle"></i> <strong>XML INVÁLIDO</strong>
+                            <ul class="mt-2 small">${erroresHTML}</ul>
+                        </div>
+                    `;
+                }
+            }
+
+            // ============================================
+            // 5. SISTEMA DE NOTIFICACIONES Y ALERTAS
+            // ============================================
+            function mostrarAlerta(mensaje) {
+                Swal.fire({
+                    title: 'Atención',
+                    text: mensaje,
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido',
+                    background: '#1a202c',
+                    color: '#ffffff',
+                    confirmButtonColor: '#fd7e14'
+                });
+            }
+
+            // ============================================
+            // 6. IMPLEMENTACIÓN DE DRAG & DROP PARA ARCHIVOS
+            // ============================================
+            function inicializarDragAndDrop() {
+                const areasUpload = document.querySelectorAll('.upload-area');
+
+                areasUpload.forEach(area => {
+                    area.addEventListener('dragover', function(e) {
+                        e.preventDefault();
+                        this.classList.add('dragover');
+                    });
+
+                    area.addEventListener('dragleave', function(e) {
+                        e.preventDefault();
+                        this.classList.remove('dragover');
+                    });
+
+                    area.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                        this.classList.remove('dragover');
+
+                        const files = e.dataTransfer.files;
+                        if (files.length > 0) {
+                            const target = this.getAttribute('data-target');
+                            const [tipo, index] = target.split('-');
+                            const input = document.querySelector(`.archivo-${tipo}[data-index="${index}"]`);
+
+                            if (input) {
+                                input.files = files;
+                                const event = new Event('change', { bubbles: true });
+                                input.dispatchEvent(event);
+                            }
+                        }
+                    });
+
+                    area.addEventListener('click', function() {
+                        const target = this.getAttribute('data-target');
+                        const [tipo, index] = target.split('-');
+                        const input = document.querySelector(`.archivo-${tipo}[data-index="${index}"]`);
+                        if (input) input.click();
+                    });
+                });
+            }
+
+            // ============================================
+            // 7. VISUALIZACIÓN DE INFORMACIÓN DE ARCHIVOS
+            // ============================================
+            function mostrarInfoArchivo(input, index, tipo) {
+                const fileInfo = document.getElementById(`file-info-${tipo}-${index}`);
+                if (!fileInfo) return;
+
+                if (!input.files[0]) {
+                    fileInfo.innerHTML = '';
+                    return;
+                }
+
+                const file = input.files[0];
+                const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                const iconClass = tipo === 'pdf' ? 'fa-file-pdf' : 'fa-file-code';
+
+                fileInfo.innerHTML = `
+                    <div class="validation-indicator">
+                        <i class="fas ${iconClass}"></i>
+                        <span>${file.name} (${fileSize} MB)</span>
+                        ${tipo === 'xml' ? '<i class="fas fa-spinner fa-spin ms-2"></i>' : ''}
+                    </div>
+                `;
+            }
+
+            // ============================================
+            // 8. CONFIGURACIÓN INICIAL DE EVENTOS Y CONTROLES
+            // ============================================
+            function inicializar() {
+                console.log("Configurando eventos del formulario");
+
+                inicializarDragAndDrop();
+
+                $('.archivo-pdf').off('change').on('change', function() {
+                    const index = $(this).data('index');
+
+                    if (!validarArchivoBasico(this, 5, 'PDF')) {
+                        mostrarInfoArchivo(this, index, 'pdf');
+                        return;
+                    }
+                    mostrarInfoArchivo(this, index, 'pdf');
+                });
+
+                $('.archivo-xml').off('change').on('change', function() {
+                    const index = $(this).data('index');
+
+                    if (!validarArchivoBasico(this, 2, 'XML')) {
+                        mostrarInfoArchivo(this, index, 'xml');
+                        const validationResult = document.getElementById(`xml-validation-result-${index}`);
+                        if (validationResult) validationResult.innerHTML = '';
+                        return;
+                    }
+
+                    mostrarInfoArchivo(this, index, 'xml');
+
+                    const validationResult = document.getElementById(`xml-validation-result-${index}`);
+                    if (validationResult) {
+                        validationResult.innerHTML = `
+                            <div class="alert-comprobacion-warning">
+                                <i class="fas fa-spinner fa-spin"></i> Validando XML...
+                            </div>
+                        `;
+                    }
+
+                    setTimeout(() => validarXML(this, index), 100);
+                });
+
+                $('#btn-enviar-correcciones').off('click').on('click', enviarCorrecciones);
+
+                $('#formCorreccion').off('submit').on('submit', function(e) {
+                    e.preventDefault();
+                    enviarCorrecciones();
+                });
+            }
+
+            // ============================================
+            // 9. VALIDACIÓN FINAL Y ENVÍO DE CORRECCIONES
+            // ============================================
+            function enviarCorrecciones() {
+                console.log("Validando formulario antes de enviar");
+
+                let archivosValidos = true;
+                let archivosCount = 0;
+                let xmlValidosCount = 0;
+
+                $('.archivo-xml').each(function() {
+                    const index = $(this).data('index');
+                    const validationResult = document.getElementById(`xml-validation-result-${index}`);
+
+                    if ($(this).val()) {
+                        archivosCount++;
+
+                        if (validationResult) {
+                            const tieneError = validationResult.querySelector('.alert-comprobacion-danger');
+                            const tieneExito = validationResult.querySelector('.alert-comprobacion-success');
+
+                            if (tieneError) {
+                                archivosValidos = false;
+                            } else if (tieneExito) {
+                                xmlValidosCount++;
+                            }
+                        }
+                    }
+                });
+
+                if (!archivosValidos) {
+                    Swal.fire({
+                        title: 'Error en Archivos',
+                        text: 'Uno o más archivos XML no son válidos. Por favor, corrígelos antes de enviar.',
+                        icon: 'error',
+                        confirmButtonText: 'Entendido',
+                        background: '#1a202c',
+                        color: '#ffffff',
+                        confirmButtonColor: '#fd7e14'
+                    });
+                    return;
+                }
+
+                Swal.fire({
+                    title: '¿Enviar Correcciones?',
+                    html: `
+                        <div style="text-align: center; color: #cbd5e0;">
+                            <div style="margin-bottom: 20px;">
+                                <i class="fas fa-paper-plane fa-3x" style="color: #f6ad55;"></i>
+                            </div>
+                            <p style="font-size: 16px; margin-bottom: 20px;">¿Estás seguro de enviar las correcciones a Finanzas?</p>
+                            <div style="background: #2d3748; border: 1px solid #4a5568; padding: 16px; border-radius: 8px; margin-top: 20px;">
+                                <i class="fas fa-info-circle" style="color: #f6ad55; margin-right: 10px;"></i>
+                                <span>Los gastos corregidos serán enviados para revisión.</span>
+                            </div>
+                        </div>
+                    `,
+                    background: '#1a202c',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, enviar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#f6ad55',
+                    cancelButtonColor: '#4a5568',
+                    width: '500px',
+                    showLoaderOnConfirm: true,
+                    preConfirm: () => {
+                        return new Promise((resolve, reject) => {
+                            const formData = new FormData($('#formCorreccion')[0]);
+                            formData.append('fechaEnvio', new Date().toISOString());
+
+                            $.ajax({
+                                url: '@Url.Action("CorregirGastos", "Comprobaciones")',
+                                type: 'POST',
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+                                headers: {
+                                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                                },
+                                success: function(response) {
+                                    if (response.success) {
+                                        resolve(response);
+                                    } else {
+                                        reject(response.message || 'Error del servidor');
+                                    }
+                                },
+                                error: function(xhr) {
+                                    reject(xhr.responseText || 'Error de conexión');
+                                }
+                            });
+                        });
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const response = result.value;
+
+                        Swal.fire({
+                            title: '¡Éxito!',
+                            html: `
+                                <div style="text-align: center; color: #cbd5e0;">
+                                    <div style="margin-bottom: 20px;">
+                                        <i class="fas fa-check-circle fa-3x" style="color: #38a169;"></i>
+                                    </div>
+                                    <p style="font-weight: 600; color: #ffffff; font-size: 18px;">${response.message}</p>
+                                    <p style="margin-top: 10px; color: #a0aec0;">Finanzas revisará tus correcciones.</p>
+                                    <div style="margin-top: 30px;">
+                                        <a href="@Url.Action("Index", "Comprobaciones")" class="btn" style="background: var(--viamtek-green); color: #ffffff; padding: 10px 20px; border-radius: 6px; text-decoration: none;">
+                                            <i class="fas fa-list"></i> Volver a Comprobaciones
+                                        </a>
+                                    </div>
+                                </div>
+                            `,
+                            background: '#1a202c',
+                            showConfirmButton: false,
+                            width: '500px'
+                        });
+                    }
+                }).catch((error) => {
+                    Swal.fire({
+                        title: 'Error',
+                        html: `
+                            <div style="text-align: center; color: #cbd5e0;">
+                                <div style="margin-bottom: 20px;">
+                                    <i class="fas fa-exclamation-triangle fa-3x" style="color: #e53e3c;"></i>
+                                </div>
+                                <p style="font-weight: 600; color: #ffffff;">Error al enviar</p>
+                                <div style="background: #2d3748; border: 1px solid #4a5568; padding: 16px; border-radius: 8px; margin-top: 20px;">
+                                    <i class="fas fa-info-circle" style="color: #e53e3c; margin-right: 10px;"></i>
+                                    <span>${error}</span>
+                                </div>
+                            </div>
+                        `,
+                        background: '#1a202c',
+                        showConfirmButton: false,
+                        width: '500px'
+                    });
+                });
+            }
+
+            // ============================================
+            // 10. EJECUCIÓN DE LA INICIALIZACIÓN
+            // ============================================
+            inicializar();
+        });
+    </script>
+}

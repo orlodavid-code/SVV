@@ -1,0 +1,399 @@
+﻿@model SVV.ViewModels.CrearEmpleadoViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Crear Empleado";
+    var fechaHoy = DateTime.Now.ToString("yyyy-MM-dd");
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="container-fluid">
+    <div class="admin-header">
+        <h1 class="admin-title"><i class="fas fa-user-plus me-2"></i> Crear Nuevo Empleado</h1>
+        <nav aria-label="breadcrumb" class="breadcrumb-viamtek">
+            <ol class="breadcrumb bg-transparent p-0 m-0">
+                <li class="breadcrumb-item"><a asp-action="Empleados" class="text-decoration-none">Gestión de Empleados</a></li>
+                <li class="breadcrumb-item active">Crear Nuevo</li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Sistema de notificaciones para errores del backend -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <h5 class="card-title"><i class="fas fa-user-circle me-2"></i> Información del Nuevo Empleado</h5>
+        </div>
+        <div class="admin-card-body">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+
+            <!-- Formulario principal con antiforgery token -->
+            <form asp-action="CrearEmpleado" asp-controller="Admin" method="post" id="createForm">
+                @Html.AntiForgeryToken()
+
+                <div class="row">
+                    <!-- Columna Izquierda - Campos obligatorios -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Nombre" class="form-label-custom">Nombre *</label>
+                            <input asp-for="Nombre" class="form-control form-control-dark"
+                                   placeholder="Ingrese el nombre" required />
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label-custom">Email Corporativo *</label>
+                            <input asp-for="Email" type="email" class="form-control form-control-dark"
+                                   placeholder="usuario@viamtek.com o usuario@qvitek.com" required />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                            <small class="form-text text-muted">Solo se permiten emails de los dominios viamtek.com y qvitek.com</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="RolId" class="form-label-custom">Rol en el Sistema *</label>
+                            <select asp-for="RolId" id="rolSelect" class="form-select form-select-dark select-roles"
+                                    asp-items='new SelectList(ViewBag.Roles, "Id", "Nombre")' required>
+                                <option value="">Seleccione un rol</option>
+                            </select>
+                            <span asp-validation-for="RolId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="AreaAdscripcion" class="form-label-custom">Área de Adscripción *</label>
+                            <input asp-for="AreaAdscripcion" class="form-control form-control-dark"
+                                   placeholder="Ej: Tecnologías de la Información" required />
+                            <span asp-validation-for="AreaAdscripcion" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Puesto" class="form-label-custom">Puesto</label>
+                            <input asp-for="Puesto" class="form-control form-control-dark"
+                                   placeholder="Ej: Desarrollador Senior" />
+                            <span asp-validation-for="Puesto" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Columna Derecha - Campos opcionales -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Apellidos" class="form-label-custom">Apellidos *</label>
+                            <input asp-for="Apellidos" class="form-control form-control-dark"
+                                   placeholder="Ingrese los apellidos" required />
+                            <span asp-validation-for="Apellidos" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Telefono" class="form-label-custom">Teléfono</label>
+                            <input asp-for="Telefono" class="form-control form-control-dark"
+                                   placeholder="Ej: +52 55 1234 5678" />
+                            <span asp-validation-for="Telefono" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="JefeDirectoId" class="form-label-custom">Jefe Directo</label>
+                            <select asp-for="JefeDirectoId" id="rolSelect" class="form-select form-select-dark select-roles"
+                                    asp-items='new SelectList(ViewBag.Jefes, "Id", "Nombre")'>
+                                <option value="">Sin jefe directo asignado</option>
+                            </select>
+                            <span asp-validation-for="JefeDirectoId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Departamento" class="form-label-custom">Departamento</label>
+                            <input asp-for="Departamento" class="form-control form-control-dark"
+                                   placeholder="Ej: Desarrollo de Software" />
+                            <span asp-validation-for="Departamento" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="NivelPuesto" class="form-label-custom">Nivel de Puesto</label>
+                            <input asp-for="NivelPuesto" class="form-control form-control-dark"
+                                   placeholder="Ej: Senior, Junior, Manager" />
+                            <span asp-validation-for="NivelPuesto" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="FechaIngreso" class="form-label-custom">Fecha de Ingreso</label>
+                            <input asp-for="FechaIngreso" type="date" class="form-control form-control-dark"
+                                   value="@fechaHoy" />
+                            <span asp-validation-for="FechaIngreso" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fila Inferior - Ubicación y estado remoto -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <!-- Sistema de ubicación con estados y municipios dinámicos -->
+                        <div class="mb-3">
+                            <label asp-for="UbicacionBase" class="form-label-custom">Ubicación Base</label>
+
+                            <div class="row g-2 mb-2">
+                                <div class="col-md-6">
+                                    <label class="form-label">Estado</label>
+                                    <select id="estadoSelectUbicacion" class="form-select form-select-dark">
+                                        <option value="">-- Seleccione un estado --</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Municipio</label>
+                                    <select id="municipioSelectUbicacion" class="form-select form-select-dark" disabled>
+                                        <option value="">-- Seleccione un municipio --</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Campo oculto para almacenar ubicación formateada -->
+                            <input type="hidden" asp-for="UbicacionBase" id="UbicacionBaseHidden" />
+
+                            <!-- Vista previa de ubicación seleccionada -->
+                            <div class="alert alert-light py-2 mt-2">
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                Ubicación seleccionada: <strong id="ubicacionPreview">No seleccionada</strong>
+                            </div>
+
+                            <span asp-validation-for="UbicacionBase" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check form-switch mt-4">
+                            <input asp-for="ColaboradorRemoto" class="form-check-input form-check-input-dark" />
+                            <label class="form-check-label form-label-custom ms-2" asp-for="ColaboradorRemoto">
+                                ¿Es colaborador remoto?
+                            </label>
+                            <span asp-validation-for="ColaboradorRemoto" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información sobre contraseña temporal generada por el sistema -->
+                <div class="alert alert-info mt-4">
+                    <div class="d-flex">
+                        <i class="fas fa-info-circle me-3 mt-1"></i>
+                        <div>
+                            <h6 class="alert-heading mb-2">Información Importante</h6>
+                            <p class="mb-1">• Al crear el empleado, se generará automáticamente una contraseña temporal: <strong>Temp123!</strong></p>
+                            <p class="mb-0">• El empleado deberá cambiar esta contraseña en su primer acceso al sistema.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de acción del formulario -->
+                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                    <a asp-action="Empleados" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Cancelar y Volver
+                    </a>
+                    <button type="submit" class="btn btn-gradient" id="submitBtn">
+                        <i class="fas fa-user-plus me-2"></i> Crear Empleado
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ============================================
+            // SISTEMA DINÁMICO DE ESTADOS Y MUNICIPIOS
+            // ============================================
+            const estadoSelect = document.getElementById('estadoSelectUbicacion');
+            const municipioSelect = document.getElementById('municipioSelectUbicacion');
+            const ubicacionBaseHidden = document.getElementById('UbicacionBaseHidden');
+            const ubicacionPreview = document.getElementById('ubicacionPreview');
+            let estadosData = [];
+
+            // Función principal para cargar datos geográficos desde JSON estático
+            async function cargarEstados() {
+                try {
+                    console.log('Cargando datos de estados desde servidor...');
+                    const response = await fetch('/data/estados-mexico.json');
+                    if (!response.ok) throw new Error('Error en la respuesta del servidor');
+
+                    const data = await response.json();
+                    estadosData = data.estados || [];
+
+                    // Limpiar y poblar select de estados
+                    estadoSelect.innerHTML = '<option value="">-- Seleccione un estado --</option>';
+                    estadosData.forEach(estado => {
+                        const option = document.createElement('option');
+                        option.value = estado.nombre;
+                        option.textContent = estado.nombre;
+                        estadoSelect.appendChild(option);
+                    });
+
+                    console.log('Datos de estados cargados correctamente');
+
+                    // Cargar ubicación existente si hay datos previos
+                    if (ubicacionBaseHidden && ubicacionBaseHidden.value) {
+                        cargarUbicacionExistente(ubicacionBaseHidden.value);
+                    }
+
+                } catch (error) {
+                    console.error('Error al cargar estados:', error);
+                    mostrarMensajeError();
+                }
+            }
+
+            // Función para cargar datos previos en modo edición
+            function cargarUbicacionExistente(valor) {
+                const partes = valor.split(',').map(p => p.trim());
+
+                if (partes.length === 2) {
+                    const [municipio, estado] = partes;
+                    const estadoEncontrado = estadosData.find(e => e.nombre === estado);
+
+                    if (estadoEncontrado) {
+                        estadoSelect.value = estado;
+                        cargarMunicipiosDeEstado(estadoEncontrado);
+
+                        setTimeout(() => {
+                            if (municipioSelect.querySelector(`option[value="${municipio}"]`)) {
+                                municipioSelect.value = municipio;
+                            }
+                            actualizarUbicacion();
+                        }, 100);
+                    }
+                } else {
+                    const estadoEncontrado = estadosData.find(e => e.nombre === valor);
+                    if (estadoEncontrado) {
+                        estadoSelect.value = valor;
+                        actualizarUbicacion();
+                    }
+                }
+            }
+
+            // Función para cargar municipios basados en estado seleccionado
+            function cargarMunicipiosDeEstado(estado) {
+                municipioSelect.innerHTML = '<option value="">-- Seleccione un municipio --</option>';
+
+                if (estado && estado.municipios) {
+                    municipioSelect.disabled = false;
+                    const municipiosOrdenados = [...estado.municipios].sort((a, b) =>
+                        a.localeCompare(b, 'es', { sensitivity: 'base' })
+                    );
+
+                    municipiosOrdenados.forEach(municipio => {
+                        const option = document.createElement('option');
+                        option.value = municipio;
+                        option.textContent = municipio;
+                        municipioSelect.appendChild(option);
+                    });
+                } else {
+                    municipioSelect.disabled = true;
+                }
+            }
+
+            // Manejador de evento para cambio de estado
+            function manejarCambioEstado() {
+                const estadoNombre = this.value;
+                if (estadoNombre) {
+                    const estado = estadosData.find(e => e.nombre === estadoNombre);
+                    if (estado) {
+                        cargarMunicipiosDeEstado(estado);
+                    }
+                } else {
+                    municipioSelect.disabled = true;
+                    municipioSelect.innerHTML = '<option value="">-- Seleccione un municipio --</option>';
+                }
+                actualizarUbicacion();
+            }
+
+            // Función para actualizar valores de ubicación en tiempo real
+            function actualizarUbicacion() {
+                const estado = estadoSelect.value;
+                const municipio = municipioSelect.value;
+                let ubicacion = '';
+
+                if (estado && municipio) {
+                    ubicacion = `${municipio}, ${estado}`;
+                } else if (estado) {
+                    ubicacion = estado;
+                }
+
+                if (ubicacionBaseHidden) {
+                    ubicacionBaseHidden.value = ubicacion;
+                }
+
+                if (ubicacionPreview) {
+                    if (ubicacion) {
+                        ubicacionPreview.textContent = ubicacion;
+                        ubicacionPreview.style.color = '#28a745';
+                    } else {
+                        ubicacionPreview.textContent = 'No seleccionada';
+                        ubicacionPreview.style.color = '#6c757d';
+                    }
+                }
+            }
+
+            // Función para mostrar errores de carga
+            function mostrarMensajeError() {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'alert alert-warning mt-2';
+                errorDiv.innerHTML = `
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    No se pudieron cargar los estados. Por favor, escribe tu ubicación manualmente.
+                `;
+
+                const container = estadoSelect.closest('.mb-3');
+                if (container) {
+                    container.appendChild(errorDiv);
+                }
+
+                estadoSelect.disabled = true;
+                municipioSelect.disabled = true;
+            }
+
+            // Configuración inicial de event listeners
+            if (estadoSelect) {
+                estadoSelect.addEventListener('change', manejarCambioEstado);
+            }
+
+            if (municipioSelect) {
+                municipioSelect.addEventListener('change', actualizarUbicacion);
+            }
+
+            // Inicializar carga de datos
+            if (estadoSelect) {
+                cargarEstados();
+            }
+
+            // ============================================
+            // MANEJO DE ENVÍO DEL FORMULARIO
+            // ============================================
+            const form = document.getElementById('createForm');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (form && submitBtn) {
+                form.addEventListener('submit', function(e) {
+                    // Validación adicional antes del envío
+                    if (ubicacionBaseHidden && !ubicacionBaseHidden.value.trim()) {
+                        console.log('Ubicación base no especificada (campo opcional)');
+                    }
+
+                    // Deshabilitar botón durante envío para prevenir doble envío
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Creando empleado...';
+
+                    return true;
+                });
+            }
+        });
+    </script>
+}

@@ -1,0 +1,185 @@
+﻿@model dynamic
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: #6f42c1;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        .button {
+            background: #6f42c1;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .alert-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #6f42c1;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #6f42c1;
+        }
+
+        .status-badge {
+            background: #e9ecef;
+            color: #6f42c1;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 14px;
+            display: inline-block;
+            margin: 5px 0;
+        }
+
+        .instructions {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #007bff;
+        }
+
+        .warning {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+
+        .detail-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 4px;
+            border-left: 3px solid #6f42c1;
+        }
+
+        .deadline {
+            color: #856404;
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 Comprobación Reabierta para Corrección</h1>
+            <p>Sistema de Viáticos - Validación de Gastos</p>
+        </div>
+
+        <div class="content">
+            <h2>¡Atención! Correcciones Requeridas</h2>
+            <p>Hola <strong>@Model.EmpleadoNombre</strong>,</p>
+
+            <div class="alert-box">
+                <p><span class="label">Código de Comprobación:</span> @Model.CodigoComprobacion</p>
+                <p><span class="label">Fecha de Reapertura:</span> @Model.FechaReapertura</p>
+                <p>
+                    <span class="label">Estado:</span>
+                    <span class="status-badge">✏️ REABIERTA PARA CORRECCIÓN</span>
+                </p>
+            </div>
+
+            <div class="warning">
+                <p><strong>📋 Información Importante:</strong></p>
+                <p>Tu comprobación ha sido reabierta por el área de Finanzas para realizar correcciones en los gastos registrados.</p>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Comentarios))
+            {
+                <div class="instructions">
+                    <p><strong>📝 Comentarios de Finanzas:</strong></p>
+                    <p>@Model.Comentarios</p>
+                </div>
+            }
+
+            <div class="instructions">
+                <p><strong>🔧 Instrucciones para la Corrección:</strong></p>
+                <p>@Model.Instrucciones</p>
+                <p>Por favor, corrige todos los gastos devueltos y reenvía la comprobación a Finanzas.</p>
+            </div>
+
+            <div class="deadline">
+                ⏰ <strong>Fecha límite para corrección:</strong> 3 días a partir de hoy
+            </div>
+
+            <p><strong>🔗 Acceso Rápido:</strong> Haz clic en el siguiente botón para acceder directamente a la corrección de gastos.</p>
+
+            <div style="text-align: center; margin: 25px 0;">
+                <a href="@Model.Url" class="button">✏️ Corregir Comprobación</a>
+            </div>
+
+            <p style="font-size: 14px; color: #666;">
+                <strong>Nota:</strong> Si el botón no funciona, copia y pega la siguiente URL en tu navegador:
+                <br>
+                <code style="background: #f8f9fa; padding: 5px; border-radius: 3px; word-break: break-all; display: block; margin-top: 5px;">
+                    @Model.Url
+                </code>
+            </p>
+
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 20px;">
+                <p><strong>📞 Soporte:</strong> Si tienes alguna duda o necesitas asistencia, contacta al departamento de Finanzas.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>📧 Este es un mensaje automático generado por el Sistema de Viáticos de Viamtek.</p>
+            <p>Por favor, no respondas a este correo. Si necesitas ayuda, contacta a soporte.</p>
+            <p>&copy; @DateTime.Now.Year - Sistema de Viáticos | Viamtek</p>
+        </div>
+    </div>
+</body>
+</html>

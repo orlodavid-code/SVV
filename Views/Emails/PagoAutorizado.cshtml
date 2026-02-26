@@ -1,0 +1,126 @@
+﻿@model dynamic
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: #20c997;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        .details {
+            background: #d1f2eb;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #20c997;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #0c5460;
+        }
+
+        .status-autorizado {
+            color: #155724;
+            background: #d4edda;
+            padding: 5px 10px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .payment-details {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Pago Autorizado</h1>
+            <p>Sistema de Viáticos - Procesamiento de Pagos</p>
+        </div>
+
+        <div class="content">
+            <h2>¡Pago Autorizado Exitosamente!</h2>
+            <p>Hola <strong>@Model.EmpleadoNombre</strong>,</p>
+
+            <div class="details">
+                <p><span class="label">Código de Comprobación:</span> @Model.CodigoComprobacion</p>
+                <p><span class="label">Monto Autorizado:</span> @Model.Monto</p>
+                <p><span class="label">Fecha de Autorización:</span> @Model.FechaAutorizacion</p>
+                <p><span class="label">Estado:</span> <span class="status-autorizado">💰 Pago Autorizado</span></p>
+            </div>
+
+            <div class="payment-details">
+                💳 <strong>Monto a procesar:</strong> @Model.Monto
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Comentarios))
+            {
+                <div style="background: #e8f4fc; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <p><strong>📝 Comentarios de Finanzas:</strong></p>
+                    <p>@Model.Comentarios</p>
+                </div>
+            }
+
+            <p>
+                <strong>📅 Próximos pasos:</strong> El pago será procesado en los próximos días hábiles según
+                los procedimientos establecidos en el departamento de Finanzas.
+            </p>
+
+            <p style="font-size: 14px; color: #666;">
+                <strong>Nota:</strong> El tiempo de procesamiento puede variar según el método de pago
+                y los controles internos establecidos. Si no recibes el pago en 5 días hábiles,
+                contacta al departamento de Finanzas.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>📧 Este es un mensaje automático generado por el Sistema de Viáticos.</p>
+            <p>Por favor, no respondas a este correo.</p>
+            <p>&copy; @DateTime.Now.Year - Sistema de Viáticos | Viamtek</p>
+        </div>
+    </div>
+</body>
+</html>

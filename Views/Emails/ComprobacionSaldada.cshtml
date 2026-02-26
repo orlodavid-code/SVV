@@ -1,0 +1,123 @@
+﻿@model dynamic
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: #17a2b8;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        .button {
+            background: #17a2b8;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 15px 0;
+        }
+
+        .details {
+            background: #d1ecf1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #0c5460;
+        }
+
+        .status-completado {
+            color: #155724;
+            background: #d4edda;
+            padding: 5px 10px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Comprobación Saldada</h1>
+            <p>Sistema de Viáticos - Liquidación Completada</p>
+        </div>
+
+        <div class="content">
+            <h2>¡Comprobación Liquidada Exitosamente!</h2>
+            <p>Hola <strong>@Model.EmpleadoNombre</strong>,</p>
+
+            <div class="details">
+                <p><span class="label">Código de Comprobación:</span> @Model.CodigoComprobacion</p>
+                <p><span class="label">Total Gastos Comprobados:</span> @Model.TotalGastos</p>
+                <p><span class="label">Total Anticipo:</span> @Model.TotalAnticipo</p>
+                <p><span class="label">Diferencia:</span> @Model.Diferencia</p>
+                <p><span class="label">Fecha de Procesamiento:</span> @Model.FechaProcesamiento</p>
+                <p><span class="label">Estado:</span> <span class="status-completado">✅ Completamente Saldada</span></p>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Comentarios))
+            {
+                <div style="background: #e8f4fc; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <p><strong>📝 Comentarios:</strong></p>
+                    <p>@Model.Comentarios</p>
+                </div>
+            }
+
+            <p>
+                <strong>🎉 ¡Felicidades!</strong> Tu comprobación de gastos ha sido procesada y liquidada completamente.
+                No hay diferencias pendientes de pago o reintegro.
+            </p>
+
+            <p style="font-size: 14px; color: #666;">
+                <strong>Nota:</strong> Este proceso marca el cierre completo de la gestión de viáticos para este viaje.
+                Si tienes alguna pregunta, contacta al departamento de Finanzas.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>📧 Este es un mensaje automático generado por el Sistema de Viáticos.</p>
+            <p>Por favor, no respondas a este correo.</p>
+            <p>&copy; @DateTime.Now.Year - Sistema de Viáticos | Viamtek</p>
+        </div>
+    </div>
+</body>
+</html>

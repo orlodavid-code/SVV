@@ -1,0 +1,470 @@
+﻿@model SVV.Models.SolicitudesViaje
+
+@{
+    ViewData["Title"] = "Eliminar Solicitud";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="solicitud-title"><i class="fas fa-trash-alt me-2 text-danger"></i>Eliminar Solicitud</h1>
+                    <p class="solicitud-subtitle">Confirmar eliminación permanente de solicitud</p>
+                </div>
+                <a asp-action="Index" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-arrow-left me-2"></i>Volver al Listado
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <div class="delete-card">
+                <div class="alert-delete mb-4">
+                    <div class="d-flex align-items-center">
+                        <div class="alert-icon me-3">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h4 class="alert-heading mb-2">¡Acción Destructiva!</h4>
+                            <p class="mb-0">Esta acción <strong class="text-danger">NO SE PUEDE DESHACER</strong>. Todos los datos serán eliminados permanentemente.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="info-section">
+                            <h5 class="section-title">
+                                <i class="fas fa-info-circle me-2"></i>Información Principal
+                            </h5>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">Código:</span>
+                                    <span class="info-value text-primary fw-bold">@Model.CodigoSolicitud</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Proyecto:</span>
+                                    <span class="info-value">@Model.NombreProyecto</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Destino:</span>
+                                    <span class="info-value">@Model.Destino</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Fechas:</span>
+                                    <span class="info-value">@Model.FechaSalida.ToString("dd/MM/yyyy") - @Model.FechaRegreso.ToString("dd/MM/yyyy")</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Tipo Viático:</span>
+                                    <span class="info-value">@Model.TipoViatico?.Nombre</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Estado:</span>
+                                    <span class="info-value">
+                                        @{
+                                            var estadoClase = "bg-secondary";
+                                            var estadoCodigo = Model.Estado?.Codigo ?? "";
+
+                                            if (estadoCodigo == "BORRADOR") estadoClase = "bg-secondary";
+                                            else if (estadoCodigo == "ENVIADA_JP") estadoClase = "bg-warning text-dark";
+                                            else if (estadoCodigo.Contains("APROBADA")) estadoClase = "bg-success";
+                                            else if (estadoCodigo == "RECHAZADA") estadoClase = "bg-danger";
+                                            else estadoClase = "bg-info";
+                                        }
+                                        <span class="status-badge @estadoClase">@estadoCodigo</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="info-section mb-4">
+                            <h5 class="section-title">
+                                <i class="fas fa-clipboard-list me-2"></i>Motivo del Viaje
+                            </h5>
+                            <div class="content-box">
+                                <p class="mb-0">@Model.Motivo</p>
+                            </div>
+                        </div>
+
+                        <div class="info-section">
+                            <h5 class="section-title">
+                                <i class="fas fa-money-bill-wave me-2"></i>Información de Anticipo
+                            </h5>
+                            <div class="content-box">
+                                @if (Model.RequiereAnticipo == true)
+                                {
+                                    if (Model.MontoAnticipo.HasValue && Model.MontoAnticipo > 0)
+                                    {
+                                        <div class="financial-info">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="text-light">¿Requiere Anticipo?</span>
+                                                <span class="text-success fw-bold">SÍ</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="text-light">Monto Asignado:</span>
+                                                <span class="text-success fw-bold fs-5">@Model.MontoAnticipo.Value.ToString("C")</span>
+                                            </div>
+                                            <div class="mt-2">
+                                                <small class="text-info">
+                                                    <i class="fas fa-info-circle me-1"></i>
+                                                    Monto asignado por Finanzas
+                                                </small>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="financial-info">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="text-light">¿Requiere Anticipo?</span>
+                                                <span class="text-warning fw-bold">SÍ</span>
+                                            </div>
+                                            <div class="text-center py-2">
+                                                <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                                                <p class="text-warning mb-0">
+                                                    <small>Pendiente de asignación</small>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="text-center py-3">
+                                        <i class="fas fa-ban fa-2x text-muted mb-2"></i>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-light">¿Requiere Anticipo?</span>
+                                            <span class="text-muted fw-bold">NO</span>
+                                        </div>
+                                        <p class="text-muted mb-0">No se requiere anticipo</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="impact-section mt-4">
+                    <h6 class="impact-title">
+                        <i class="fas fa-exclamation-circle me-2 text-warning"></i>Impacto de la Eliminación
+                    </h6>
+                    <div class="impact-items">
+                        <div class="impact-item">
+                            <i class="fas fa-times-circle text-danger"></i>
+                            <span>Solicitud removida permanentemente</span>
+                        </div>
+                        @if (Model.RequiereAnticipo == true)
+                        {
+                            <div class="impact-item">
+                                <i class="fas fa-times-circle text-danger"></i>
+                                <span>Información de anticipo eliminada</span>
+                            </div>
+                        }
+                        <div class="impact-item">
+                            <i class="fas fa-times-circle text-danger"></i>
+                            <span>No se puede recuperar esta información</span>
+                        </div>
+                        @if (Model.Estado?.Codigo != "BORRADOR")
+                        {
+                            <div class="impact-item">
+                                <i class="fas fa-exclamation-triangle text-warning"></i>
+                                <span>Solicitud ya fue enviada a aprobación</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @if (Model.Estado?.Codigo != "BORRADOR")
+                {
+                    <div class="alert alert-warning mt-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                            <div>
+                                <h5 class="alert-heading mb-2">¡Advertencia!</h5>
+                                <p class="mb-0">
+                                    Esta solicitud ya no está en estado <strong>BORRADOR</strong>.
+                                    Solo puedes eliminar solicitudes en estado BORRADOR.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="actions-section mt-5 pt-4 border-top border-danger">
+                    <form asp-action="Eliminar" method="post" id="deleteForm">
+                        <input type="hidden" asp-for="Id" />
+                        @Html.AntiForgeryToken()
+
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <a asp-action="Index" class="btn btn-secondary btn-lg w-100">
+                                    <i class="fas fa-times me-2"></i>Cancelar
+                                </a>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="text-center">
+                                    <p class="text-warning mb-3">
+                                        <i class="fas fa-shield-alt me-2"></i>
+                                        Confirma la eliminación permanente
+                                    </p>
+                                    @if (Model.Estado?.Codigo == "BORRADOR")
+                                    {
+                                        <button type="submit" class="btn btn-danger btn-lg px-5" id="btnEliminar">
+                                            <i class="fas fa-trash-alt me-2"></i>Eliminar Permanentemente
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-danger btn-lg px-5" disabled>
+                                            <i class="fas fa-trash-alt me-2"></i>Eliminar Permanentemente
+                                        </button>
+                                        <div class="mt-2">
+                                            <small class="text-muted">No disponible - No está en estado BORRADOR</small>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --card-bg-transparent: rgba(43, 46, 56, 0.95);
+        --border-color: rgba(255, 255, 255, 0.1);
+        --viamtek-green: #5cc87b;
+        --viamtek-dark-green: #308184;
+        --accent-glow: rgba(92, 200, 123, 0.35);
+        --danger-glow: rgba(220, 53, 69, 0.4);
+    }
+
+    .delete-card {
+        background: var(--card-bg-transparent);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--border-color);
+        backdrop-filter: blur(15px);
+        border-left: 4px solid #dc3545;
+    }
+
+    .alert-delete {
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.15), rgba(220, 53, 69, 0.05));
+        border: 1px solid rgba(220, 53, 69, 0.3);
+        border-radius: 15px;
+        padding: 1.5rem;
+        color: #ff6b6b;
+    }
+
+    .alert-icon {
+        color: #ff6b6b;
+    }
+
+    .info-section {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .section-title {
+        color: var(--viamtek-green);
+        font-weight: 600;
+        margin-bottom: 1.25rem;
+        font-size: 1.1rem;
+        border-bottom: 1px solid rgba(92, 200, 123, 0.2);
+        padding-bottom: 0.5rem;
+    }
+
+    .info-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+    .info-label {
+        color: #b0b0b0;
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: #ffffff;
+        text-align: right;
+    }
+
+    .content-box {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        padding: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .financial-info {
+        padding: 0.5rem 0;
+    }
+
+    .status-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .impact-section {
+        background: rgba(220, 53, 69, 0.08);
+        border-radius: 12px;
+        padding: 1.25rem;
+        border: 1px solid rgba(220, 53, 69, 0.2);
+    }
+
+    .impact-title {
+        color: #ff6b6b;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .impact-items {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .impact-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #ff6b6b;
+        font-size: 0.9rem;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c82333, #bd2130);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--danger-glow);
+        }
+
+        .btn-danger:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #b0b0b0;
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        transition: all 0.3s ease;
+    }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+    .alert-warning {
+        background: rgba(255, 193, 7, 0.1);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        border-radius: 12px;
+        color: #ffc107;
+    }
+
+    @@media (max-width: 768px) {
+        .delete-card {
+            padding: 1.5rem;
+            margin: 0 -1rem;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .info-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.25rem;
+        }
+
+        .info-value {
+            text-align: left;
+        }
+
+        .actions-section .row {
+            gap: 1rem;
+        }
+
+        .financial-info .d-flex {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteForm = document.getElementById('deleteForm');
+            const btnEliminar = document.getElementById('btnEliminar');
+
+            if (btnEliminar) {
+                btnEliminar.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: '¿Estás absolutamente seguro?',
+                        text: "Esta acción NO se puede deshacer. La solicitud será eliminada permanentemente.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Sí, eliminar permanentemente',
+                        cancelButtonText: 'Cancelar',
+                        background: '#1a1f2e',
+                        color: '#ffffff',
+                        iconColor: '#ff6b6b'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            btnEliminar.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Eliminando...';
+                            btnEliminar.disabled = true;
+                            deleteForm.submit();
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+}

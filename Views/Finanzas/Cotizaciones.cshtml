@@ -1,0 +1,351 @@
+﻿@model IEnumerable<CotizacionesFinanzas>
+
+@{
+    ViewData["Title"] = "Gestión de Cotizaciones";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/cotizaciones.css" asp-append-version="true" />
+}
+
+<div class="container-fluid cotizaciones-container">
+    <div class="cotizaciones-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="cotizaciones-title"><i class="fas fa-file-invoice-dollar me-2"></i>Gestión de Cotizaciones</h1>
+                <p class="cotizaciones-subtitle">Administra y gestiona todas las cotizaciones del sistema</p>
+            </div>
+            <a asp-controller="Aprobaciones" asp-action="Pendientes" class="btn-cotizaciones-outline btn-lg">
+                <i class="fas fa-list me-2"></i>Ver Solicitudes para Cotizar
+            </a>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-xl-2 col-md-4 mb-4">
+            <div class="stats-card primary">
+                <div class="stats-icon"><i class="fas fa-file-invoice"></i></div>
+                <div class="stats-content">
+                    <h3>@Model.Count()</h3>
+                    <p>Total Cotizaciones</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 mb-4">
+            <div class="stats-card success">
+                <div class="stats-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stats-content">
+                    <h3>@Model.Count(c => c.Estado == "APROBADA")</h3>
+                    <p>Aprobadas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 mb-4">
+            <div class="stats-card info">
+                <div class="stats-icon"><i class="fas fa-dollar-sign"></i></div>
+                <div class="stats-content">
+                    <h3>@Model.Where(c => c.Estado == "APROBADA").Sum(c => c.TotalAutorizado).ToString("C")</h3>
+                    <p>Total Autorizado</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cotizaciones-card">
+        <div class="card-body">
+            <!-- Botón Exportar en tu vista de Cotizaciones -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0 text-white"><i class="fas fa-list-alt me-2"></i>Lista de Cotizaciones</h5>
+                <a asp-action="ExportarCotizacionesExcel" id="btnExportarExcel" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-download me-2"></i>Exportar Excel
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-dark align-middle">
+                    <thead class="table-header-custom">
+                        <tr>
+                            <th>Código</th>
+                            <th>Solicitud</th>
+                            <th>Empleado</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                            <th>Fecha Creación</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var cotizacion in Model)
+                        {
+                            var esAprobadaDireccion = cotizacion.SolicitudViaje.EstadoId == 9;
+
+                            <tr class="cotizacion-item"
+                                data-cotizacion-id="@cotizacion.Id"
+                                data-cotizacion-codigo="@cotizacion.CodigoCotizacion"
+                                data-solicitud-aprobada="@esAprobadaDireccion.ToString().ToLower()">
+
+                                <td><strong class="text-accent">@cotizacion.CodigoCotizacion</strong></td>
+                                <td class="text-white">@cotizacion.SolicitudViaje.CodigoSolicitud</td>
+                                <td class="text-white">@cotizacion.SolicitudViaje.Empleado.Nombre @cotizacion.SolicitudViaje.Empleado.Apellidos</td>
+                                <td><span class="total-autorizado">@cotizacion.TotalAutorizado.ToString("C")</span></td>
+                                <td>
+                                    @if (cotizacion.Estado == "PENDIENTE")
+                                    {
+                                        <span class="estado-cotizacion estado-pendiente">@cotizacion.Estado</span>
+                                    }
+                                    else if (cotizacion.Estado == "APROBADA")
+                                    {
+                                        <span class="estado-cotizacion estado-aprobada">@cotizacion.Estado</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="estado-cotizacion estado-rechazada">@cotizacion.Estado</span>
+                                    }
+                                </td>
+                                <td class="text-white">@cotizacion.FechaCotizacion?.ToString("dd/MM/yyyy")</td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="DetallesCotizacion" asp-route-id="@cotizacion.Id"
+                                           class="btn btn-outline-info btn-action" title="Ver detalles">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+
+                                        <a asp-action="EditarCotizacion" asp-route-id="@cotizacion.Id"
+                                           class="btn btn-outline-warning btn-action btn-editar-cotizacion"
+                                           title="Editar cotización"
+                                           data-cotizacion-id="@cotizacion.Id"
+                                           data-cotizacion-codigo="@cotizacion.CodigoCotizacion"
+                                           data-solicitud-aprobada="@esAprobadaDireccion.ToString().ToLower()">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+
+                                        <button type="button" class="btn btn-outline-danger btn-action btn-eliminar-cotizacion"
+                                                data-cotizacion-id="@cotizacion.Id"
+                                                data-cotizacion-codigo="@cotizacion.CodigoCotizacion"
+                                                data-solicitud-aprobada="@esAprobadaDireccion.ToString().ToLower()"
+                                                title="Eliminar cotización">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+
+                                        @if (cotizacion.Estado == "PENDIENTE")
+                                        {
+                                            <form asp-action="AprobarCotizacion" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@cotizacion.Id" />
+                                                <button type="submit" class="btn btn-outline-success btn-action" title="Aprobar cotización">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Script de cotizaciones cargado');
+
+            // 1. Efectos hover en las filas
+            const tableRows = document.querySelectorAll('.cotizacion-item');
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 4px 15px rgba(92, 200, 123, 0.2)';
+                });
+
+                row.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 'none';
+                });
+            });
+
+            // 2. Validación para botón EDITAR
+            document.querySelectorAll('.btn-editar-cotizacion').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const solicitudAprobada = this.getAttribute('data-solicitud-aprobada');
+                    const esAprobada = solicitudAprobada === 'True' || solicitudAprobada === 'true';
+
+                    if (esAprobada) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        const cotizacionCodigo = this.getAttribute('data-cotizacion-codigo');
+
+                        Swal.fire({
+                            title: '⚠️ Función Bloqueada',
+                            html: `<div class="text-center">
+                                    <div class="mb-3"><i class="fas fa-ban fa-3x" style="color: #f39c12;"></i></div>
+                                    <p>No se puede editar la cotización <strong>${cotizacionCodigo}</strong> porque la solicitud asociada ya fue <strong>aprobada por Dirección</strong>.</p>
+                                  </div>`,
+                            icon: 'warning',
+                            confirmButtonText: 'Entendido'
+                        });
+                    }
+                });
+            });
+
+            // 3. Validación para botón ELIMINAR
+            document.querySelectorAll('.btn-eliminar-cotizacion').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const cotizacionId = this.getAttribute('data-cotizacion-id');
+                    const cotizacionCodigo = this.getAttribute('data-cotizacion-codigo');
+                    const solicitudAprobada = this.getAttribute('data-solicitud-aprobada');
+                    const esAprobada = solicitudAprobada === 'True' || solicitudAprobada === 'true';
+
+                    if (esAprobada) {
+                        Swal.fire({
+                            title: '⚠️ Función Bloqueada',
+                            html: `<div class="text-center">
+                                    <div class="mb-3"><i class="fas fa-ban fa-3x" style="color: #f39c12;"></i></div>
+                                    <p>No se puede eliminar la cotización <strong>${cotizacionCodigo}</strong> porque la solicitud asociada ya fue <strong>aprobada por Dirección</strong>.</p>
+                                  </div>`,
+                            icon: 'warning',
+                            confirmButtonText: 'Entendido'
+                        });
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: '¿Eliminar Cotización?',
+                        html: `<div class="text-center">
+                                <div class="mb-3"><i class="fas fa-trash fa-3x" style="color: #e74c3c;"></i></div>
+                                <p>¿Estás seguro de eliminar la siguiente cotización?</p>
+                                <div style="text-align: left; padding: 1rem; margin: 1rem 0;">
+                                    <strong>Código:</strong> <span class="text-danger">${cotizacionCodigo}</span><br>
+                                    <strong>Acción:</strong> <span class="text-danger">ELIMINAR</span>
+                                </div>
+                                <small class="text-warning">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    <strong>Importante:</strong> Esta acción no se puede deshacer
+                                </small>
+                              </div>`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e74c3c',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: '<i class="fas fa-trash me-2"></i>Sí, eliminar',
+                        cancelButtonText: '<i class="fas fa-times me-2"></i>Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire({
+                                title: 'Eliminando Cotización...',
+                                html: `<div class="text-center">
+                                        <div class="mb-3"><i class="fas fa-spinner fa-spin fa-2x" style="color: #e74c3c;"></i></div>
+                                        <p>Procesando tu solicitud de eliminación</p>
+                                        <div class="progress" style="height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px;">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                                 style="width: 100%; background: linear-gradient(45deg, #e74c3c, #c0392b);"></div>
+                                        </div>
+                                      </div>`,
+                                allowEscapeKey: false,
+                                allowOutsideClick: false,
+                                showConfirmButton: false
+                            });
+
+                            fetch(`/Finanzas/EliminarCotizacion/${cotizacionId}`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                                },
+                                body: `id=${cotizacionId}`
+                            })
+                            .then(response => {
+                                if (response.ok) {
+                                    window.location.reload();
+                                } else {
+                                    throw new Error('Error en la eliminación');
+                                }
+                            })
+                            .catch(() => {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'No se pudo eliminar la cotización',
+                                    icon: 'error',
+                                    confirmButtonText: 'Aceptar'
+                                });
+                            });
+                        }
+                    });
+                });
+            });
+
+            // 4. Validación extra para enlaces de editar (clicks en el icono)
+            document.addEventListener('click', function(e) {
+                const linkEditar = e.target.closest('a[href*="EditarCotizacion"]');
+
+                if (linkEditar) {
+                    const fila = linkEditar.closest('tr');
+                    if (fila) {
+                        const solicitudAprobada = fila.getAttribute('data-solicitud-aprobada');
+                        const esAprobada = solicitudAprobada === 'True' || solicitudAprobada === 'true';
+
+                        if (esAprobada) {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            const cotizacionCodigo = fila.querySelector('.text-accent')?.textContent || 'N/A';
+
+                            Swal.fire({
+                                title: '⚠️ Función Bloqueada',
+                                html: `<div class="text-center">
+                                        <div class="mb-3"><i class="fas fa-ban fa-3x" style="color: #f39c12;"></i></div>
+                                        <p>No se puede editar la cotización <strong>${cotizacionCodigo}</strong> porque la solicitud asociada ya fue <strong>aprobada por Dirección</strong>.</p>
+                                      </div>`,
+                                icon: 'warning',
+                                confirmButtonText: 'Entendido'
+                            });
+                        }
+                    }
+                }
+            });
+
+          const btnExportarExcel = document.getElementById('btnExportarExcel');
+
+            if (btnExportarExcel) {
+                btnExportarExcel.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const totalCotizaciones = @Model.Count();
+                    const totalAprobadas = @Model.Count(c => c.Estado == "APROBADA");
+                    const totalAutorizado = @Model.Where(c => c.Estado == "APROBADA").Sum(c => c.TotalAutorizado);
+
+                    Swal.fire({
+                        title: '¿Exportar Cotizaciones a Excel?',
+                        html: `<div class="text-center">
+                                <div class="mb-3"><i class="fas fa-file-excel fa-3x text-success"></i></div>
+                                <p>¿Estás seguro de que deseas descargar el reporte completo de cotizaciones?</p>
+                                <div class="alert alert-info" style="text-align: left;">
+                                    <strong>Total Cotizaciones:</strong> ${totalCotizaciones}<br>
+                                    <strong>Aprobadas:</strong> ${totalAprobadas}<br>
+                                    <strong>Total Autorizado:</strong> $${totalAutorizado.toLocaleString('es-MX', {minimumFractionDigits: 2})}
+                                </div>
+                              </div>`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#28a745',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: '<i class="fas fa-download me-2"></i>Descargar',
+                        cancelButtonText: '<i class="fas fa-times me-2"></i>Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Redirigir directamente sin mensaje adicional
+                            window.location.href = this.href;
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+}

@@ -1,0 +1,1166 @@
+﻿@using System.Security.Claims;
+@using SVV.Models;
+@using SVV.ViewModels;
+
+@{
+    ViewData["Title"] = "Dashboard - " + ViewBag.RolNombre;
+    var solicitudesPendientes = ViewBag.SolicitudesPendientes as List<SolicitudDashboardViewModel> ?? new List<SolicitudDashboardViewModel>();
+    var rolId = (int?)ViewBag.RolId;
+
+    // ✅ Variables para diferentes tipos de solicitudes pendientes - CON VALORES POR DEFECTO
+    var solicitudesPendientesJP = ViewBag.SolicitudesPendientesJP as List<SolicitudesViaje> ?? new List<SolicitudesViaje>();
+    var solicitudesPendientesRH = ViewBag.SolicitudesPendientesRH as List<SolicitudesViaje> ?? new List<SolicitudesViaje>();
+    var comprobacionesPendientesRevisionJP = ViewBag.ComprobacionesPendientesRevisionJP as List<ComprobacionesViaje> ?? new List<ComprobacionesViaje>();
+    
+    // ✅ Variable para solicitudes recientes de empleado
+    var solicitudesRecientes = ViewBag.SolicitudesRecientes as List<SolicitudesViaje> ?? new List<SolicitudesViaje>();
+    
+    // ✅ Funciones helper para formatear valores
+    string FormatCurrency(decimal? value)
+    {
+        if (value == null) return "$0.00";
+        return value.Value.ToString("C");
+    }
+    
+    decimal GetDecimalValue(decimal? value) => value ?? 0;
+}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="dashboard-title">
+                    ¡Hola de nuevo, <span class="user-name">@ViewBag.NombreUsuario</span>!
+                </h1>
+                <p class="dashboard-subtitle">Resumen de Viáticos y Actividad del Sistema.</p>
+            </div>
+            <div class="col-md-6 text-md-end text-start">
+                <span class="badge bg-viamtek me-2">@ViewBag.RolNombre</span>
+                <span class="user-email d-block d-md-inline-block text-secondary">@User.Identity.Name</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertas (ahora manejadas por SweetAlert) -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show d-none" role="alert" data-sweet-alert="success">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show d-none" role="alert" data-sweet-alert="error">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+        </div>
+    }
+
+    @if (TempData["Warning"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show d-none" role="alert" data-sweet-alert="warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>@TempData["Warning"]
+        </div>
+    }
+
+    <!-- ✅ ESTADÍSTICAS ESPECÍFICAS POR ROL -->
+    @if (rolId == 1) // EMPLEADO
+    {
+        <h4 class="section-title">Tu Resumen de Viáticos</h4>
+        <div class="row">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stats-card primary">
+                    <div class="stats-icon"><i class="fas fa-edit"></i></div>
+                    <div class="stats-content">
+                        <h3>@(ViewBag.MisSolicitudesBorrador ?? 0)</h3>
+                        <p>En Borrador</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stats-card warning">
+                    <div class="stats-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stats-content">
+                        <h3>@(ViewBag.MisSolicitudesPendientes ?? 0)</h3>
+                        <p>Pendientes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stats-card success">
+                    <div class="stats-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stats-content">
+                        <h3>@(ViewBag.MisSolicitudesAprobadas ?? 0)</h3>
+                        <p>Aprobadas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stats-card danger">
+                    <div class="stats-icon"><i class="fas fa-times-circle"></i></div>
+                    <div class="stats-content">
+                        <h3>@(ViewBag.MisSolicitudesRechazadas ?? 0)</h3>
+                        <p>Rechazadas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-12 col-md-12 mb-4">
+                <div class="stats-card secondary">
+                    <div class="stats-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                    <div class="stats-content">
+                        <h3>@((ViewBag.TotalAnticiposAutorizados ?? 0).ToString("C"))</h3>
+                        <p>Anticipos Autorizados</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (rolId == 2) // JEFE PROYECTO
+    {
+        <h4 class="section-title">Panel de Jefe de Proceso/Proyecto</h4>
+        <div class="row">
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stats-card warning">
+                    <div class="stats-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stats-content">
+                        <h3>@(ViewBag.PendientesJP ?? 0)</h3>
+                        <p>Solicitudes Pendientes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stats-card success">
+                    <div class="stats-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stats-content">
+                        <h3>@(ViewBag.AprobadasJP ?? 0)</h3>
+                        <p>Solicitudes Aprobadas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stats-card info">
+                    <div class="stats-icon"><i class="fas fa-clipboard-check"></i></div>
+                    <div class="stats-content">
+                        <h3>@(ViewBag.ComprobacionesPendientesRevision ?? 0)</h3>
+                        <p>Comprobaciones para Revisión</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (rolId == 3) // RECURSOS HUMANOS
+    {
+        <h4 class="section-title">Panel de Capital Humano</h4>
+        <div class="row">
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stats-card primary">
+                    <div class="stats-icon"><i class="fas fa-plane"></i></div>
+                    <div class="stats-content">
+                        <h3>@(ViewBag.TotalSolicitudesActivas ?? 0)</h3>
+                        <p>Solicitudes Activas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stats-card success">
+                    <div class="stats-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stats-content">
+                        <h3>@(ViewBag.SolicitudesAprobadasDireccion ?? 0)</h3>
+                        <p>Solicitudes Aprobadas por Dirección</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stats-card secondary">
+                    <div class="stats-icon"><i class="fas fa-edit"></i></div>
+                    <div class="stats-content">
+                        <h3>@(ViewBag.SolicitudesBorradorOtros ?? 0)</h3>
+                        <p>Borrador de Otros Empleados</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (rolId == 4) // FINANZAS
+    {
+        <h4 class="section-title">Panel de Finanzas</h4>
+        <div class="row">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stats-card primary">
+                    <div class="stats-icon"><i class="fas fa-plane"></i></div>
+                    <div class="stats-content">
+                        <h3>@(ViewBag.SolicitudesActivas ?? 0)</h3>
+                        <p>Solicitudes Activas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stats-card warning">
+                    <div class="stats-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stats-content">
+                        <h3>@(ViewBag.PendientesFinanzas ?? 0)</h3>
+                        <p>Pendientes de Aprobación</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stats-card danger">
+                    <div class="stats-icon"><i class="fas fa-money-bill-wave"></i></div>
+                    <div class="stats-content">
+                        <h3>@(ViewBag.PendientesPorSaldar ?? 0)</h3>
+                        <p>Pendientes por Saldar</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stats-card success">
+                    <div class="stats-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                    <div class="stats-content">
+                        <h3>@((ViewBag.AnticiposAutorizadosPorUsuario ?? 0).ToString("C"))</h3>
+                        <p>Anticipos Autorizados por Mí</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (rolId == 5) // DIRECCIÓN
+    {
+        <h4 class="section-title">Panel de Dirección General</h4>
+        <div class="row">
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stats-card primary">
+                    <div class="stats-icon"><i class="fas fa-plane"></i></div>
+                    <div class="stats-content">
+                        <h3>@(ViewBag.SolicitudesActivas ?? 0)</h3>
+                        <p>Solicitudes Activas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stats-card warning">
+                    <div class="stats-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stats-content">
+                        <h3>@(ViewBag.PendientesDireccion ?? 0)</h3>
+                        <p>Pendientes de Aprobación</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stats-card info">
+                    <div class="stats-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="stats-content">
+                        <h3>@((ViewBag.AnticiposAutorizados ?? 0).ToString("C"))</h3>
+                        <p>Anticipos Totales Autorizados</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (rolId == 6) // ADMIN
+    {
+        <h4 class="section-title">Panel de Administración</h4>
+        <div class="row">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stats-card primary">
+                    <div class="stats-icon"><i class="fas fa-plane"></i></div>
+                    <div class="stats-content">
+                        <h3>@(ViewBag.SolicitudesActivas ?? 0)</h3>
+                        <p>Solicitudes Activas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stats-card warning">
+                    <div class="stats-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stats-content">
+                        <h3>@(ViewBag.PendientesAprobacion ?? 0)</h3>
+                        <p>Pendientes de Aprobación</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stats-card success">
+                    <div class="stats-icon"><i class="fas fa-users"></i></div>
+                    <div class="stats-content">
+                        <h3>@(ViewBag.TotalUsuariosActivos ?? 0)</h3>
+                        <p>Usuarios Activos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stats-card info">
+                    <div class="stats-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="stats-content">
+                        <h3>@((ViewBag.AnticiposTotalesAutorizados ?? 0).ToString("C"))</h3>
+                        <p>Anticipos Totales</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ✅ ACCIONES UNIVERSALES PARA TODOS LOS ROLES -->
+    <h4 class="section-title">Gestiona Tus Viáticos</h4>
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="quick-actions-card h-100">
+                <h4 class="card-title"><i class="fas fa-bolt me-2"></i> Acciones Rápidas</h4>
+                <div class="row">
+                    <!-- ✅ ACCIONES UNIVERSALES PARA TODOS -->
+                    <div class="col-4 mb-3">
+                        <a asp-controller="Solicitudes" asp-action="CrearSolicitud" class="quick-action-btn" data-bs-toggle="tooltip">
+                            <div class="action-icon">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                            <span class="action-text">Crear Solicitud</span>
+                        </a>
+                    </div>
+                    <div class="col-4 mb-3">
+                        <a asp-controller="Solicitudes" asp-action="Index" class="quick-action-btn" data-bs-toggle="tooltip">
+                            <div class="action-icon">
+                                <i class="fas fa-list"></i>
+                            </div>
+                            <span class="action-text">Mis Solicitudes</span>
+                        </a>
+                    </div>
+                    <div class="col-4 mb-3">
+                        <a asp-controller="Comprobaciones" asp-action="Index" class="quick-action-btn" data-bs-toggle="tooltip">
+                            <div class="action-icon">
+                                <i class="fas fa-receipt"></i>
+                            </div>
+                            <span class="action-text">Comprobar Gastos</span>
+                        </a>
+                    </div>
+
+                    <!-- ✅ ACCIONES ESPECÍFICAS POR ROL -->
+                    @if (rolId == 6 || rolId == 5 || rolId == 4) // Admin, Dirección, Finanzas
+                    {
+                        @if (rolId == 4) // Finanzas
+                        {
+                            <div class="col-4 mb-3">
+                                <a asp-controller="Finanzas" asp-action="Cotizaciones" class="quick-action-btn" data-bs-toggle="tooltip">
+                                    <div class="action-icon">
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                    </div>
+                                    <span class="action-text">Cotizaciones</span>
+                                </a>
+                            </div>
+                            <div class="col-4 mb-3">
+                                <a asp-controller="Finanzas" asp-action="Facturas" class="quick-action-btn" data-bs-toggle="tooltip">
+                                    <div class="action-icon">
+                                        <i class="fas fa-receipt"></i>
+                                    </div>
+                                    <span class="action-text">Revisión Facturas</span>
+                                </a>
+                            </div>
+                            <div class="col-4 mb-3">
+                                <a asp-controller="Finanzas" asp-action="AutorizacionesPago" class="quick-action-btn" data-bs-toggle="tooltip">
+                                    <div class="action-icon">
+                                        <i class="fas fa-money-check"></i>
+                                    </div>
+                                    <span class="action-text">Autorizar Pagos</span>
+                                </a>
+                            </div>
+                        }
+
+                        @if (rolId == 6) // Solo Admin
+                        {
+                            <div class="col-4 mb-3">
+                                <a asp-controller="Admin" asp-action="Empleados" class="quick-action-btn" data-bs-toggle="tooltip">
+                                    <div class="action-icon">
+                                        <i class="fas fa-user-tie"></i>
+                                    </div>
+                                    <span class="action-text">Gestionar Personal</span>
+                                </a>
+                            </div>
+                        }
+
+                        <div class="col-4 mb-3">
+                            <a asp-controller="Finanzas" asp-action="Reportes" class="quick-action-btn" data-bs-toggle="tooltip">
+                                <div class="action-icon">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <span class="action-text">Reportes</span>
+                            </a>
+                        </div>
+                        <div class="col-4 mb-3">
+                            <a asp-controller="Aprobaciones" asp-action="Pendientes" class="quick-action-btn" data-bs-toggle="tooltip">
+                                <div class="action-icon">
+                                    <i class="fas fa-tasks"></i>
+                                </div>
+                                <span class="action-text">Solicitudes Pendientes</span>
+                            </a>
+                        </div>
+                    }
+                    else if (rolId == 2) // Jefe Proyecto
+                    {
+                        <div class="col-4 mb-3">
+                            <a asp-controller="Aprobaciones" asp-action="Pendientes" class="quick-action-btn" data-bs-toggle="tooltip">
+                                <div class="action-icon">
+                                    <i class="fas fa-tasks"></i>
+                                </div>
+                                <span class="action-text">Solicitudes Pendientes</span>
+                            </a>
+                        </div>
+                        <div class="col-4 mb-3">
+                            <a asp-controller="Finanzas" asp-action="RevisionActividadesJP" class="quick-action-btn" data-bs-toggle="tooltip">
+                                <div class="action-icon">
+                                    <i class="fas fa-clipboard-check"></i>
+                                </div>
+                                <span class="action-text">Revisar Actividades</span>
+                            </a>
+                        </div>
+                    }
+                    else if (rolId == 3) // RH - CAPITAL HUMANO
+                    {
+                        <div class="col-4 mb-3">
+                            <a asp-controller="Aprobaciones" asp-action="Pendientes" class="quick-action-btn" data-bs-toggle="tooltip">
+                                <div class="action-icon">
+                                    <i class="fas fa-tasks"></i>
+                                </div>
+                                <span class="action-text">Ver Todas Solicitudes</span>
+                            </a>
+                        </div>
+                        <!-- RH NO tiene Gestionar Empleados -->
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- ✅ INFORMACIÓN IMPORTANTE ESPECÍFICA POR ROL -->
+        <div class="col-lg-6 mb-4">
+            <div class="info-card info-card-role-@rolId">
+                <div class="info-card-header">
+                    <h4 class="info-card-title">
+                        <i class="fas fa-info-circle"></i> Información Importante
+                    </h4>
+                </div>
+                <div class="info-card-body">
+                    @if (rolId == 1) // EMPLEADO
+                    {
+                        <ul class="info-list">
+                            <li>
+                                <i class="fas fa-check-circle info-icon"></i>
+                                <span class="info-text">Crea solicitudes de viáticos para tus viajes de trabajo</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle info-icon"></i>
+                                <span class="info-text">Tus solicitudes pasan por: <strong> tu Jefe Directo → Capital Humano → Finanzas → Dirección</strong></span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle info-icon"></i>
+                                <span class="info-text">Comprueba tus gastos después de cada viaje dentro del plazo establecido</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-exclamation-triangle info-icon"></i>
+                                <span class="info-text"><strong>Plazos importantes:</strong> Solicitud 3 días antes | Comprobación hasta 5 días después</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-exclamation-triangle info-icon"></i>
+                                <span class="info-text"><strong>Facturas:</strong> A nombre de CUVITEK Software con RFC correcto</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="info-highlight">
+                            <div class="info-highlight-title">
+                                <i class="fas fa-lightbulb me-2"></i>Consejo Rápido
+                            </div>
+                            <p class="info-highlight-text">
+                                Mantén todos tus comprobantes originales. Las facturas deben incluir RFC, dirección fiscal y desglose de IVA.
+                            </p>
+                        </div>
+                    }
+                    else if (rolId == 2) // JEFE PROYECTO
+                    {
+                        <ul class="info-list">
+                            <li>
+                                <i class="fas fa-check-circle info-icon"></i>
+                                <span class="info-text">Aprueba solicitudes de viáticos de tus empleados directos</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle info-icon"></i>
+                                <span class="info-text">Revisa actividades y comprobaciones de viajes de tu equipo</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-exclamation-triangle info-icon"></i>
+                                <span class="info-text"><strong>Plazo de revisión:</strong> 24 horas hábiles máximo por solicitud</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-exclamation-triangle info-icon"></i>
+                                <span class="info-text">Verifica que las actividades coincidan con el proyecto asignado</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-info-circle info-icon"></i>
+                                <span class="info-text">Tus aprobaciones son el <strong>primer filtro</strong> del proceso de viáticos</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="info-highlight">
+                            <div class="info-highlight-title">
+                                <i class="fas fa-lightbulb me-2"></i>Consejo Rápido
+                            </div>
+                            <p class="info-highlight-text">
+                                Revisa cuidadosamente que los montos solicitados sean acordes al destino y duración del viaje.
+                            </p>
+                        </div>
+                    }
+                    else if (rolId == 3) // RECURSOS HUMANOS
+                    {
+                        <ul class="info-list">
+                            <li>
+                                <i class="fas fa-check-circle info-icon"></i>
+                                <span class="info-text">Visualiza todas las solicitudes de viáticos de la empresa</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle info-icon"></i>
+                                <span class="info-text">Monitorea el proceso de aprobación completo de principio a fin</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-exclamation-triangle info-icon"></i>
+                                <span class="info-text"><strong>No puedes:</strong> Gestionar empleados (solo Finanzas tiene este permiso)</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-info-circle info-icon"></i>
+                                <span class="info-text">Tu rol es de <strong>supervisión y seguimiento</strong> del proceso</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-info-circle info-icon"></i>
+                                <span class="info-text">Reporta inconsistencias directamente a Dirección o Finanzas</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="info-highlight">
+                            <div class="info-highlight-title">
+                                <i class="fas fa-lightbulb me-2"></i>Consejo Rápido
+                            </div>
+                            <p class="info-highlight-text">
+                                Utiliza la vista de todas las solicitudes para identificar días fuera de oficina.
+                            </p>
+                        </div>
+                    }
+                    else if (rolId == 4) // FINANZAS
+                    {
+                        <ul class="info-list">
+                            <li>
+                                <i class="fas fa-check-circle info-icon"></i>
+                                <span class="info-text">Autorizas anticipos y pagos finales de viáticos</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle info-icon"></i>
+                                <span class="info-text">Validas facturas, comprobaciones y documentación fiscal</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle info-icon"></i>
+                                <span class="info-text">Generas cotizaciones y reportes financieros detallados</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-exclamation-triangle info-icon"></i>
+                                <span class="info-text"><strong>Responsabilidad:</strong> Verificar RFC, montos y legalidad de documentos</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-info-circle info-icon"></i>
+                                <span class="info-text">Solo Finanzas autoriza <strong>pagos finales</strong> y cierra comprobaciones</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="info-highlight">
+                            <div class="info-highlight-title">
+                                <i class="fas fa-lightbulb me-2"></i>Consejo Rápido
+                            </div>
+                            <p class="info-highlight-text">
+                                Verifica siempre que el RFC en las facturas coincida con el de la empresa y que el IVA esté correctamente desglosado.
+                            </p>
+                        </div>
+                    }
+                    else if (rolId == 5) // DIRECCIÓN
+                    {
+                        <ul class="info-list">
+                            <li>
+                                <i class="fas fa-check-circle info-icon"></i>
+                                <span class="info-text">Apruebas todas las solicitudes</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle info-icon"></i>
+                                <span class="info-text">Tienes visión completa de todos los viáticos de la organización</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-exclamation-triangle info-icon"></i>
+                                <span class="info-text"><strong>No puedes:</strong> Gestionar personal (esta función es exclusiva de Finanzas)</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-info-circle info-icon"></i>
+                                <span class="info-text">Tu aprobación es la <strong>final</strong> antes de que Finanzas proceda con los pagos</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-info-circle info-icon"></i>
+                                <span class="info-text">Puedes observar todos los reportes generados por finanzas</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="info-highlight">
+                            <div class="info-highlight-title">
+                                <i class="fas fa-lightbulb me-2"></i>Consejo Rápido
+                            </div>
+                            <p class="info-highlight-text">
+                                Revisa el historial de viáticos por empleado para identificar patrones de gasto y optimizar recursos.
+                            </p>
+                        </div>
+                    }
+                    else if (rolId == 6) // ADMIN
+                    {
+                        <ul class="info-list">
+                            <li>
+                                <i class="fas fa-check-circle info-icon"></i>
+                                <span class="info-text">Gestión completa de empleados, usuarios y permisos del sistema</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle info-icon"></i>
+                                <span class="info-text">Configuración de catálogos, reglas y parámetros del sistema</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle info-icon"></i>
+                                <span class="info-text">Acceso total a todos los módulos, reportes y funcionalidades</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-exclamation-triangle info-icon"></i>
+                                <span class="info-text"><strong>Responsabilidad:</strong> Mantener la integridad y seguridad del sistema</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-info-circle info-icon"></i>
+                                <span class="info-text">Soporte a usuarios y resolución de problemas técnicos</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="info-highlight">
+                            <div class="info-highlight-title">
+                                <i class="fas fa-lightbulb me-2"></i>Consejo Rápido
+                            </div>
+                            <p class="info-highlight-text">
+                                Realiza respaldos periódicos de la base de datos y monitorea el uso del sistema para prevenir problemas.
+                            </p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ SOLICITUDES RECIENTES (PARA ROLES QUE TIENEN SUS PROPIAS SOLICITUDES) -->
+    @if (rolId == 1) // EMPLEADO - SOLICITUDES PROPIAS
+    {
+        <h4 class="section-title">Tus Solicitudes Recientes</h4>
+        <div class="row">
+            <div class="col-12 mb-5">
+                <div class="solicitud-card">
+                    <div class="solicitud-card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0 text-white"><i class="fas fa-history me-2"></i>Actividad Reciente</h5>
+                            <a asp-controller="Solicitudes" asp-action="Index" class="btn btn-solicitud-outline btn-sm">
+                                <i class="fas fa-list me-1"></i> Ver Todas
+                            </a>
+                        </div>
+
+                        @if (solicitudesRecientes != null && solicitudesRecientes.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover table-striped">
+                                    <thead class="table-header-custom">
+                                        <tr>
+                                            <th class="border-0">Código</th>
+                                            <th class="border-0">Destino</th>
+                                            <th class="border-0">Fechas</th>
+                                            <th class="border-0">Estado</th>
+                                            <th class="border-0 text-center">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (SolicitudesViaje solicitud in solicitudesRecientes)
+                                        {
+                                            var totalAnticipos = solicitud.Anticipos?.Sum(a => a.MontoSolicitado) ?? 0;
+                                            <tr class="table-row-custom">
+                                                <td>
+                                                    <strong class="text-accent">@solicitud.CodigoSolicitud</strong>
+                                                </td>
+                                                <td class="text-white">@solicitud.Destino</td>
+                                                <td>
+                                                    <small class="text-muted">@solicitud.FechaSalida.ToString("dd/MM/yyyy") - @solicitud.FechaRegreso.ToString("dd/MM/yyyy")</small>
+                                                </td>
+                                                <td>
+                                                    @if (solicitud.Estado?.Codigo == "BORRADOR")
+                                                    {
+                                                        <span class="badge bg-secondary">@solicitud.Estado.Codigo</span>
+                                                    }
+                                                    else if (solicitud.Estado?.Codigo == "ENVIADA_JP")
+                                                    {
+                                                        <span class="badge bg-warning text-dark">@solicitud.Estado.Codigo</span>
+                                                    }
+                                                    else if (solicitud.Estado?.Codigo != null && solicitud.Estado.Codigo.Contains("APROBADA"))
+                                                    {
+                                                        <span class="badge bg-success">@solicitud.Estado.Codigo</span>
+                                                    }
+                                                    else if (solicitud.Estado?.Codigo == "RECHAZADA")
+                                                    {
+                                                        <span class="badge bg-danger">@solicitud.Estado.Codigo</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-info">@solicitud.Estado?.Codigo</span>
+                                                    }
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <a asp-controller="Solicitudes" asp-action="Detalles" asp-route-id="@solicitud.Id"
+                                                           class="btn btn-outline-info btn-action" title="Ver detalles">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                        @if (solicitud.EstadoId == 1) // BORRADOR
+                                                        {
+                                                            <a asp-controller="Solicitudes" asp-action="Editar" asp-route-id="@solicitud.Id"
+                                                               class="btn btn-outline-warning btn-action" title="Editar">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                        }
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
+                                <h5 class="text-muted mb-2">No tienes solicitudes recientes</h5>
+                                <p class="text-muted mb-3">Comienza creando tu primera solicitud de viáticos</p>
+                                <a asp-controller="Solicitudes" asp-action="CrearSolicitud" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>Crear Primera Solicitud
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ✅ PENDIENTES DE APROBACIÓN (PARA ROLES CON PERMISOS DE APROBACIÓN) -->
+    @if (rolId == 6 || rolId == 5 || rolId == 4 || rolId == 2) // Admin, Dirección, Finanzas, JP
+    {
+        <h4 class="section-title">Pendientes de Aprobación</h4>
+        <div class="row">
+            <div class="col-12 mb-5">
+                <div class="solicitud-card">
+                    <div class="solicitud-card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0 text-white"><i class="fas fa-list-alt me-2"></i> Solicitudes que Requieren su Acción</h5>
+                            <a asp-controller="Aprobaciones" asp-action="Pendientes" class="btn btn-solicitud-outline btn-sm">
+                                <i class="fas fa-external-link-alt me-2"></i>Ver Todas
+                            </a>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover table-striped">
+                                <thead class="table-header-custom">
+                                    <tr>
+                                        <th class="border-0">Código</th>
+                                        <th class="border-0">Empleado</th>
+                                        <th class="border-0">Proyecto</th>
+                                        <th class="border-0">Destino</th>
+                                        <th class="border-0">Monto Sol.</th>
+                                        <th class="border-0">Estado</th>
+                                        <th class="border-0 text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (solicitudesPendientes != null && solicitudesPendientes.Any())
+                                    {
+                                        @foreach (var solicitud in solicitudesPendientes)
+                                        {
+                                            <tr class="table-row-custom">
+                                                <td><strong class="text-accent">@solicitud.Codigo</strong></td>
+                                                <td class="text-white">@solicitud.EmpleadoNombre</td>
+                                                <td class="text-white">@solicitud.NombreProyecto</td>
+                                                <td class="text-white">@solicitud.Destino</td>
+                                                <td class="text-white">@solicitud.MontoSolicitado</td>
+                                                <td><span class="status-badge @solicitud.EstadoCssClass">@solicitud.EstadoNombre</span></td>
+                                                <td class="text-center">
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <a asp-controller="Aprobaciones" asp-action="Detalles" asp-route-id="@solicitud.IdSolicitud"
+                                                           class="btn btn-outline-info btn-action" title="Revisar">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-4">
+                                                <i class="fas fa-check-circle me-2"></i> ¡Genial! No hay solicitudes pendientes de aprobación.
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ✅ COMPROBACIONES PENDIENTES DE REVISIÓN JP (SOLO PARA ROL 2) -->
+    @if (rolId == 2)
+    {
+        <h4 class="section-title">Comprobaciones Pendientes de Revisión</h4>
+        <div class="row">
+            <div class="col-12 mb-5">
+                <div class="solicitud-card">
+                    <div class="solicitud-card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0 text-white"><i class="fas fa-clipboard-check me-2"></i> Comprobaciones para Revisión de Actividades</h5>
+                            <a asp-controller="Finanzas" asp-action="RevisionActividadesJP" class="btn btn-solicitud-outline btn-sm">
+                                <i class="fas fa-external-link-alt me-2"></i>Ver Todas
+                            </a>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover table-striped">
+                                <thead class="table-header-custom">
+                                    <tr>
+                                        <th class="border-0">Código Comprobación</th>
+                                        <th class="border-0">Empleado</th>
+                                        <th class="border-0">Destino</th>
+                                        <th class="border-0">Total Gastos</th>
+                                        <th class="border-0">Total Anticipo</th>
+                                        <th class="border-0">Diferencia</th>
+                                        <th class="border-0 text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (comprobacionesPendientesRevisionJP != null && comprobacionesPendientesRevisionJP.Any())
+                                    {
+                                        @foreach (var comprobacion in comprobacionesPendientesRevisionJP)
+                                        {
+                                            <tr class="table-row-custom">
+                                                <td><strong class="text-accent">@comprobacion.CodigoComprobacion</strong></td>
+                                                <td class="text-white">@(comprobacion.SolicitudViaje?.Empleado?.Nombre ?? "N/A") @(comprobacion.SolicitudViaje?.Empleado?.Apellidos ?? "")</td>
+                                                <td class="text-white">@(comprobacion.SolicitudViaje?.Destino ?? "N/A")</td>
+                                                <td class="text-white">@(comprobacion.TotalGastosComprobados?.ToString("C") ?? "$0")</td>
+                                                <td class="text-white">@(comprobacion.TotalAnticipo?.ToString("C") ?? "$0")</td>
+                                                <td>
+                                                    @{
+                                                        var diferencia = (comprobacion.TotalAnticipo ?? 0) - (comprobacion.TotalGastosComprobados ?? 0);
+                                                        var diferenciaClass = diferencia >= 0 ? "text-success" : "text-danger";
+                                                        var diferenciaIcon = diferencia >= 0 ? "fas fa-arrow-up" : "fas fa-arrow-down";
+                                                    }
+                                                    <span class="@diferenciaClass">
+                                                        <i class="@diferenciaIcon me-1"></i>
+                                                        @Math.Abs(diferencia).ToString("C")
+                                                        @if (diferencia >= 0)
+                                                        {
+                                                            <span class="badge bg-info ms-2">A FAVOR</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="badge bg-warning text-dark ms-2">EN CONTRA</span>
+                                                        }
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <a asp-controller="Finanzas" asp-action="RevisionActividadesJP"
+                                                           class="btn btn-outline-info btn-action" title="Revisar">
+                                                            <i class="fas fa-eye"></i> Revisar
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-4">
+                                                <i class="fas fa-check-circle me-2"></i> ¡Genial! No hay comprobaciones pendientes de revisión.
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ✅ TODAS LAS SOLICITUDES ACTIVAS (PARA RH) -->
+    @if (rolId == 3)
+    {
+        <h4 class="section-title">Todas las Solicitudes Activas</h4>
+        <div class="row">
+            <div class="col-12 mb-5">
+                <div class="solicitud-card">
+                    <div class="solicitud-card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0 text-white"><i class="fas fa-list-alt me-2"></i> Solicitudes en Curso</h5>
+                            <a asp-controller="Aprobaciones" asp-action="Pendientes" class="btn btn-solicitud-outline btn-sm">
+                                <i class="fas fa-external-link-alt me-2"></i>Ver Todas
+                            </a>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover table-striped">
+                                <thead class="table-header-custom">
+                                    <tr>
+                                        <th class="border-0">Código</th>
+                                        <th class="border-0">Empleado</th>
+                                        <th class="border-0">Proyecto</th>
+                                        <th class="border-0">Destino</th>
+                                        <th class="border-0">Monto Sol.</th>
+                                        <th class="border-0">Estado</th>
+                                        <th class="border-0 text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (solicitudesPendientesRH != null && solicitudesPendientesRH.Any())
+                                    {
+                                        @foreach (var solicitud in solicitudesPendientesRH)
+                                        {
+                                            <tr class="table-row-custom">
+                                                <td><strong class="text-accent">@solicitud.CodigoSolicitud</strong></td>
+                                                <td class="text-white">@(solicitud.Empleado?.Nombre ?? "N/A") @(solicitud.Empleado?.Apellidos ?? "")</td>
+                                                <td class="text-white">@solicitud.NombreProyecto</td>
+                                                <td class="text-white">@solicitud.Destino</td>
+                                                <td class="text-white">@(solicitud.MontoAnticipo?.ToString("C") ?? "$0")</td>
+                                                <td>
+                                                    @if (solicitud.Estado?.Codigo == "BORRADOR")
+                                                    {
+                                                        <span class="badge bg-secondary">@solicitud.Estado.Codigo</span>
+                                                    }
+                                                    else if (solicitud.Estado?.Codigo == "ENVIADA_JP")
+                                                    {
+                                                        <span class="badge bg-warning text-dark">@solicitud.Estado.Codigo</span>
+                                                    }
+                                                    else if (solicitud.Estado?.Codigo == "APROBADA_JP")
+                                                    {
+                                                        <span class="badge bg-success">@solicitud.Estado.Codigo</span>
+                                                    }
+                                                    else if (solicitud.Estado?.Codigo == "ENVIADA_RH")
+                                                    {
+                                                        <span class="badge bg-warning text-dark">@solicitud.Estado.Codigo</span>
+                                                    }
+                                                    else if (solicitud.Estado?.Codigo == "APROBADA_RH")
+                                                    {
+                                                        <span class="badge bg-success">@solicitud.Estado.Codigo</span>
+                                                    }
+                                                    else if (solicitud.Estado?.Codigo == "ENVIADA_FINANZAS")
+                                                    {
+                                                        <span class="badge bg-warning text-dark">@solicitud.Estado.Codigo</span>
+                                                    }
+                                                    else if (solicitud.Estado?.Codigo == "ENVIADA_DIRECCION")
+                                                    {
+                                                        <span class="badge bg-warning text-dark">@solicitud.Estado.Codigo</span>
+                                                    }
+                                                    else if (solicitud.Estado?.Codigo == "APROBADA_DIRECCION")
+                                                    {
+                                                        <span class="badge bg-success">@solicitud.Estado.Codigo</span>
+                                                    }
+                                                    else if (solicitud.Estado?.Codigo == "RECHAZADA")
+                                                    {
+                                                        <span class="badge bg-danger">@solicitud.Estado.Codigo</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-info">@solicitud.Estado?.Codigo</span>
+                                                    }
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <a asp-controller="Aprobaciones" asp-action="Detalles" asp-route-id="@solicitud.Id"
+                                                           class="btn btn-outline-info btn-action" title="Revisar">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-4">
+                                                <i class="fas fa-inbox me-2"></i> No hay solicitudes en curso en este momento.
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="~/css/sweetalert-custom.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/charts.css" asp-append-version="true" />
+    
+    <style>
+        /* Estilos adicionales para la sección de información importante - TODOS VERDE */
+        .info-card {
+            background: linear-gradient(135deg, rgba(25, 35, 45, 0.95) 0%, rgba(15, 25, 35, 0.95) 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(92, 200, 123, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(92, 200, 123, 0.2);
+            border-color: rgba(92, 200, 123, 0.5);
+        }
+        
+        .info-card-header {
+            background: rgba(30, 40, 50, 0.9);
+            padding: 1.5rem;
+            border-bottom: 2px solid rgba(92, 200, 123, 0.3);
+        }
+        
+        .info-card-title {
+            color: #5cc87b;
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .info-card-body {
+            padding: 1.5rem;
+        }
+        
+        .info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .info-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        
+        .info-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .info-icon {
+            color: #5cc87b;
+            font-size: 1.1rem;
+            margin-top: 0.2rem;
+            flex-shrink: 0;
+        }
+        
+        .info-text {
+            color: #e2e8f0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .info-text strong {
+            color: #ffffff;
+            font-weight: 600;
+        }
+        
+        .info-highlight {
+            background: rgba(92, 200, 123, 0.1);
+            border-left: 4px solid #5cc87b;
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin-top: 1rem;
+        }
+        
+        .info-highlight-title {
+            color: #5cc87b;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .info-highlight-text {
+            color: #cbd5e0;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        /* Mismo verde para todos los roles */
+        .info-card-role-1,
+        .info-card-role-2,
+        .info-card-role-3,
+        .info-card-role-4,
+        .info-card-role-5,
+        .info-card-role-6 { 
+            border-color: rgba(92, 200, 123, 0.3); 
+        }
+        
+        .info-card-role-1 .info-card-title,
+        .info-card-role-2 .info-card-title,
+        .info-card-role-3 .info-card-title,
+        .info-card-role-4 .info-card-title,
+        .info-card-role-5 .info-card-title,
+        .info-card-role-6 .info-card-title { 
+            color: #5cc87b; 
+        }
+        
+        .info-card-role-1 .info-icon,
+        .info-card-role-2 .info-icon,
+        .info-card-role-3 .info-icon,
+        .info-card-role-4 .info-icon,
+        .info-card-role-5 .info-icon,
+        .info-card-role-6 .info-icon { 
+            color: #5cc87b; 
+        }
+        
+        .info-card-role-1 .info-highlight,
+        .info-card-role-2 .info-highlight,
+        .info-card-role-3 .info-highlight,
+        .info-card-role-4 .info-highlight,
+        .info-card-role-5 .info-highlight,
+        .info-card-role-6 .info-highlight { 
+            border-left-color: #5cc87b; 
+            background: rgba(92, 200, 123, 0.1); 
+        }
+    </style>
+}
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/notificaciones.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/admin.js" asp-append-version="true"></script>
+    
+    <!-- Datos del dashboard en formato JSON (opcional, si los necesitas) -->
+    @if (ViewBag.DashboardData != null)
+    {
+        <script id="dashboard-data" type="application/json">
+            @Html.Raw(Json.Serialize(ViewBag.DashboardData))
+        </script>
+    }
+}

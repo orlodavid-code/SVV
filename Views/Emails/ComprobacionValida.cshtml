@@ -1,0 +1,205 @@
+﻿@model dynamic
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: #28a745;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        .button {
+            background: #007bff;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 15px 0;
+        }
+
+        .details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #28a745;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .approved {
+            color: #155724;
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #28a745;
+            margin: 15px 0;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 13px;
+            display: inline-block;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+            .summary-item:last-child {
+                border-bottom: none;
+            }
+
+        .positive {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .negative {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 Sistema de Viáticos</h1>
+            <p>Comprobación Validada</p>
+        </div>
+
+        <div class="content">
+            <h2>✅ ¡Comprobación Validada!</h2>
+
+            <div class="approved">
+                <p><strong>Estimado/a @Model.EmpleadoNombre,</strong></p>
+                <p>¡Excelente noticia! Tu comprobación <strong>@Model.CodigoComprobacion</strong> ha sido <strong>validada</strong> por el Departamento de Finanzas.</p>
+            </div>
+
+            <div class="details">
+                <p><span class="label">Código de Comprobación:</span> @Model.CodigoComprobacion</p>
+                <p><span class="label">Fecha de Validación:</span> @Model.FechaProcesamiento</p>
+                <p>
+                    <span class="label">Estado:</span>
+                    <span class="status-badge" style="background: #d4edda; color: #155724;">✅ Validada por Finanzas</span>
+                </p>
+            </div>
+
+            <h3>📊 Resumen Financiero:</h3>
+            <div class="details">
+                <div class="summary-item">
+                    <span>Total Gastos Comprobados:</span>
+                    <span>@Model.TotalGastos</span>
+                </div>
+                <div class="summary-item">
+                    <span>Total Anticipo Recibido:</span>
+                    <span>@Model.TotalAnticipo</span>
+                </div>
+                <div class="summary-item">
+                    <span>Diferencia (Anticipo - Gastos):</span>
+                    <span class="@(Model.Diferencia.StartsWith("-$") || Model.Diferencia.StartsWith("(") ? "negative" : "positive")">
+                        @Model.Diferencia
+                    </span>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Comentarios))
+            {
+                <h3>📝 Comentarios de Finanzas:</h3>
+                <div class="details">
+                    <p>@Model.Comentarios</p>
+                </div>
+            }
+
+            <h3>💰 Proceso de Liquidación:</h3>
+            <div class="details">
+                @if (Model.Diferencia.StartsWith("-$") || Model.Diferencia.StartsWith("("))
+                {
+                    <p><strong>Saldo a Favor del Empleado:</strong></p>
+                    <ul>
+                        <li>Se generará una solicitud de reembolso automáticamente</li>
+                        <li>El pago se procesará en los próximos <strong>5-10 días hábiles</strong></li>
+                        <li>Recibirás una notificación cuando el pago sea realizado</li>
+                        <li>El reembolso se hará vía transferencia bancaria</li>
+                    </ul>
+                }
+                else
+                {
+                    <p><strong>Saldo a Favor de la Empresa:</strong></p>
+                    <ul>
+                        <li>El saldo se descontará de tu siguiente nómina</li>
+                        <li>El descuento se realizará en el próximo período de pago</li>
+                        <li>Recibirás el detalle en tu recibo de nómina</li>
+                    </ul>
+                }
+            </div>
+
+            <div style="text-align: center; margin: 25px 0;">
+                <a href="@Model.Url" class="button">📊 Ver Comprobaciones en el Sistema</a>
+            </div>
+
+            <div class="details">
+                <p><strong>📋 Próximos Pasos:</strong></p>
+                <ul>
+                    <li>El departamento de Finanzas procesará la liquidación</li>
+                    <li>Recibirás notificaciones por correo de cada avance</li>
+                    <li>Consulta el sistema para ver el estado del proceso</li>
+                </ul>
+            </div>
+
+            <p style="font-size: 14px; color: #666;">
+                <strong>Nota:</strong> El proceso de liquidación puede tomar algunos días hábiles. Si tienes alguna duda, contacta al departamento de Finanzas.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>📧 Este es un mensaje automático generado por el Sistema de Viáticos.</p>
+            <p>Por favor, no respondas a este correo.</p>
+            <p>&copy; @DateTime.Now.Year - Sistema de Viáticos | Viamtek</p>
+        </div>
+    </div>
+</body>
+</html>

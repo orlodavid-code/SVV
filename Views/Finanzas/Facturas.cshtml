@@ -1,0 +1,640 @@
+﻿@model List<SVV.ViewModels.FacturasViewModel>
+@{
+    ViewData["Title"] = "Revisión de Facturas y Comprobaciones";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/facturas.css" asp-append-version="true" />
+    <style>
+        /* Estilos Viamtek para botones */
+        .btn-viamtek {
+            background: linear-gradient(135deg, var(--viamtek-green), #38a169);
+            border: none;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+            .btn-viamtek:hover {
+                background: linear-gradient(135deg, #38a169, var(--viamtek-green));
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+
+        .btn-viamtek-outline {
+            border: 2px solid var(--viamtek-green);
+            color: var(--viamtek-green);
+            font-weight: 600;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+
+            .btn-viamtek-outline:hover {
+                background: linear-gradient(135deg, var(--viamtek-green), #38a169);
+                color: white;
+                border-color: var(--viamtek-green);
+                transform: translateY(-2px);
+            }
+
+        /* Estilos específicos para botones de filtro */
+        .filtro-activo {
+            background: linear-gradient(135deg, var(--viamtek-green), #38a169) !important;
+            color: white !important;
+            border: none !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Estilos para botones de acción */
+        .btn-ver-correccion {
+            background: linear-gradient(135deg, #f6ad55, #ed8936);
+            border: none;
+            color: #1a202c;
+            font-weight: 600;
+        }
+
+            .btn-ver-correccion:hover {
+                background: linear-gradient(135deg, #ed8936, #dd6b20);
+                color: #1a202c;
+                transform: translateY(-2px);
+            }
+
+        .estado-correcciones-pendientes {
+            background: linear-gradient(135deg, #f6ad55, #ed8936) !important;
+            color: #1a202c !important;
+            font-weight: 600;
+        }
+
+        .estado-parcialmente-aprobada {
+            background: linear-gradient(135deg, #38a169, #2f855a) !important;
+            color: white !important;
+            font-weight: 600;
+        }
+
+        /* Estilos para badges de estado */
+        .badge-estado {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .estado-pendiente {
+            background: linear-gradient(135deg, #4299e1, #3182ce) !important;
+            color: white !important;
+        }
+
+        .estado-en-proceso {
+            background: linear-gradient(135deg, #f6ad55, #ed8936) !important;
+            color: #1a202c !important;
+        }
+
+        .estado-con-correcciones {
+            background: linear-gradient(135deg, #e53e3e, #c53030) !important;
+            color: white !important;
+        }
+
+        /* Mejora para los filtros rápidos */
+        .filtros-rapidos {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .btn-filtro {
+            min-width: 100px;
+            text-align: center;
+        }
+    </style>
+}
+
+<div class="facturas-container">
+    <div class="facturas-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="facturas-title">Revisión de Facturas</h1>
+                <p class="facturas-subtitle">Gestiona las comprobaciones enviadas por los empleados</p>
+            </div>
+            <div class="alert alert-info py-2">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>@Model.Count comprobaciones</strong> pendientes de revisión
+            </div>
+        </div>
+    </div>
+
+    <div class="resumen-facturas">
+        <div class="resumen-card">
+            <div class="resumen-icono">
+                <i class="fas fa-receipt"></i>
+            </div>
+            <div class="resumen-numero">@Model.Count</div>
+            <div class="resumen-texto">Comprobaciones Pendientes</div>
+        </div>
+        <div class="resumen-card">
+            <div class="resumen-icono">
+                <i class="fas fa-file-invoice"></i>
+            </div>
+            <div class="resumen-numero">@Model.Sum(m => m.Gastos.Count)</div>
+            <div class="resumen-texto">Total de Gastos</div>
+        </div>
+        <div class="resumen-card">
+            <div class="resumen-icono">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="resumen-numero">@Model.Count(m => m.Gastos.All(g => g.TieneXML))</div>
+            <div class="resumen-texto">Comprobaciones Completas</div>
+        </div>
+        <div class="resumen-card">
+            <div class="resumen-icono">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="resumen-numero">
+                @Model.Count(m => m.EstadoComprobacionId == 9)
+            </div>
+            <div class="resumen-texto">Con Correcciones</div>
+        </div>
+    </div>
+
+    <div class="facturas-card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="card-title">
+                    <i class="fas fa-list me-2"></i>Comprobaciones por Revisar 
+                </h6>
+                <div class="filtros-rapidos ms-2">
+                    <button class="btn btn-sm btn-viamtip-filtro btn-filtro" data-filtro="todos">
+                        <i class="fas fa-list me-1"></i>Todos
+                    </button>
+                    <button class="btn btn-sm btn-viamtip-filtro btn-filtro" data-filtro="1">
+                        <i class="fas fa-clock me-1"></i>Pendientes
+                    </button>
+                    <button class="btn btn-sm btn-viamtip-filtro btn-filtro" data-filtro="2">
+                        <i class="fas fa-spinner me-1"></i>En Proceso
+                    </button>
+                    <button class="btn btn-sm btn-viamtip-filtro btn-filtro" data-filtro="9">
+                        <i class="fas fa-exclamation-triangle me-1"></i>Correcciones
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-facturas bg-dark" id="tablaFacturas" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th width="100">Información</th>
+                                <th width="70">Destino</th>
+                                <th width="60">Fecha</th>
+                                <th width="100">Montos</th>
+                                <th width="80">Estado</th>
+                                <th width="80">Documentos</th>
+                                <th width="140" class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr data-estado="@item.EstadoComprobacionId"
+                                    data-correcciones="@(item.EstadoComprobacionId == 9 ? "si" : "no")">
+                                    <td>
+                                        <div class="comprobacion-info">
+                                            <strong title="Código: @item.CodigoComprobacion">@item.CodigoComprobacion</strong>
+                                            <small title="Solicitud: @item.CodigoSolicitud">@item.CodigoSolicitud</small>
+                                            <div class="empleado-nombre" title="Empleado: @item.EmpleadoNombre">
+                                                <i class="fas fa-user me-1"></i>
+                                                @item.EmpleadoNombre.Split(' ')[0]
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="destino-truncado" title="@item.Destino">@item.Destino</span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@item.FechaComprobacion.ToString("dd/MM/yyyy")</small>
+                                    </td>
+                                    <td>
+                                        <div class="montos-info">
+                                            <div class="monto-item">
+                                                <span class="monto-label">Gastos:</span>
+                                                <span class="text-success fw-bold">@item.DisplayTotalGastos</span>
+                                            </div>
+                                            <div class="monto-item">
+                                                <span class="monto-label">Anticipos:</span>
+                                                <span class="text-info">@item.DisplayTotalAnticipo</span>
+                                            </div>
+                                            <div class="monto-item">
+                                                <span class="monto-label">Diferencia:</span>
+                                                <span class="@item.ClaseCssDiferencia fw-bold">@item.DisplayDiferencia</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @{
+                                            var badgeClass = item.EstadoComprobacionId switch
+                                            {
+                                                1 => "badge-estado estado-pendiente",
+                                                2 => "badge-estado estado-en-proceso",
+                                                9 => "badge-estado estado-con-correcciones",
+                                                _ => "badge-estado estado-pendiente"
+                                            };
+                                        }
+                                        <span class="@badgeClass">@item.EstadoComprobacion</span>
+                                    </td>
+                                    <td>
+                                        <div class="documentos-compactos">
+                                            <div class="documento-item" title="@item.Gastos.Count(g => g.TieneXML)/@item.Gastos.Count XML subidos">
+                                                <i class="fas fa-file-code @(item.Gastos.Count(g => g.TieneXML) == item.Gastos.Count ? "text-success" : "text-warning")"></i>
+                                                <small>@item.Gastos.Count(g => g.TieneXML)/@item.Gastos.Count</small>
+                                            </div>
+                                            <div class="documento-item" title="@item.Gastos.Count(g => g.TienePDF)/@item.Gastos.Count PDF subidos">
+                                                <i class="fas fa-file-pdf @(item.Gastos.Count(g => g.TienePDF) == item.Gastos.Count ? "text-success" : "text-warning")"></i>
+                                                <small>@item.Gastos.Count(g => g.TienePDF)/@item.Gastos.Count</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <!-- Botón Detalles -->
+                                            <a asp-action="DetallesFactura" asp-route-id="@item.ComprobacionId"
+                                               class="btn btn-primary btn-action" title="Revisar Detalles">
+                                                <i class="fas fa-search"></i>
+                                            </a>
+
+                                            <!-- Botón para comprobaciones con correcciones -->
+                                            @if (item.EstadoComprobacionId == 9)
+                                            {
+                                                <a asp-action="RevisarCorreccion" asp-controller="Finanzas"
+                                                   asp-route-id="@item.ComprobacionId"
+                                                   class="btn btn-warning btn-action btn-ver-correccion"
+                                                   title="Revisar Correcciones">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <!-- Botón Validar (solo si no tiene correcciones pendientes) -->
+                                                <button class="btn btn-success btn-action btn-validar"
+                                                        data-id="@item.ComprobacionId"
+                                                        data-codigo="@item.CodigoComprobacion"
+                                                        title="Validar Comprobación">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            }
+
+                                            <!-- Botón Reabrir (siempre visible) -->
+                                            <button class="btn btn-warning btn-action btn-reabrir"
+                                                    data-id="@item.ComprobacionId"
+                                                    data-codigo="@item.CodigoComprobacion"
+                                                    title="Reabrir para Corrección">
+                                                <i class="fas fa-redo"></i>
+                                            </button>
+
+                                            <!-- Botón Rechazar -->
+                                            <button class="btn btn-danger btn-action btn-rechazar"
+                                                    data-id="@item.ComprobacionId"
+                                                    data-codigo="@item.CodigoComprobacion"
+                                                    title="Rechazar Comprobación">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                    <h5 class="text-success">¡Excelente!</h5>
+                    <p class="text-muted">No hay comprobaciones pendientes de revisión</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Inicializar DataTable con configuración
+            var table = $('#tablaFacturas').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
+                },
+                "order": [[2, "desc"]], // Ordenar por fecha descendente
+                "responsive": true,
+                "pageLength": 10,
+                "autoWidth": false,
+                "dom": '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                "drawCallback": function(settings) {
+                    $('[title]').tooltip();
+
+                    // Mantener el filtro aplicado después de cada redibujo
+                    var filtroActivo = $('.btn-viamtip-filtro.filtro-activo').data('filtro') || 'todos';
+                    if (filtroActivo && filtroActivo !== 'todos') {
+                        aplicarFiltroDataTable(filtroActivo);
+                    }
+                }
+            });
+
+            // Inicializar botones de filtro con estilo Viamtek
+            $('.btn-viamtip-filtro').each(function() {
+                $(this).addClass('btn-viamtek-outline');
+            });
+
+            // Marcar el botón "Todos" como activo por defecto
+            $('.btn-viamtip-filtro[data-filtro="todos"]')
+                .removeClass('btn-viamtek-outline')
+                .addClass('btn-viamtek filtro-activo');
+
+            // Variable para almacenar el filtro actual
+            var filtroPersonalizado = null;
+
+            // Función para aplicar filtro usando DataTables API
+            function aplicarFiltroDataTable(filtro) {
+                // Limpiar filtros anteriores
+                $.fn.dataTable.ext.search = [];
+
+                if (filtro !== 'todos') {
+                    // Agregar nuevo filtro personalizado
+                    $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+                        var row = table.row(dataIndex).node();
+                        var estado = $(row).data('estado');
+                        return estado == filtro;
+                    });
+                }
+
+                table.draw();
+                actualizarContador(filtro);
+            }
+
+            // Función para actualizar el contador
+            function actualizarContador(filtro) {
+                var contador = 0;
+
+                if (filtro === 'todos') {
+                    contador = table.rows({ search: 'applied' }).count();
+                } else {
+                    // Contar filas visibles después del filtro
+                    contador = table.rows({ search: 'applied' }).count();
+                }
+
+                // Actualizar el texto del título
+                var estadoTexto = filtro === '1' ? 'pendientes' :
+                                  filtro === '2' ? 'en proceso' :
+                                  filtro === '9' ? 'con correcciones' : 'todas';
+                $('.card-title').html(`<i class="fas fa-list me-2"></i>Comprobaciones ${estadoTexto} (${contador})`);
+            }
+
+            // Función principal para filtrar por estado
+            function filtrarPorEstado(filtro) {
+                // Resetear todos los botones
+                $('.btn-viamtip-filtro').each(function() {
+                    $(this).removeClass('filtro-activo')
+                           .removeClass('btn-viamtek')
+                           .addClass('btn-viamtek-outline');
+                });
+
+                // Activar el botón seleccionado
+                $(`.btn-viamtip-filtro[data-filtro="${filtro}"]`)
+                    .removeClass('btn-viamtek-outline')
+                    .addClass('btn-viamtek filtro-activo');
+
+                // Aplicar el filtro
+                aplicarFiltroDataTable(filtro);
+            }
+
+            // Asignar eventos a los botones de filtro
+            $(document).on('click', '.btn-viamtip-filtro', function() {
+                const filtro = $(this).data('filtro');
+                filtrarPorEstado(filtro);
+            });
+
+            // Eventos para los botones de acción
+            $(document).on('click', '.btn-validar', function() {
+                const id = $(this).data('id');
+                const codigo = $(this).data('codigo');
+                mostrarConfirmacionValidar(id, codigo);
+            });
+
+            $(document).on('click', '.btn-reabrir', function() {
+                const id = $(this).data('id');
+                const codigo = $(this).data('codigo');
+                mostrarConfirmacionReabrir(id, codigo);
+            });
+
+            $(document).on('click', '.btn-rechazar', function() {
+                const id = $(this).data('id');
+                const codigo = $(this).data('codigo');
+                mostrarConfirmacionRechazar(id, codigo);
+            });
+
+            function mostrarConfirmacionValidar(id, codigo) {
+                Swal.fire({
+                    title: '¿Validar Comprobación?',
+                    html: `
+                        <div class="text-center">
+                            <div class="mb-3"><i class="fas fa-check-circle fa-3x" style="color: var(--viamtek-green);"></i></div>
+                            <p>¿Estás seguro de validar la siguiente comprobación?</p>
+                            <div style="text-align: left; padding: 1rem; margin: 1rem 0;">
+                                <strong>Código:</strong> <span class="text-success">${codigo}</span><br>
+                                <strong>Acción:</strong> <span class="text-success">VALIDAR</span><br>
+                                <strong>Estado:</strong> <span class="text-success">APROBADA</span>
+                            </div>
+                            <small class="text-info">
+                                <i class="fas fa-info-circle me-1"></i>
+                                La comprobación será marcada como validada y aprobada
+                            </small>
+                        </div>
+                    `,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: 'var(--viamtek-green)',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fas fa-check me-2"></i>Sí, validar',
+                    cancelButtonText: '<i class="fas fa-times me-2"></i>Cancelar',
+                    background: 'var(--card-bg)',
+                    color: 'var(--primary-text)',
+                    customClass: {
+                        popup: 'sweetalert-dark',
+                        confirmButton: 'btn-sweet-confirm',
+                        cancelButton: 'btn-sweet-cancel'
+                    },
+                    input: 'textarea',
+                    inputLabel: 'Comentarios (opcional):',
+                    inputPlaceholder: 'Agregue comentarios para el empleado...',
+                    inputAttributes: {
+                        'aria-label': 'Escribe tus comentarios aquí'
+                    },
+                    showLoaderOnConfirm: true,
+                    preConfirm: (comentarios) => procesarAccion(id, 'validar', comentarios),
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    if (result.isConfirmed) mostrarResultado(result.value);
+                });
+            }
+
+            function mostrarConfirmacionReabrir(id, codigo) {
+                Swal.fire({
+                    title: '¿Reabrir Comprobación?',
+                    html: `
+                        <div class="text-center">
+                            <div class="mb-3"><i class="fas fa-redo fa-3x" style="color: #f39c12;"></i></div>
+                            <p>¿Estás seguro de reabrir la siguiente comprobación?</p>
+                            <div style="text-align: left; padding: 1rem; margin: 1rem 0;">
+                                <strong>Código:</strong> <span class="text-warning">${codigo}</span><br>
+                                <strong>Acción:</strong> <span class="text-warning">REABRIR</span><br>
+                                <strong>Estado:</strong> <span class="text-warning">PENDIENTE CORRECCIÓN</span>
+                            </div>
+                            <small class="text-warning">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                El empleado podrá subir documentos faltantes
+                            </small>
+                        </div>
+                    `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#f39c12',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fas fa-redo me-2"></i>Sí, reabrir',
+                    cancelButtonText: '<i class="fas fa-times me-2"></i>Cancelar',
+                    background: 'var(--card-bg)',
+                    color: 'var(--primary-text)',
+                    customClass: {
+                        popup: 'sweetalert-dark',
+                        confirmButton: 'btn-sweet-warning',
+                        cancelButton: 'btn-sweet-cancel'
+                    },
+                    input: 'textarea',
+                    inputLabel: 'Comentarios (recomendado):',
+                    inputPlaceholder: 'Especifique qué documentos faltan o necesitan corrección...',
+                    inputAttributes: {
+                        'aria-label': 'Escribe tus comentarios aquí'
+                    },
+                    showLoaderOnConfirm: true,
+                    preConfirm: (comentarios) => procesarAccion(id, 'reabrir', comentarios),
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    if (result.isConfirmed) mostrarResultado(result.value);
+                });
+            }
+
+            function mostrarConfirmacionRechazar(id, codigo) {
+                Swal.fire({
+                    title: '¿Rechazar Comprobación?',
+                    html: `
+                        <div class="text-center">
+                            <div class="mb-3"><i class="fas fa-times-circle fa-3x" style="color: #e74c3c;"></i></div>
+                            <p>¿Estás seguro de rechazar la siguiente comprobación?</p>
+                            <div style="text-align: left; padding: 1rem; margin: 1rem 0;">
+                                <strong>Código:</strong> <span class="text-danger">${codigo}</span><br>
+                                <strong>Acción:</strong> <span class="text-danger">RECHAZAR</span><br>
+                                <strong>Estado:</strong> <span class="text-danger">RECHAZADA</span>
+                            </div>
+                            <small class="text-danger">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                <strong>Importante:</strong> Esta acción no se puede deshacer
+                            </small>
+                        </div>
+                    `,
+                    icon: 'error',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e74c3c',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fas fa-times me-2"></i>Sí, rechazar',
+                    cancelButtonText: '<i class="fas fa-times me-2"></i>Cancelar',
+                    background: 'var(--card-bg)',
+                    color: 'var(--primary-text)',
+                    customClass: {
+                        popup: 'sweetalert-dark',
+                        confirmButton: 'btn-sweet-danger',
+                        cancelButton: 'btn-sweet-cancel'
+                    },
+                    input: 'textarea',
+                    inputLabel: 'Motivo del rechazo (obligatorio):',
+                    inputPlaceholder: 'Especifique el motivo del rechazo...',
+                    inputAttributes: {
+                        'aria-label': 'Escribe el motivo del rechazo aquí'
+                    },
+                    inputValidator: (value) => !value ? '¡Debes especificar el motivo del rechazo!' : null,
+                    showLoaderOnConfirm: true,
+                    preConfirm: (comentarios) => procesarAccion(id, 'rechazar', comentarios),
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    if (result.isConfirmed) mostrarResultado(result.value);
+                });
+            }
+
+            async function procesarAccion(id, tipo, comentarios) {
+                try {
+                    let url = '';
+                    switch(tipo) {
+                        case 'validar': url = '@Url.Action("ValidarComprobacion", "Finanzas")'; break;
+                        case 'reabrir': url = '@Url.Action("ReabrirComprobacion", "Finanzas")'; break;
+                        case 'rechazar': url = '@Url.Action("RechazarComprobacion", "Finanzas")'; break;
+                    }
+
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        body: `id=${id}&comentarios=${encodeURIComponent(comentarios || '')}`
+                    });
+
+                    if (!response.ok) throw new Error(`Error ${response.status}`);
+                    const result = await response.json();
+
+                    if (result.success) {
+                        return {
+                            success: true,
+                            message: result.message,
+                            tipo: tipo
+                        };
+                    } else {
+                        throw new Error(result.message || 'Error desconocido');
+                    }
+                } catch (error) {
+                    throw new Error(`No se pudo completar la acción: ${error.message}`);
+                }
+            }
+
+            function mostrarResultado(resultado) {
+                if (resultado.success) {
+                    const titulo = resultado.tipo === 'validar' ? '¡Comprobación Validada!' :
+                                  resultado.tipo === 'reabrir' ? '¡Comprobación Reabierta!' : '¡Comprobación Rechazada!';
+
+                    Swal.fire({
+                        title: titulo,
+                        html: `
+                            <div class="text-center">
+                                <div class="mb-3"><i class="fas fa-check-circle fa-3x text-success"></i></div>
+                                <p>${resultado.message}</p>
+                                <div class="alert alert-success mt-3">
+                                    <i class="fas fa-sync-alt fa-spin me-2"></i>
+                                    Redirigiendo...
+                                </div>
+                            </div>
+                        `,
+                        icon: 'success',
+                        timer: 2000,
+                        timerProgressBar: true,
+                        showConfirmButton: false,
+                        background: 'var(--card-bg)',
+                        color: 'var(--primary-text)',
+                        customClass: {
+                            popup: 'sweetalert-dark'
+                        },
+                        willClose: () => window.location.reload()
+                    });
+                }
+            }
+        });
+    </script>
+}

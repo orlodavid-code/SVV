@@ -1,0 +1,291 @@
+﻿
+@model dynamic
+@using System.Globalization
+
+@{
+    Layout = null;
+    CultureInfo culturaMexicana = new CultureInfo("es-MX");
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nueva Comprobación Enviada - Viamtek</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #308184, #5cc87b);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+            .header h1 {
+                margin: 0;
+                font-size: 24px;
+                font-weight: 600;
+            }
+
+        .content {
+            padding: 30px;
+        }
+
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #5cc87b;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 6px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .info-item {
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            color: #333;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .highlight {
+            color: #308184;
+            font-weight: 700;
+        }
+
+        .documentos-status {
+            display: inline-block;
+            padding: 8px 15px;
+            background-color: @(Model.PorcentajeCompletos == 100 ? "#d4edda" : "#fff3cd");
+            color: @(Model.PorcentajeCompletos == 100 ? "#155724" : "#856404");
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 1px solid @(Model.PorcentajeCompletos == 100 ? "#c3e6cb" : "#ffeaa7");
+        }
+
+        .action-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #308184, #5cc87b);
+            color: white;
+            text-decoration: none;
+            padding: 14px 35px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            margin: 25px 0;
+            transition: all 0.3s ease;
+            font-size: 1.05rem;
+        }
+
+            .action-button:hover {
+                background: linear-gradient(135deg, #5cc87b, #308184);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(92, 200, 123, 0.3);
+            }
+
+        .secondary-button {
+            display: inline-block;
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            padding: 10px 25px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+        }
+
+            .secondary-button:hover {
+                background: #5a6268;
+                transform: translateY(-1px);
+            }
+
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+
+        .logo {
+            max-width: 150px;
+            margin-bottom: 15px;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background-color: #fff3cd;
+            color: #856404;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+            border: 1px solid #ffeaa7;
+        }
+
+        @@media (max-width: 600px) {
+            .info-grid
+
+        {
+            grid-template-columns: 1fr;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .action-button {
+            display: block;
+            margin: 20px 0;
+            width: 100%;
+        }
+
+        .secondary-button {
+            display: block;
+            margin: 10px 0 0 0;
+            width: 100%;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📤 Nueva Comprobación Enviada</h1>
+            <p>Sistema de Viáticos - Viamtek</p>
+        </div>
+
+        <div class="content">
+            <p class="greeting">Hola <strong>@Model.NombreFinanzas</strong>,</p>
+
+            <p>Se ha recibido una nueva comprobación para revisión:</p>
+
+            <div class="info-box">
+                <h3 style="margin-top: 0; color: #308184;">📋 Información de la Comprobación</h3>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Empleado</div>
+                        <div class="info-value">@Model.NombreEmpleado</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Código</div>
+                        <div class="info-value highlight">@Model.CodigoComprobacion</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Fecha de Comprobación</div>
+                        <div class="info-value">@Model.FechaComprobacion.ToString("dd/MM/yyyy")</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Fecha de Envío</div>
+                        <div class="info-value">@Model.FechaEnvio.ToString("dd/MM/yyyy HH:mm")</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Monto Total</div>
+                        <div class="info-value highlight">@Model.MontoTotalFormateado</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Documentos</div>
+                        <div class="documentos-status">
+                            @Model.GastosCompletos/@Model.TotalGastos completos
+                            (@Model.PorcentajeCompletos.ToString("N0")%)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <p><strong>Acción requerida:</strong> Por favor revisa esta comprobación en el sistema.</p>
+
+                <div style="margin: 25px 0;">
+                    <a href="@Model.EnlaceRevisar" class="action-button">
+                        🔍 Revisar Comprobación
+                    </a>
+
+                    <a href="@Model.EnlaceDashboard" class="secondary-button">
+                        📋 Ver Todas las Comprobaciones
+                    </a>
+                </div>
+
+                <p style="font-size: 0.9rem; color: #666;">
+                    <em>Este enlace expira en 7 días</em>
+                </p>
+            </div>
+
+            <div style="background-color: #e8f4fc; border-radius: 8px; padding: 15px; margin-top: 25px; border-left: 4px solid #17a2b8;">
+                <p style="margin: 0; color: #0c5460; font-weight: 600;">
+                    ⚡ <strong>Tiempo de respuesta:</strong>
+                    Por favor revisa esta comprobación dentro de las próximas 48 horas hábiles.
+                </p>
+            </div>
+
+            <p style="margin-top: 30px;">
+                Saludos cordiales,<br>
+                <strong>Sistema de Viáticos Viamtek</strong>
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>📧 Este es un correo automático, por favor no responder directamente.</p>
+            <p>Sistema de Viáticos Viamtek • © @DateTime.Now.Year</p>
+            <p style="font-size: 12px; color: #999;">
+                <a href="#" style="color: #5cc87b; text-decoration: none;">Política de privacidad</a> •
+                <a href="#" style="color: #5cc87b; text-decoration: none;">Términos de uso</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,518 @@
+:root {
+    --viamtek-green: #00bf75;
+    --viamtek-green-light: #28d08c;
+    --border-primary: #5cc87b;
+    --border-secondary: #5cc87b;
+    --color-black: #0d0d0d;
+    --color-gray-dark: #1a1a1a;
+    --color-gray-light: #2a2a2a;
+    --card-bg: #1c1c1c;
+    --text-primary: #f0f0f0;
+    --text-secondary: #b0b0b0;
+    --border-color: #383838;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body.theme-dark {
+    background-color: var(--color-black);
+    color: var(--text-primary);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* 2. NAVBAR COMPLETAMENTE RESPONSIVA */
+.custom-navbar {
+    background: linear-gradient(135deg, var(--color-gray-dark) 0%, #252525 100%) !important;
+    border-bottom: 3px solid var(--border-primary) !important;
+    min-height: clamp(60px, 10vh, 80px);
+    padding: clamp(0.25rem, 1vh, 0.5rem) clamp(0.5rem, 2vw, 1rem);
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1030;
+}
+
+/* LOGO DEL NAVBAR - MÁS GRANDE EN ESCRITORIO */
+.navbar-logo {
+    height: clamp(80px, 16vh, 120px); /* Ajustado para ser más grande */
+    width: auto;
+    max-width: 150px;
+    transition: all 0.3s ease;
+    filter: brightness(0) invert(1);
+    object-fit: contain;
+}
+
+    .navbar-logo:hover {
+        transform: scale(1.05);
+        filter: brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(100deg);
+    }
+
+/* ELEMENTOS DEL NAVBAR RESPONSIVOS */
+.custom-navbar .nav-link {
+    color: var(--text-secondary) !important;
+    padding: clamp(0.375rem, 1vh, 0.5rem) clamp(0.5rem, 1.5vw, 1rem) !important;
+    margin: 0 clamp(0.125rem, 0.5vw, 0.25rem);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    position: relative;
+    font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+    white-space: nowrap;
+}
+
+    .custom-navbar .nav-link:hover {
+        color: var(--viamtek-green) !important;
+        background-color: rgba(92, 200, 123, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .custom-navbar .nav-link.active {
+        color: var(--viamtek-green) !important;
+        background-color: rgba(92, 200, 123, 0.15);
+    }
+
+/* DROPDOWN MENUS RESPONSIVOS */
+.custom-navbar .dropdown-menu {
+    background: var(--color-gray-dark);
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    margin-top: 0.5rem;
+    min-width: min(90vw, 250px);
+}
+
+.custom-navbar .dropdown-item {
+    color: var(--text-secondary);
+    padding: clamp(0.5rem, 1.5vh, 0.75rem) clamp(0.75rem, 2vw, 1.25rem);
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    margin: 0.1rem 0.5rem;
+    width: auto;
+    font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+}
+
+    .custom-navbar .dropdown-item:hover {
+        background-color: var(--border-primary);
+        color: white !important;
+        transform: translateX(3px);
+    }
+
+.custom-navbar .dropdown-header {
+    color: var(--viamtek-green);
+    font-weight: 600;
+    font-size: clamp(0.75rem, 2vw, 0.85rem);
+}
+
+.custom-navbar .dropdown-divider {
+    border-color: var(--border-color);
+    opacity: 0.6;
+}
+
+/* MENÚ DE USUARIO RESPONSIVO */
+.user-menu {
+    background: rgba(92, 200, 123, 0.1);
+    border-radius: clamp(20px, 4vw, 25px);
+    padding: clamp(0.375rem, 1vh, 0.5rem) clamp(0.75rem, 2vw, 1rem) !important;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+    font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+}
+
+    .user-menu:hover {
+        background: rgba(92, 200, 123, 0.2) !important;
+        border-color: var(--border-primary);
+    }
+
+/* 3. LAYOUT PRINCIPAL RESPONSIVO */
+.main-content-container {
+    padding-top: clamp(70px, 12vh, 90px);
+    min-height: calc(100vh - clamp(120px, 20vh, 150px));
+    width: 100%;
+}
+
+.main-content {
+    padding: clamp(1rem, 3vh, 2rem) clamp(0.5rem, 2vw, 1rem);
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* 4. FOOTER RESPONSIVO */
+.custom-footer {
+    background: var(--color-gray-dark);
+    border-top: 2px solid var(--border-secondary);
+    color: var(--text-secondary);
+    padding: clamp(1rem, 3vh, 1.5rem) clamp(0.5rem, 2vw, 1rem);
+    margin-top: auto;
+    text-align: center;
+    font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+}
+
+/* 5. BOTÓN LOGOUT MEJORADO */
+.custom-navbar form button.dropdown-item {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    padding: clamp(0.5rem, 1.5vh, 0.75rem) clamp(0.75rem, 2vw, 1.25rem);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+}
+
+    .custom-navbar form button.dropdown-item:hover {
+        background-color: #dc3545 !important;
+        color: white !important;
+    }
+
+/* === ESCRITORIO (993px+) - NAVBAR MÁS COMPACTA Y LOGO MÁS GRANDE === */
+@media (min-width: 993px) {
+    .custom-navbar {
+        min-height: 65px !important; /* Más compacta que los 75-85px anteriores */
+        padding: 0.3rem 1.5rem !important; /* Menos padding vertical */
+    }
+
+    .navbar-logo {
+        height: 60px !important; /* Más grande en escritorio */
+        max-width: 180px !important; /* Más ancho */
+    }
+
+    .custom-navbar .nav-link {
+        padding: 0.4rem 0.8rem !important; /* Menos padding */
+        margin: 0 0.2rem; /* Menos margen */
+        font-size: 0.9rem; /* Tamaño de fuente consistente */
+    }
+
+    .user-menu {
+        padding: 0.4rem 0.9rem !important; /* Más compacto */
+        font-size: 0.88rem;
+    }
+
+    .main-content-container {
+        padding-top: 70px !important; /* Ajustado por navbar más compacta */
+    }
+
+    /* Ajustar el contenedor del navbar para mejor alineación */
+    .navbar > .container-fluid {
+        align-items: center;
+    }
+
+    /* Menos espacio entre elementos de navegación */
+    .navbar-nav {
+        gap: 0.1rem;
+    }
+}
+
+/* === TABLETAS GRANDES (769px - 992px) - AJUSTES INTERMEDIOS === */
+@media (min-width: 769px) and (max-width: 992px) {
+    .custom-navbar {
+        min-height: 70px; /* Intermedio entre móvil y desktop */
+    }
+
+    .navbar-logo {
+        height: 55px;
+        max-width: 160px;
+    }
+
+    .custom-navbar .nav-link {
+        font-size: 0.9rem;
+        padding: 0.45rem 0.7rem !important;
+    }
+
+    .main-content-container {
+        padding-top: 75px;
+    }
+}
+
+/* === MÓVILES Y TABLETAS PEQUEÑAS (<= 768px) - MANTENER ESTILOS ORIGINALES === */
+@media (max-width: 768px) {
+    .custom-navbar {
+        min-height: clamp(60px, 10vh, 70px);
+        padding: 0.3rem 0.5rem;
+    }
+
+    .navbar-logo {
+        height: clamp(50px, 9vh, 60px);
+        max-width: 140px;
+    }
+
+    .custom-navbar .navbar-toggler {
+        padding: 0.25rem 0.45rem;
+        width: clamp(40px, 7vw, 45px);
+        height: clamp(40px, 7vw, 45px);
+    }
+
+    .custom-navbar .nav-link {
+        padding: 0.75rem 1rem !important;
+        margin: 0.25rem 0;
+        font-size: 0.9rem;
+        text-align: center;
+    }
+
+    .main-content-container {
+        padding-top: clamp(65px, 11vh, 75px);
+    }
+
+    .user-menu {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.85rem;
+    }
+}
+
+/* Tabletas (577px - 768px) */
+@media (min-width: 577px) and (max-width: 768px) {
+    .custom-navbar {
+        min-height: clamp(70px, 10vh, 80px);
+    }
+
+    .navbar-logo {
+        height: clamp(55px, 8vh, 65px);
+        max-width: 130px;
+    }
+
+    .custom-navbar .nav-link {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem !important;
+    }
+
+    .main-content {
+        padding: clamp(1.25rem, 4vh, 1.75rem) clamp(1rem, 3vw, 1.5rem);
+    }
+}
+
+/* 7. MEJORAS ESPECÍFICAS PARA LOGO EN DISPOSITIVOS MUY PEQUEÑOS */
+@media (max-width: 380px) {
+    .navbar-logo {
+        height: clamp(48px, 8.5vh, 58px);
+        max-width: 135px;
+    }
+
+    .custom-navbar {
+        min-height: clamp(62px, 10.5vh, 72px);
+    }
+}
+
+/* Para dispositivos con pantallas muy altas pero estrechas */
+@media (max-width: 576px) and (min-height: 700px) {
+    .navbar-logo {
+        height: clamp(55px, 9.5vh, 65px);
+    }
+}
+
+/* 8. MEJORAS VISUALES Y UTILIDADES RESPONSIVAS */
+
+/* Navbar toggler mejorado */
+.navbar-toggler {
+    border: 1px solid var(--border-primary);
+    padding: clamp(0.2rem, 0.8vh, 0.25rem) clamp(0.4rem, 1vw, 0.5rem);
+    width: clamp(40px, 7vw, 45px);
+    height: clamp(40px, 7vw, 45px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .navbar-toggler:focus {
+        box-shadow: 0 0 0 2px rgba(92, 200, 123, 0.5);
+    }
+
+.navbar-toggler-icon {
+    width: clamp(18px, 4vw, 22px);
+    height: clamp(18px, 4vw, 22px);
+    background-size: contain;
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-gray-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-primary);
+    border-radius: 3px;
+}
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--border-secondary);
+    }
+
+/* Animaciones */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-menu {
+    animation: fadeIn 0.3s ease;
+}
+
+/* 9. OVERRIDES DE BOOTSTRAP RESPONSIVOS */
+
+/* Cards en tema oscuro */
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: clamp(0.5rem, 1.5vw, 0.75rem);
+}
+
+/* Formularios en tema oscuro */
+.form-control {
+    background-color: var(--color-gray-dark);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: clamp(0.9rem, 2.8vw, 1rem);
+    padding: clamp(0.5rem, 1.5vh, 0.75rem) clamp(0.75rem, 2vw, 1rem);
+    border-radius: clamp(0.375rem, 1vw, 0.5rem);
+}
+
+    .form-control:focus {
+        background-color: var(--color-gray-dark);
+        border-color: var(--border-primary);
+        color: var(--text-primary);
+        box-shadow: 0 0 0 0.2rem rgba(92, 200, 123, 0.25);
+    }
+
+/* Botones responsivos */
+.btn {
+    padding: clamp(0.5rem, 1.5vh, 0.75rem) clamp(1rem, 2.5vw, 1.5rem);
+    font-size: clamp(0.85rem, 2.5vw, 1rem);
+    border-radius: clamp(0.375rem, 1vw, 0.5rem);
+    min-height: clamp(2.5rem, 6vh, 3rem);
+}
+
+.btn-primary {
+    background-color: var(--border-primary);
+    border-color: var(--border-primary);
+}
+
+    .btn-primary:hover {
+        background-color: var(--border-secondary);
+        border-color: var(--border-secondary);
+    }
+
+/* Mejoras para el dropdown de usuario */
+.navbar-nav .dropdown-menu {
+    min-width: min(90vw, 220px);
+}
+
+.dropdown-header {
+    font-size: clamp(0.75rem, 2vw, 0.8rem);
+    color: var(--viamtek-green) !important;
+}
+
+.dropdown-item {
+    transition: all 0.2s ease;
+    font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+}
+
+    .dropdown-item:hover {
+        background-color: var(--viamtek-green);
+        color: white !important;
+        transform: translateX(5px);
+    }
+
+/* 10. MEJORAS ESPECÍFICAS PARA DISPOSITIVOS MÓVILES */
+
+/* Safe areas para dispositivos con notch */
+@supports(padding: max(0px)) {
+    .custom-navbar {
+        padding-left: max(clamp(0.5rem, 2vw, 1rem), env(safe-area-inset-left));
+        padding-right: max(clamp(0.5rem, 2vw, 1rem), env(safe-area-inset-right));
+    }
+
+    .main-content {
+        padding-left: max(clamp(0.5rem, 2vw, 1rem), env(safe-area-inset-left));
+        padding-right: max(clamp(0.5rem, 2vw, 1rem), env(safe-area-inset-right));
+    }
+}
+
+/* Mejora de rendimiento en móviles */
+@media (max-width: 768px) {
+    .custom-navbar {
+        backdrop-filter: blur(5px);
+    }
+
+    /* Optimizar animaciones para móviles */
+    * {
+        transition-duration: 0.2s;
+    }
+}
+
+/* Soporte para orientación horizontal en móviles */
+@media (max-width: 767px) and (orientation: landscape) {
+    .custom-navbar {
+        min-height: clamp(55px, 9vh, 65px);
+    }
+
+    .navbar-logo {
+        height: clamp(40px, 6vh, 50px);
+    }
+
+    .main-content-container {
+        padding-top: clamp(60px, 10vh, 70px);
+    }
+}
+
+/* Scroll suave para toda la aplicación */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Mejora de accesibilidad en touch */
+@media (max-width: 768px) {
+    .nav-link, .dropdown-item, .btn {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+}
+
+/* Efecto de brillo adicional para el logo en móviles */
+@media (max-width: 768px) {
+    .navbar-logo {
+        filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(92, 200, 123, 0.3));
+    }
+}
+
+/* === MEJORAS ADICIONALES PARA ESCRITORIO === */
+@media (min-width: 993px) {
+    /* Asegurar que los elementos estén perfectamente alineados verticalmente */
+    .navbar-nav .nav-item {
+        display: flex;
+        align-items: center;
+    }
+
+    /* Menos espacio entre los items del navbar */
+    .navbar-collapse {
+        justify-content: flex-end;
+        gap: 0.3rem;
+    }
+
+    /* Dropdown más compacto en desktop */
+    .dropdown-menu {
+        margin-top: 0.3rem;
+    }
+}

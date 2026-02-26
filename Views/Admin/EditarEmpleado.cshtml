@@ -1,0 +1,156 @@
+﻿@model SVV.ViewModels.EditarEmpleadoViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Editar Empleado";
+    var fechaValue = Model?.FechaIngreso?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<!-- Notificación de éxito -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="container-fluid">
+    <div class="admin-header">
+        <h1 class="admin-title"><i class="fas fa-user-edit me-2"></i> Editar Empleado</h1>
+        <nav aria-label="breadcrumb" class="breadcrumb-viamtek">
+            <ol class="breadcrumb bg-transparent p-0 m-0">
+                <li class="breadcrumb-item"><a asp-action="Empleados" class="text-decoration-none">Gestión de Empleados</a></li>
+                <li class="breadcrumb-item active">Editar - @Model?.Nombre @Model?.Apellidos</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <h5 class="card-title"><i class="fas fa-info-circle me-2"></i> Información del Empleado</h5>
+        </div>
+        <div class="admin-card-body">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+
+            <form asp-action="EditarEmpleado" asp-controller="Admin" method="post" id="editForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Nombre" class="form-label-custom">Nombre *</label>
+                            <input asp-for="Nombre" class="form-control form-control-dark" required />
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label-custom">Email *</label>
+                            <input asp-for="Email" type="email" class="form-control form-control-dark" required />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="RolId" class="form-label-custom">Rol *</label>
+                            <select id="rolSelect" asp-for="RolId" class="form-select form-select-dark"
+                                    asp-items='new SelectList(ViewBag.Roles, "Id", "Nombre", Model?.RolId)' required>
+                                <option value="">Seleccione un rol</option>
+                            </select>
+                            <span asp-validation-for="RolId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="AreaAdscripcion" class="form-label-custom">Área de Adscripción *</label>
+                            <input asp-for="AreaAdscripcion" class="form-control form-control-dark" required />
+                            <span asp-validation-for="AreaAdscripcion" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Puesto" class="form-label-custom-dark">Puesto</label>
+                            <input asp-for="Puesto" class="form-control form-control-dark" />
+                            <span asp-validation-for="Puesto" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="UbicacionBase" class="form-label-custom">Ubicación Base</label>
+                            <input asp-for="UbicacionBase" class="form-control form-control-dark" />
+                            <span asp-validation-for="UbicacionBase" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Apellidos" class="form-label-custom">Apellidos *</label>
+                            <input asp-for="Apellidos" class="form-control form-control-dark" required />
+                            <span asp-validation-for="Apellidos" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Telefono" class="form-label-custom">Teléfono</label>
+                            <input asp-for="Telefono" class="form-control form-control-dark" />
+                            <span asp-validation-for="Telefono" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="JefeDirectoId" class="form-label-custom">Jefe Directo</label>
+                            <select asp-for="JefeDirectoId" id="rolSelect" class="form-select form-select-dark"
+                                    asp-items='new SelectList(ViewBag.Jefes, "Id", "Nombre", Model?.JefeDirectoId)'>
+                                <option value="">Sin jefe directo</option>
+                            </select>
+                            <span asp-validation-for="JefeDirectoId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Departamento" class="form-label-custom">Departamento</label>
+                            <input asp-for="Departamento" class="form-control form-control-dark" />
+                            <span asp-validation-for="Departamento" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="NivelPuesto" class="form-label-custom">Nivel de Puesto</label>
+                            <input asp-for="NivelPuesto" class="form-control form-control-dark" />
+                            <span asp-validation-for="NivelPuesto" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="FechaIngreso" class="form-label-custom">Fecha de Ingreso</label>
+                            <input asp-for="FechaIngreso" type="date" class="form-control form-control-dark" value="@fechaValue" />
+                            <span asp-validation-for="FechaIngreso" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-12"> 
+                        <div class="form-check form-switch">
+                            <input asp-for="ColaboradorRemoto" class="form-check-input form-check-input-dark" />
+                            <label class="form-check-label ms-2" asp-for="ColaboradorRemoto">Colaborador Remoto</label>
+                            <span asp-validation-for="ColaboradorRemoto" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="Empleados" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Volver a la lista
+                    </a>
+                    <button type="submit" class="btn btn-gradient" id="submitBtn">
+                        <i class="fas fa-save me-1"></i> Actualizar Empleado
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

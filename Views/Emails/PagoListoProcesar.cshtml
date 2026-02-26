@@ -1,0 +1,223 @@
+﻿@model dynamic
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: #17a2b8;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        .button {
+            background: #17a2b8;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 15px 0;
+        }
+
+        .details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .info {
+            color: #0c5460;
+            background: #d1ecf1;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #17a2b8;
+            margin: 15px 0;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 13px;
+            display: inline-block;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+            .summary-item:last-child {
+                border-bottom: none;
+            }
+
+        .positive {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .negative {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .escenario-badge {
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 Sistema de Viáticos</h1>
+            <p>💰 Pago Listo para Procesar</p>
+        </div>
+
+        <div class="content">
+            <h2>📋 Comprobación Lista para Procesar</h2>
+
+            <div class="info">
+                <p><strong>Estimado/a @Model.FinanzasNombre,</strong></p>
+                <p>Tienes una comprobación <strong>lista para procesar</strong> el pago/reintegro.</p>
+                @if (Model.Nota != null && Model.Nota.Contains("NO REQUIERE APROBACIÓN"))
+                {
+                    <p style="background: #fff3cd; padding: 8px; border-radius: 4px; margin-top: 10px;">
+                        <strong>📋 No requiere aprobación del Jefe Directo</strong> - Proceso directo.
+                    </p>
+                }
+            </div>
+
+            <div class="details">
+                <p><span class="label">Código de Comprobación:</span> @Model.CodigoComprobacion</p>
+                <p><span class="label">Empleado:</span> @Model.EmpleadoNombre</p>
+                <p><span class="label">Fecha de Validación:</span> @Model.Fecha</p>
+                <p>
+                    <span class="label">Escenario:</span>
+                    @if (Model.Escenario == "REPOSICION_EMPRESA")
+                    {
+                        <span class="escenario-badge" style="background: #cce5ff; color: #004085;">🏢 Pago a Empleado</span>
+                    }
+                    else if (Model.Escenario == "REPOSICION_COLABORADOR")
+                    {
+                        <span class="escenario-badge" style="background: #f8d7da; color: #721c24;">💼 Reintegro a Empresa</span>
+                    }
+                </p>
+                <p>
+                    <span class="label">Monto a Procesar:</span>
+                    <span class="@(Model.Escenario == "REPOSICION_EMPRESA" ? "positive" : "negative")">
+                        @Model.Diferencia
+                    </span>
+                </p>
+                @if (!string.IsNullOrEmpty(Model.AccionRequerida))
+                {
+                    <p><span class="label">Acción Requerida:</span> @Model.AccionRequerida</p>
+                }
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Comentarios))
+            {
+                <h3>📝 Comentarios:</h3>
+                <div class="details">
+                    <p>@Model.Comentarios</p>
+                </div>
+            }
+
+            <h3>📋 Instrucciones para Procesar:</h3>
+            <div class="details">
+                @if (Model.Escenario == "REPOSICION_EMPRESA")
+                {
+                    <p><strong>🏢 Pago a Empleado:</strong></p>
+                    <ul>
+                        <li>Verificar datos bancarios del empleado</li>
+                        <li>Generar orden de pago por <strong>@Model.Diferencia</strong></li>
+                        <li>Procesar transferencia bancaria</li>
+                        <li>Registrar comprobante de pago en el sistema</li>
+                        <li>Marcar comprobación como <strong>SALDADA</strong></li>
+                    </ul>
+                }
+                else if (Model.Escenario == "REPOSICION_COLABORADOR")
+                {
+                    <p><strong>💼 Reintegro a Empresa:</strong></p>
+                    <ul>
+                        <li>Contactar al empleado para coordinar el reintegro</li>
+                        <li>Procesar depósito bancario por <strong>@Model.Diferencia</strong></li>
+                        <li>Registrar comprobante de depósito en el sistema</li>
+                        <li>Marcar comprobación como <strong>SALDADA</strong></li>
+                        <li>Enviar confirmación al empleado</li>
+                    </ul>
+                }
+            </div>
+
+            <div style="text-align: center; margin: 25px 0;">
+                <a href="@Model.Url" class="button">💰 Ir a Autorizaciones de Pago</a>
+            </div>
+
+            <div class="details" style="background: #e7f3ff;">
+                <p><strong>📊 Información Adicional:</strong></p>
+                <ul>
+                    <li>Todas las facturas han sido validadas por Finanzas</li>
+                    <li>La comprobación ha completado todos los pasos requeridos</li>
+                    <li>@(Model.Nota != null && Model.Nota.Contains("NO REQUIERE APROBACIÓN") ? "No requiere aprobación del Jefe Directo" : "Aprobada por el Jefe de Proceso")</li>
+                    <li>El empleado ha sido notificado sobre el proceso</li>
+                </ul>
+            </div>
+
+            <p style="font-size: 14px; color: #666;">
+                <strong>Nota:</strong> Procesa esta comprobación dentro de los próximos 3 días hábiles.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>📧 Este es un mensaje automático generado por el Sistema de Viáticos.</p>
+            <p>Por favor, no respondas a este correo.</p>
+            <p>&copy; @DateTime.Now.Year - Sistema de Viáticos | Viamtek</p>
+        </div>
+    </div>
+</body>
+</html>

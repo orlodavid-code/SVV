@@ -1,0 +1,859 @@
+﻿@model IEnumerable<SVV.Models.ComprobacionesViaje>
+
+@{
+    ViewData["Title"] = "Autorizar Pagos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/autorizaciones-pago.css" />
+}
+
+<div class="container-fluid viaticos-dark-theme" id="autorizaciones-wrapper">
+    <div class="bg-overlay"></div>
+
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 header-panel">
+        <h1 class="h3 mb-0 text-white">Autorizar Pagos de Viáticos</h1>
+        <button class="btn btn-primary" onclick="location.reload()">
+            <i class="fas fa-sync-alt me-1"></i>Actualizar
+        </button>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow custom-card card-filtros">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-white">Filtros</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Empleado</label>
+                            <select id="filtroEmpleado" class="form-select">
+                                <option value="">Todos los empleados</option>
+                                @if (Model != null && Model.Any())
+                                {
+                                    var empleados = Model
+                                    .Where(c => c.SolicitudViaje?.Empleado != null)
+                                    .Select(c => c.SolicitudViaje.Empleado)
+                                    .DistinctBy(e => e.Id)
+                                    .OrderBy(e => e.Nombre);
+                                    foreach (var emp in empleados)
+                                    {
+                                        <option value="@emp.Id">@emp.Nombre @emp.Apellidos</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Escenario</label>
+                            <select id="filtroEscenario" class="form-select">
+                                <option value="">Todos los escenarios</option>
+                                <option value="REPOSICION_EMPRESA">Reposición Empresa</option>
+                                <option value="REPOSICION_COLABORADOR">Reposición Colaborador</option>
+                                <option value="PAGO_AUTORIZADO">Pago Autorizado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3 d-flex align-items-end">
+                            <button id="btnAplicarFiltros" class="btn btn-primary w-100">
+                                <i class="fas fa-filter me-1"></i>Aplicar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="estadisticas-revision mb-4">
+        <div class="estadistica-card">
+            <div class="d-flex">
+                <div class="estadistica-icono">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="ms-3">
+                    <div class="estadistica-numero" id="contadorPendientes">0</div>
+                    <div class="estadistica-texto">Pendientes de Autorizar</div>
+                </div>
+            </div>
+        </div>
+        <div class="estadistica-card">
+            <div class="d-flex">
+                <div class="estadistica-icono">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="ms-3">
+                    <div class="estadistica-numero" id="totalPagar">@ViewBag.TotalPagar?.ToString("C")</div>
+                    <div class="estadistica-texto">Total a Pagar</div>
+                </div>
+            </div>
+        </div>
+        <div class="estadistica-card">
+            <div class="d-flex">
+                <div class="estadistica-icono">
+                    <i class="fas fa-undo"></i>
+                </div>
+                <div class="ms-3">
+                    <div class="estadistica-numero" id="totalReintegrar">@ViewBag.TotalReintegrar?.ToString("C")</div>
+                    <div class="estadistica-texto">Total a Reintegrar</div>
+                </div>
+            </div>
+        </div>
+        <div class="estadistica-card">
+            <div class="d-flex">
+                <div class="estadistica-icono">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+                <div class="ms-3">
+                    <div class="estadistica-numero" id="totalComprobaciones">@ViewBag.TotalComprobaciones</div>
+                    <div class="estadistica-texto">Comprobaciones</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4 custom-card card-tabla">
+        <div class="card-header py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-white">Comprobaciones para Autorización</h6>
+                <button id="btnAutorizarSeleccionados" class="btn btn-success me-2" disabled>
+                    <i class="fas fa-check-double me-1"></i>Autorizar Seleccionados
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-revision text-white" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th width="40">
+                                <input type="checkbox" id="selectAll">
+                            </th>
+                            <th>ID</th>
+                            <th>Empleado</th>
+                            <th>Solicitud</th>
+                            <th>Total Gastado</th>
+                            <th>Anticipo</th>
+                            <th>Diferencia</th>
+                            <th>Escenario</th>
+                            <th>Estado</th>
+                            <th>Fecha Comp.</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var comprobacion in Model)
+                            {
+                                <tr data-empleado="@comprobacion.SolicitudViaje?.EmpleadoId"
+                                    data-escenario="@comprobacion.EscenarioLiquidacion"
+                                    data-estado="@comprobacion.EstadoComprobacion?.Codigo">
+                                    <td>
+                                        <input type="checkbox" class="select-comprobacion"
+                                               data-id="@comprobacion.Id"
+                                               data-diferencia="@comprobacion.Diferencia">
+                                    </td>
+                                    <td>@comprobacion.Id</td>
+                                    <td>
+                                        <strong>@comprobacion.SolicitudViaje?.Empleado?.Nombre @comprobacion.SolicitudViaje?.Empleado?.Apellidos</strong><br>
+                                        <small class="text-secondary">@comprobacion.SolicitudViaje?.Empleado?.Departamento</small>
+                                    </td>
+                                    <td>
+                                        <a asp-controller="Solicitudes" asp-action="Detalles" asp-route-id="@comprobacion.SolicitudViajeId" target="_blank">
+                                            @comprobacion.SolicitudViaje?.CodigoSolicitud
+                                        </a><br>
+                                        <small>@comprobacion.SolicitudViaje?.NombreProyecto</small>
+                                    </td>
+                                    <td class="text-end">@(comprobacion.TotalGastosComprobados?.ToString("C") ?? "$0.00")</td>
+                                    <td class="text-end">@(comprobacion.TotalAnticipo?.ToString("C") ?? "$0.00")</td>
+                                    <td class="text-end">
+                                        @{
+                                            var diferencia = comprobacion.Diferencia ?? 0;
+                                            var claseDiferencia = diferencia >= 0 ? "text-success" : "text-danger";
+                                        }
+                                        <span class="@claseDiferencia">
+                                            @diferencia.ToString("C")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @switch (comprobacion.EscenarioLiquidacion)
+                                        {
+                                            case "REPOSICION_EMPRESA":
+                                                <span class="badge bg-warning text-dark">REPOSICIÓN EMPRESA</span>
+                                                break;
+                                            case "REPOSICION_COLABORADOR":
+                                                <span class="badge bg-danger">REPOSICIÓN COLABORADOR</span>
+                                                break;
+                                            case "PAGO_AUTORIZADO":
+                                                <span class="badge bg-success">PAGO AUTORIZADO</span>
+                                                break;
+                                            default:
+                                                <span class="badge bg-secondary">@comprobacion.EscenarioLiquidacion</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (comprobacion.EstadoComprobacion != null)
+                                        {
+                                            var estadoColor = comprobacion.EstadoComprobacion.Codigo == "APROBADA_FINANZAS" ? "bg-info" :
+                                            comprobacion.EstadoComprobacion.Codigo == "SALDADA" ? "bg-success" :
+                                            comprobacion.EstadoComprobacion.Codigo == "EN_REVISION_JP" ? "bg-warning" :
+                                            comprobacion.EstadoComprobacion.Codigo == "PENDIENTE" ? "bg-secondary" :
+                                            "bg-primary";
+                                            <span class="badge @estadoColor">
+                                                @comprobacion.EstadoComprobacion.Codigo
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>@(comprobacion.FechaComprobacion?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary btn-revisar" data-id="@comprobacion.Id">
+                                            <i class="fas fa-search me-1"></i>Revisar
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="11" class="text-center p-5">
+                                    <i class="fas fa-folder-open fa-3x mb-3 text-secondary"></i>
+                                    <h5 class="text-secondary">No hay comprobaciones pendientes</h5>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            cargarEstadisticasIniciales();
+            inicializarEventListeners();
+        });
+
+        // Función para cargar estadísticas iniciales desde ViewBag
+        function cargarEstadisticasIniciales() {
+            // Si ViewBag tiene datos, usarlos como valores iniciales
+            const totalPagarViewBag = parseFloat('@ViewBag.TotalPagar') || 0;
+            const totalReintegrarViewBag = parseFloat('@ViewBag.TotalReintegrar') || 0;
+            const totalComprobacionesViewBag = parseInt('@ViewBag.TotalComprobaciones') || 0;
+
+            // Calcular pendientes iniciales
+            let pendientesIniciales = 0;
+            $('tbody tr').each(function() {
+                if ($(this).find('td').length > 1) {
+                    let estado = $(this).find('td:nth-child(9) .badge').text().trim();
+                    if (estado === 'APROBADA_FINANZAS') {
+                        pendientesIniciales++;
+                    }
+                }
+            });
+
+            $('#contadorPendientes').text(pendientesIniciales);
+            $('#totalPagar').text(formatearMonto(totalPagarViewBag));
+            $('#totalReintegrar').text(formatearMonto(totalReintegrarViewBag));
+            $('#totalComprobaciones').text(totalComprobacionesViewBag);
+        }
+
+        function inicializarEventListeners() {
+            $(document).on('click', '.btn-revisar', function() {
+                window.comprobacionActualId = $(this).data('id');
+                cargarDetalleAutorizacion(window.comprobacionActualId);
+            });
+
+            $('#btnAplicarFiltros').click(aplicarFiltros);
+
+            $('#selectAll').change(function() {
+                $('tbody tr:visible .select-comprobacion').prop('checked', this.checked);
+                actualizarBotonAutorizar();
+            });
+
+            $(document).on('change', '.select-comprobacion', function() {
+                actualizarBotonAutorizar();
+                var totalVisible = $('tbody tr:visible .select-comprobacion').length;
+                var totalChecked = $('tbody tr:visible .select-comprobacion:checked').length;
+                $('#selectAll').prop('checked', totalVisible > 0 && totalVisible === totalChecked);
+            });
+
+            $('#btnAutorizarSeleccionados').click(autorizarSeleccionados);
+
+            $(document).on('click', '.btn-accion', function() {
+                var accion = $(this).data('accion');
+                var monto = $(this).data('monto');
+
+                if (accion === 'CANCELAR') {
+                    ejecutarAccionAutorizacion(window.comprobacionActualId, accion, monto);
+                    return;
+                }
+
+                Swal.close();
+                ejecutarAccionAutorizacion(window.comprobacionActualId, accion, monto);
+            });
+
+            // Eventos para limpiar filtros individuales
+            $(document).on('click', '.btn-limpiar-filtro', function() {
+                const filtroId = $(this).data('filtro');
+                $(`#${filtroId}`).val('');
+                aplicarFiltros();
+            });
+        }
+
+        function cargarDetalleAutorizacion(id) {
+            if (!$('#detalle-autorizacion-css').length) {
+                $('<link>', {
+                    id: 'detalle-autorizacion-css',
+                    rel: 'stylesheet',
+                    href: '/css/detalle-autorizacion.css'
+                }).appendTo('head');
+            }
+
+            mostrarLoading('Cargando detalles para autorización...');
+
+            $.ajax({
+                url: '/Finanzas/CargarDetalleAutorizacion',
+                type: 'GET',
+                data: { id: id },
+                success: function(data) {
+                    Swal.close();
+                    mostrarModalDetalle(data);
+                },
+                error: function() {
+                    cargarRevisionJP(id);
+                }
+            });
+        }
+
+        function cargarRevisionJP(id) {
+            $.ajax({
+                url: '/Finanzas/CargarRevisionJP',
+                type: 'GET',
+                data: { id: id },
+                success: function(data) {
+                    Swal.close();
+                    mostrarModalDetalle(data, 'Detalles de Comprobación');
+                },
+                error: function() {
+                    Swal.close();
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudo cargar el detalle de la comprobación',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#e74c3c'
+                    });
+                }
+            });
+        }
+
+        function mostrarModalDetalle(contenido, titulo = 'Autorización de Pago/Reintegro') {
+            Swal.fire({
+                title: titulo,
+                html: contenido,
+                width: '95%',
+                customClass: {
+                    popup: 'swal2-popup-detalle',
+                    container: 'swal2-container-detalle'
+                },
+                showConfirmButton: false,
+                showCloseButton: true,
+                background: 'var(--card-bg)',
+                scrollbarPadding: false,
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            });
+        }
+
+        function ejecutarAccionAutorizacion(id, tipoAccion, monto) {
+            if (tipoAccion === 'CANCELAR') {
+                Swal.fire({
+                    title: '¿Cancelar operación?',
+                    html: `<div class="text-start">
+                            <p>Se cerrará la ventana sin realizar cambios.</p>
+                            <div class="alert alert-info mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Los datos no se modificarán.
+                            </div>
+                           </div>`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, cancelar',
+                    cancelButtonText: 'Continuar revisando',
+                    confirmButtonColor: 'var(--viamtek-green)'
+                }).then((result) => {
+                    if (result.isConfirmed) Swal.close();
+                });
+                return;
+            }
+
+            const configuraciones = {
+                'REINTEGRO': {
+                    titulo: '¿Autorizar Reintegro?',
+                    mensaje: `<div class="text-start">
+                                <p>El empleado reintegrará a la empresa: <strong class="text-warning">${formatearMonto(monto)}</strong></p>
+                                <p>Esta acción cambiará el estado a <strong>SALDADA</strong>.</p>
+                                <div class="alert alert-warning mt-2">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    Se generará un registro de reintegro en el sistema.
+                                </div>
+                               </div>`,
+                    icono: 'warning',
+                    confirmButtonText: 'Sí, autorizar reintegro'
+                },
+                'PAGO': {
+                    titulo: '¿Autorizar Pago?',
+                    mensaje: `<div class="text-start">
+                                <p>La empresa pagará al empleado: <strong class="text-success">${formatearMonto(monto)}</strong></p>
+                                <p>Esta acción cambiará el estado a <strong>SALDADA</strong>.</p>
+                                <div class="alert alert-success mt-2">
+                                    <i class="fas fa-money-bill-wave me-1"></i>
+                                    Se generará un registro de pago en el sistema.
+                                </div>
+                               </div>`,
+                    icono: 'success',
+                    confirmButtonText: 'Sí, autorizar pago'
+                },
+                'LIQUIDADO': {
+                    titulo: '¿Marcar como Liquidado?',
+                    mensaje: `<div class="text-start">
+                                <p>La comprobación será marcada como <strong>SALDADA</strong>.</p>
+                                <p>No se generarán movimientos financieros.</p>
+                                <div class="alert alert-info mt-2">
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    La comprobación se cerrará definitivamente.
+                                </div>
+                               </div>`,
+                    icono: 'info',
+                    confirmButtonText: 'Sí, marcar como liquidado'
+                }
+            };
+
+            const config = configuraciones[tipoAccion];
+
+            Swal.fire({
+                title: config.titulo,
+                html: config.mensaje,
+                icon: config.icono,
+                showCancelButton: true,
+                confirmButtonText: config.confirmButtonText,
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: 'var(--viamtek-green)'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    procesarAutorizacion(id, tipoAccion, monto);
+                }
+            });
+        }
+
+        function procesarAutorizacion(id, tipoAccion, monto) {
+            mostrarLoading(`Procesando ${tipoAccion.toLowerCase()}...`);
+
+            $.ajax({
+                url: '/Finanzas/AutorizarPagoIndividual',
+                type: 'POST',
+                data: {
+                    id: id,
+                    tipoAccion: tipoAccion,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    Swal.close();
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Autorizado!',
+                            html: `<div class="text-start">
+                                    <p>${response.message}</p>
+                                    <div class="alert alert-success mt-3">
+                                        <strong>Estado actualizado:</strong> ${response.nuevoEstado}<br>
+                                        <strong>Acción:</strong> ${tipoAccion}<br>
+                                        ${monto ? `<strong>Monto:</strong> ${formatearMonto(monto)}` : ''}
+                                    </div>
+                                   </div>`,
+                            confirmButtonText: 'Continuar',
+                            confirmButtonColor: 'var(--viamtek-green)',
+                            timer: 3000,
+                            timerProgressBar: true,
+                            willClose: () => location.reload()
+                        });
+                    } else {
+                        mostrarError(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    Swal.close();
+                    mostrarError('Error al procesar la solicitud: ' + (xhr.responseText || 'Error desconocido'));
+                }
+            });
+        }
+
+        function actualizarEstadisticas() {
+            let totalPendientes = 0;
+            let totalPagarCalculado = 0;
+            let totalReintegrarCalculado = 0;
+            let totalComprobaciones = 0;
+
+            // Recorrer solo las filas VISIBLES después de aplicar filtros
+            $('tbody tr:visible').each(function() {
+                // Verificar que sea una fila de datos (no el mensaje vacío)
+                if ($(this).find('td').length > 1) {
+                    totalComprobaciones++;
+
+                    // Obtener datos de la fila
+                    let diferenciaTexto = $(this).find('td:nth-child(7)').text().trim();
+                    let escenario = $(this).find('td:nth-child(8) .badge').text().trim();
+                    let estado = $(this).find('td:nth-child(9) .badge').text().trim();
+
+                    // Convertir diferencia de texto a número
+                    let diferencia = 0;
+                    if (diferenciaTexto) {
+                        diferenciaTexto = diferenciaTexto.replace(/[$,]/g, '');
+                        diferencia = parseFloat(diferenciaTexto) || 0;
+                    }
+
+                    // Contar solo las APROBADAS_FINANZAS
+                    if (estado === 'APROBADA_FINANZAS') {
+                        totalPendientes++;
+
+                        // Calcular montos según escenario
+                        if (escenario === 'REPOSICIÓN EMPRESA' && diferencia > 0) {
+                            totalPagarCalculado += diferencia;
+                        } else if (escenario === 'REPOSICIÓN COLABORADOR' && diferencia < 0) {
+                            totalReintegrarCalculado += Math.abs(diferencia);
+                        }
+                    }
+                }
+            });
+
+            // Actualizar los badges
+            $('#contadorPendientes').text(totalPendientes);
+            $('#totalPagar').text(formatearMonto(totalPagarCalculado));
+            $('#totalReintegrar').text(formatearMonto(totalReintegrarCalculado));
+            $('#totalComprobaciones').text(totalComprobaciones);
+        }
+
+        function actualizarBotonAutorizar() {
+            let seleccionados = $('.select-comprobacion:checked').length;
+            let $btn = $('#btnAutorizarSeleccionados');
+
+            $btn.prop('disabled', seleccionados === 0);
+            if (seleccionados > 0) {
+                $btn.html(`<i class="fas fa-check-double me-1"></i> Autorizar (${seleccionados})`);
+            } else {
+                $btn.html(`<i class="fas fa-check-double me-1"></i> Autorizar Seleccionados`);
+            }
+        }
+
+        function aplicarFiltros() {
+            let filtroEmpleado = $('#filtroEmpleado').val();
+            let filtroEscenario = $('#filtroEscenario').val();
+            let filtroEstado = $('#filtroEstado').val();
+
+            // Contador de filas visibles
+            let filasVisibles = 0;
+
+            $('tbody tr').each(function() {
+                let mostrar = true;
+
+                // Obtener datos de la fila para filtros
+                let empleadoId = $(this).data('empleado');
+                let escenario = $(this).data('escenario');
+                let estado = $(this).data('estado');
+
+                // Aplicar filtros
+                if (filtroEmpleado && empleadoId != filtroEmpleado) mostrar = false;
+                if (filtroEscenario && escenario != filtroEscenario) mostrar = false;
+                if (filtroEstado && estado != filtroEstado) mostrar = false;
+
+                if (mostrar) {
+                    $(this).show();
+                    filasVisibles++;
+                } else {
+                    $(this).hide();
+                    $(this).find('.select-comprobacion').prop('checked', false);
+                }
+            });
+
+            // Mostrar mensaje si no hay resultados
+            if (filasVisibles === 0) {
+                // Si ya existe un mensaje de no resultados, mostrarlo
+                let $mensajeVacio = $('tbody tr:contains("No hay comprobaciones")');
+                if ($mensajeVacio.length === 0) {
+                    $('tbody').append(`
+                        <tr id="mensaje-no-resultados">
+                            <td colspan="11" class="text-center p-5">
+                                <i class="fas fa-filter fa-3x mb-3 text-secondary"></i>
+                                <h5 class="text-secondary">No hay resultados con los filtros aplicados</h5>
+                                <p class="text-secondary">Intenta con otros criterios de búsqueda</p>
+                                <button id="btnLimpiarFiltros" class="btn btn-sm btn-outline-secondary mt-2">
+                                    <i class="fas fa-times me-1"></i>Limpiar filtros
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+
+                    // Agregar evento al botón de limpiar filtros
+                    $('#btnLimpiarFiltros').click(function() {
+                        $('#filtroEmpleado').val('');
+                        $('#filtroEscenario').val('');
+                        $('#filtroEstado').val('');
+                        $('#mensaje-no-resultados').remove();
+                        aplicarFiltros();
+                    });
+                } else {
+                    $mensajeVacio.show();
+                }
+            } else {
+                // Ocultar mensaje de no resultados si existe
+                $('#mensaje-no-resultados').remove();
+                $('tbody tr:contains("No hay comprobaciones")').hide();
+            }
+
+            actualizarEstadisticas();
+            actualizarBotonAutorizar();
+
+            // Actualizar el checkbox "Seleccionar todos"
+            var totalVisible = $('tbody tr:visible .select-comprobacion').length;
+            var totalChecked = $('tbody tr:visible .select-comprobacion:checked').length;
+            $('#selectAll').prop('checked', totalVisible > 0 && totalVisible === totalChecked);
+        }
+
+        function autorizarSeleccionados() {
+            let ids = [];
+            let totalPagarCalculado = 0;
+            let totalReintegrarCalculado = 0;
+
+            $('.select-comprobacion:checked').each(function() {
+                let id = $(this).data('id');
+                let diferencia = parseFloat($(this).data('diferencia')) || 0;
+                let $fila = $(this).closest('tr');
+                let escenario = $fila.data('escenario');
+
+                ids.push(id);
+
+                // Calcular montos según escenario
+                if (escenario === 'REPOSICION_EMPRESA' && diferencia > 0) {
+                    totalPagarCalculado += diferencia;
+                } else if (escenario === 'REPOSICION_COLABORADOR' && diferencia < 0) {
+                    totalReintegrarCalculado += Math.abs(diferencia);
+                }
+            });
+
+            if (ids.length === 0) {
+                Swal.fire({
+                    title: 'Advertencia',
+                    text: 'No hay comprobaciones seleccionadas.',
+                    icon: 'warning',
+                    confirmButtonText: 'Aceptar',
+                    confirmButtonColor: 'var(--viamtek-green)'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: '¿Autorización Masiva?',
+                html: `<div class="text-start">
+                        <p>Vas a autorizar <strong>${ids.length}</strong> comprobaciones:</p>
+                        <ul class="mt-2 mb-3">
+                            <li><strong>Total a Pagar:</strong> ${formatearMonto(totalPagarCalculado)}</li>
+                            <li><strong>Total a Reintegrar:</strong> ${formatearMonto(totalReintegrarCalculado)}</li>
+                        </ul>
+                        <div class="alert alert-warning mt-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Esta acción cambiará el estado a <strong>SALDADA</strong> y generará registros contables.
+                        </div>
+                       </div>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: `Sí, autorizar ${ids.length}`,
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: 'var(--viamtek-green)',
+                width: 600
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    procesarAutorizacionMasiva(ids, totalPagarCalculado, totalReintegrarCalculado);
+                }
+            });
+        }
+
+        function procesarAutorizacionMasiva(ids, totalPagar, totalReintegrar) {
+            mostrarLoading('Autorizando pagos...');
+
+            $.ajax({
+                url: '/Finanzas/AutorizarPagosMasivo',
+                type: 'POST',
+                data: {
+                    ids: ids,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    Swal.close();
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Proceso Completado!',
+                            html: `<div class="text-start">
+                                    <p>${response.message}</p>
+                                    <div class="alert alert-success mt-3">
+                                        <strong>Comprobaciones autorizadas:</strong> ${response.cantidadAutorizada}<br>
+                                        ${totalPagar > 0 ? `<strong>Total Pagado:</strong> ${formatearMonto(totalPagar)}<br>` : ''}
+                                        ${totalReintegrar > 0 ? `<strong>Total Reintegrado:</strong> ${formatearMonto(totalReintegrar)}` : ''}
+                                    </div>
+                                   </div>`,
+                            confirmButtonText: 'Continuar',
+                            confirmButtonColor: 'var(--viamtek-green)',
+                            timer: 3000,
+                            timerProgressBar: true,
+                            willClose: () => location.reload()
+                        });
+                    } else {
+                        mostrarError(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    Swal.close();
+                    mostrarError(xhr.status === 500 ? 'Error interno del servidor.' : 'Error al procesar la solicitud');
+                }
+            });
+        }
+
+        function mostrarLoading(mensaje) {
+            Swal.fire({
+                title: mensaje,
+                html: `<div class="text-center">
+                        <div class="mb-3"><i class="fas fa-spinner fa-spin fa-2x" style="color: var(--viamtek-green);"></i></div>
+                        <p>Procesando solicitud...</p>
+                        <div class="progress" style="height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%; background: var(--button-gradient);"></div>
+                        </div>
+                    </div>`,
+                allowEscapeKey: false,
+                allowOutsideClick: false,
+                showConfirmButton: false
+            });
+        }
+
+        function mostrarError(mensaje) {
+            Swal.fire({
+                title: 'Error',
+                text: mensaje,
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#e74c3c'
+            });
+        }
+
+        function formatearMonto(monto) {
+            if (monto === null || monto === undefined || isNaN(monto)) return '$0.00';
+
+            // Redondear a 2 decimales y formatear
+            let montoRedondeado = Math.round(monto * 100) / 100;
+
+            // Formatear con separador de miles
+            return montoRedondeado.toLocaleString('es-MX', {
+                style: 'currency',
+                currency: 'MXN',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+    </script>
+
+    <style>
+        .swal2-popup-detalle {
+            max-width: 95% !important;
+            padding: 2rem !important;
+            background: var(--card-bg) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3) !important;
+        }
+
+        .swal2-container-detalle {
+            z-index: 99999 !important;
+        }
+
+        .sweetalert-dark .swal2-popup {
+            background: var(--card-bg) !important;
+            border: 1px solid var(--border-light) !important;
+            border-radius: var(--border-radius-md) !important;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.55) !important;
+            backdrop-filter: blur(20px) !important;
+            max-width: 500px !important;
+        }
+
+        .sweetalert-dark .swal2-title {
+            color: var(--primary-text) !important;
+        }
+
+        .sweetalert-dark .swal2-html-container {
+            color: var(--secondary-text) !important;
+        }
+
+        /* Estilos para badges */
+        .badge.bg-warning.text-dark {
+            background: linear-gradient(135deg, #f6ad55, #ed8936) !important;
+            color: #1a202c !important;
+            font-weight: 700;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+        }
+
+        .badge.bg-danger {
+            background: linear-gradient(135deg, #f56565, #e53e3e) !important;
+            color: white !important;
+            font-weight: 700;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+        }
+
+        .badge.bg-success {
+            background: linear-gradient(135deg, var(--viamtek-green), #38a169) !important;
+            color: white !important;
+            font-weight: 700;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+        }
+
+        .badge.bg-info {
+            background: linear-gradient(135deg, #4299e1, #3182ce) !important;
+            color: white !important;
+            font-weight: 700;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+        }
+
+        /* Clases para diferencias monetarias */
+        .text-success {
+            color: var(--viamtek-green) !important;
+            font-weight: 700;
+        }
+
+        .text-danger {
+            color: #f56565 !important;
+            font-weight: 700;
+        }
+
+        /* Estilos para los badges de estadísticas */
+        .stat-badge {
+            font-size: 1.1rem;
+            padding: 0.6rem 1rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+    </style>
+}

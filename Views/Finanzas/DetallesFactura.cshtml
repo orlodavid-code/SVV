@@ -1,0 +1,967 @@
+﻿@model SVV.ViewModels.FacturasViewModel
+@{
+    ViewData["Title"] = "Detalles de Comprobación - " + Model.CodigoComprobacion;
+    var tieneCorrecciones = Model.EstadoComprobacionId == 8 || Model.EstadoComprobacionId == 9;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/facturas.css" asp-append-version="true" />
+    <style>
+        .btn-revisar-correccion {
+            background: linear-gradient(135deg, #f6ad55, #ed8936);
+            border: none;
+            color: #1a202c;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-revisar-correccion:hover {
+            background: linear-gradient(135deg, #ed8936, #dd6b20);
+            color: #1a202c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(246, 173, 85, 0.3);
+        }
+        
+        .alerta-correcciones {
+            background: linear-gradient(135deg, rgba(246, 173, 85, 0.15), rgba(237, 137, 54, 0.1));
+            border: 1px solid rgba(246, 173, 85, 0.3);
+            border-left: 4px solid #f6ad55;
+        }
+        
+        .gasto-devuelto {
+            background: rgba(246, 173, 85, 0.08);
+            border: 1px solid rgba(246, 173, 85, 0.3);
+            border-left: 4px solid #f6ad55;
+        }
+        
+        .gasto-devuelto .gasto-concepto {
+            color: #f6ad55;
+        }
+    </style>
+}
+
+<div class="facturas-container detalles-factura-container">
+    <div class="facturas-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="facturas-title">Detalles de Comprobación</h1>
+                <p class="facturas-subtitle">@Model.CodigoComprobacion - @Model.CodigoSolicitud</p>
+            </div>
+            <div>
+                <a asp-action="Facturas" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerta si tiene correcciones -->
+    @if (tieneCorrecciones)
+    {
+        <div class="alert alerta-correcciones mb-4">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-triangle fa-2x me-3" style="color: #f6ad55;"></i>
+                <div>
+                    <h5 class="mb-1">⚠️ Comprobación con Correcciones Pendientes</h5>
+                    <p class="mb-0">
+                        Esta comprobación tiene gastos devueltos para corrección. 
+                        El empleado ya realizó las correcciones. Por favor, revisa los documentos corregidos.
+                    </p>
+                </div>
+                <a asp-action="RevisarCorreccion" asp-controller="Finanzas" 
+                   asp-route-id="@Model.ComprobacionId"
+                   class="btn-revisar-correccion ms-auto">
+                    <i class="fas fa-eye"></i> Revisar Corrección
+                </a>
+            </div>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="facturas-card">
+                <div class="card-header py-2">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Información General
+                    </h6>
+                </div>
+                <div class="card-body py-2">
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <div class="info-item p-2 rounded">
+                                <div class="info-label text-muted mb-1 small">Empleado</div>
+                                <div class="info-value h6 mb-0">@Model.EmpleadoNombre</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="info-item p-2 rounded">
+                                <div class="info-label text-muted mb-1 small">Destino</div>
+                                <div class="info-value h6 mb-0">@Model.Destino</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="info-item p-2 rounded">
+                                <div class="info-label text-muted mb-1 small">Fecha Comprobación</div>
+                                <div class="info-value h6 mb-0">@Model.FechaComprobacion.ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="info-item p-2 rounded">
+                                <div class="info-label text-muted mb-1 small">Estado</div>
+                                <div class="info-value">
+                                    @{
+                                        var estadoBadgeClass = Model.EstadoComprobacionId switch
+                                        {
+                                            1 => "estado-factura estado-pendiente",
+                                            2 => "estado-factura estado-completa",
+                                            3 => "estado-factura estado-validada",
+                                            8 => "estado-factura estado-parcialmente-aprobada",
+                                            9 => "estado-factura estado-correcciones-pendientes",
+                                            _ => "estado-factura estado-pendiente"
+                                        };
+                                    }
+                                    <span class="@estadoBadgeClass d-inline-block px-3 py-1">
+                                        @Model.EstadoComprobacion
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mt-3 mt-md-0">
+            <div class="facturas-card">
+                <div class="card-header py-2">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-calculator me-2"></i>Totales
+                    </h6>
+                </div>
+                <div class="card-body py-2">
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <div class="info-item p-2 rounded text-center">
+                                <div class="info-label text-muted mb-1 small">Total Gastos</div>
+                                <div class="info-value h5 text-success fw-bold mb-0">
+                                    @(Model.TotalGastosComprobados?.ToString("C") ?? "$0")
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="info-item p-2 rounded text-center">
+                                <div class="info-label text-muted mb-1 small">Total Anticipo</div>
+                                <div class="info-value h5 text-info mb-0">
+                                    @(Model.TotalAnticipo?.ToString("C") ?? "$0")
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="info-item p-2 rounded text-center">
+                                <div class="info-label text-muted mb-1 small">Diferencia</div>
+                                <div class="info-value h5 @(Model.Diferencia >= 0 ? "text-success" : "text-danger") fw-bold mb-0">
+                                    @(Model.Diferencia?.ToString("C") ?? "$0")
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="info-item p-2 rounded text-center">
+                                <div class="info-label text-muted mb-1 small">Escenario</div>
+                                <div class="info-value">
+                                    <span class="estado-factura @(Model.Diferencia >= 0 ? "estado-pendiente" : "estado-validada") d-inline-block px-3 py-1">
+                                        @(Model.Diferencia >= 0 ? "REPOSICIÓN EMPRESA" : "REPOSICIÓN COLABORADOR")
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="facturas-card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-receipt me-2"></i>Gastos y Facturas
+                            <span class="badge-facturas badge-xml ms-2 me-2">@Model.Gastos.Count gastos</span>
+                            @if (tieneCorrecciones)
+                            {
+                                <span class="badge bg-warning ms-2">
+                                    @Model.Gastos.Count(g => g.EstadoGastoCodigo == "DEVUELTO_CORRECCION") correcciones pendientes
+                                </span>
+                            }
+                        </h6>
+                        @if (Model.EstadoComprobacionId == 1 || Model.EstadoComprobacionId == 2)
+                        {
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-warning" id="btn-seleccionar-todos">
+                                    <i class="fas fa-check-square ms-3 me-1"></i> Seleccionar Todos
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-deseleccionar-todos">
+                                    <i class="fas fa-square ms-2 me-1"></i> Deseleccionar Todos
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.Gastos.Any())
+                    {
+                        <div class="lista-gastos" id="lista-gastos">
+                            @foreach (var gasto in Model.Gastos)
+                            {
+                                var esDevuelto = gasto.EstadoGastoCodigo == "DEVUELTO_CORRECCION";
+                                var gastoClass = "gasto-item";
+                                var estadoGastoClass = gasto.EstadoGastoCodigo switch
+                                {
+                                    "APROBADO" => "gasto-aprobado",
+                                    "RECHAZADO" => "gasto-rechazado",
+                                    "DEVUELTO_CORRECCION" => "gasto-rechazado",
+                                    _ => ""
+                                };
+                                
+                                <div class="@gastoClass @estadoGastoClass @(esDevuelto ? "gasto-devuelto" : "") gasto-seleccionable" 
+                                     data-gasto-id="@gasto.GastoId"
+                                     data-estado="@gasto.EstadoGastoCodigo">
+                                    <div class="gasto-header">
+                                        <div class="d-flex align-items-center">
+                                            @if (Model.EstadoComprobacionId == 1 || Model.EstadoComprobacionId == 2)
+                                            {
+                                                <input type="checkbox" 
+                                                       class="form-check-input checkbox-gasto" 
+                                                       id="gasto_@gasto.GastoId"
+                                                       value="@gasto.GastoId"
+                                                       data-estado="@gasto.EstadoGastoCodigo"
+                                                       @(gasto.EstadoGastoCodigo == "APROBADO" ? "disabled" : "") />
+                                            }
+                                            <div class="gasto-concepto">
+                                                @if (esDevuelto)
+                                                {
+                                                    <i class="fas fa-exclamation-circle me-2" style="color: #f6ad55;"></i>
+                                                }
+                                                @gasto.Concepto
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge @gasto.EstadoGastoBadgeClass badge-estado-gasto">
+                                                @gasto.EstadoGasto
+                                                @if (esDevuelto)
+                                                {
+                                                    <i class="fas fa-clock ms-1"></i>
+                                                }
+                                            </span>
+                                            <div class="gasto-monto">@gasto.DisplayMonto</div>
+                                        </div>
+                                    </div>
+                                    <div class="gasto-detalles">
+                                        <div class="info-item">
+                                            <div class="info-label">Categoría</div>
+                                            <div class="info-value">@gasto.Categoria</div>
+                                        </div>
+                                        <div class="info-item">
+                                            <div class="info-label">Fecha</div>
+                                            <div class="info-value">@gasto.DisplayFecha</div>
+                                        </div>
+                                        <div class="info-item">
+                                            <div class="info-label">Proveedor</div>
+                                            <div class="info-value">@gasto.Proveedor</div>
+                                        </div>
+                                        <div class="info-item">
+                                            <div class="info-label">Estado Facturas</div>
+                                            <div class="info-value">
+                                                <span class="estado-factura @(gasto.TieneXML ? "estado-completa" : "estado-incompleta")">
+                                                    @if (gasto.TieneXML && gasto.TienePDF)
+                                                    {
+                                                        <text>COMPLETO</text>
+                                                    }
+                                                    else if (gasto.TieneXML)
+                                                    {
+                                                        <text>XML OK</text>
+                                                    }
+                                                    else if (gasto.TienePDF)
+                                                    {
+                                                        <text>PDF OK</text>
+                                                    }
+                                                    else
+                                                    {
+                                                        <text>PENDIENTE</text>
+                                                    }
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="gasto-archivos">
+                                        @if (gasto.TienePDF)
+                                        {
+                                            <a href="~/@gasto.FacturaPDF" target="_blank" class="archivo-item">
+                                                <i class="fas fa-file-pdf archivo-icono archivo-pdf"></i>
+                                                <span class="archivo-nombre">PDF</span>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <div class="archivo-item text-muted">
+                                                <i class="fas fa-file-pdf archivo-icono"></i>
+                                                <span class="archivo-nombre">Sin PDF</span>
+                                            </div>
+                                        }
+                                        @if (gasto.TieneXML)
+                                        {
+                                            <a href="~/@gasto.FacturaXML" target="_blank" class="archivo-item">
+                                                <i class="fas fa-file-code archivo-icono archivo-xml"></i>
+                                                <span class="archivo-nombre">XML</span>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <div class="archivo-item text-muted">
+                                                <i class="fas fa-file-code archivo-icono"></i>
+                                                <span class="archivo-nombre">Sin XML</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No hay gastos registrados en esta comprobación</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="facturas-card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-file-alt me-2"></i>Informe del Viaje
+                        </h6>
+                        <div class="text-muted small m-2">
+                            <i class="fas fa-info-circle me-1"></i>Información proporcionada por el empleado
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3 mb-md-0 mt-2">
+                            <div class="h6 mb-2 text-primary ms-2">
+                                <i class="fas fa-tasks me-2"></i>Descripción de Actividades
+                            </div>
+                            <div class="informe-contenido p-3 border rounded bg-dark bg-opacity-10">
+                                @if (!string.IsNullOrEmpty(Model.DescripcionActividades))
+                                {
+                                    @Html.Raw(Model.DescripcionActividades.Replace("\n", "<br>"))
+                                }
+                                else
+                                {
+                                    <div class="text-center text-muted py-3">
+                                        <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
+                                        <p class="mb-0">El empleado no proporcionó descripción de actividades</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mt-2 ">
+                            <div class="h6 mb-2 text-primary">
+                                <i class="fas fa-chart-line me-2"></i>Resultados del Viaje
+                            </div>
+                            <div class="informe-contenido p-3 border rounded bg-dark bg-opacity-10">
+                                @if (!string.IsNullOrEmpty(Model.ResultadosViaje))
+                                {
+                                    @Html.Raw(Model.ResultadosViaje.Replace("\n", "<br>"))
+                                }
+                                else
+                                {
+                                    <div class="text-center text-muted py-3">
+                                        <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
+                                        <p class="mb-0">El empleado no proporcionó resultados del viaje</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="alert alert-info bg-opacity-10 border-info">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-info-circle fa-lg text-info me-3"></i>
+                                    <div>
+                                        <strong>Información del informe:</strong>
+                                        <div class="small text-muted">
+                                            Este informe fue creado por el empleado el 
+                                            @Model.FechaComprobacion.ToString("dd/MM/yyyy HH:mm").
+                                            Finanzas debe validar que la información coincida con los gastos presentados.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ComentariosFinanzas))
+    {
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="facturas-card">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-comments me-2"></i>Comentarios de Finanzas
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">@Model.ComentariosFinanzas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="facturas-card">
+                <div class="card-body">
+                    <div class="botones-accion-facturas">
+                        @if (tieneCorrecciones)
+                        {
+                            <!-- Botones para comprobaciones con correcciones -->
+                            <a asp-action="RevisarCorreccion" asp-controller="Finanzas" 
+                               asp-route-id="@Model.ComprobacionId"
+                               class="btn-facturas btn-revisar-correccion">
+                                <i class="fas fa-eye me-1"></i> Revisar Corrección
+                            </a>
+                            
+                            <button class="btn-facturas btn-devolver-factura" id="btn-devolver-gastos">
+                                <i class="fas fa-undo me-1"></i> Devolver Otros Gastos
+                            </button>
+                            
+                            <button class="btn-facturas btn-reabrir-factura btn-reabrir"
+                                    data-id="@Model.ComprobacionId"
+                                    data-codigo="@Model.CodigoComprobacion">
+                                <i class="fas fa-redo me-1"></i> Reabrir Todo
+                            </button>
+                            
+                            <button class="btn-facturas btn-rechazar-factura btn-rechazar"
+                                    data-id="@Model.ComprobacionId"
+                                    data-codigo="@Model.CodigoComprobacion">
+                                <i class="fas fa-times me-1"></i> Rechazar Todo
+                            </button>
+                        }
+                        else if (Model.EstadoComprobacionId == 1 || Model.EstadoComprobacionId == 2)
+                        {
+                            <!-- Botones para comprobaciones normales -->
+                            <button class="btn-facturas btn-validar-factura btn-validar"
+                                    data-id="@Model.ComprobacionId"
+                                    data-codigo="@Model.CodigoComprobacion">
+                                <i class="fas fa-check me-1"></i> Validar Completamente
+                            </button>
+                            
+                            <button class="btn-facturas btn-devolver-factura" id="btn-devolver-gastos">
+                                <i class="fas fa-undo me-1"></i> Reembolso Parcial
+                            </button>
+                            
+                            <button class="btn-facturas btn-reabrir-factura btn-reabrir"
+                                    data-id="@Model.ComprobacionId"
+                                    data-codigo="@Model.CodigoComprobacion">
+                                <i class="fas fa-redo me-1"></i> Reabrir Todo
+                            </button>
+                            
+                            <button class="btn-facturas btn-rechazar-factura btn-rechazar"
+                                    data-id="@Model.ComprobacionId"
+                                    data-codigo="@Model.CodigoComprobacion">
+                                <i class="fas fa-times me-1"></i> Rechazar Todo
+                            </button>
+                        }
+                        else if (Model.EstadoComprobacionId == 3)
+                        {
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Comprobación validada completamente.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalDevolverGastos" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-undo me-2"></i>Devolver Gastos para Corrección
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Los gastos seleccionados serán devueltos al empleado para corrección. 
+                    El empleado recibirá una notificación por correo electrónico.
+                </div>
+                
+                <div class="mb-3">
+                    <label for="comentariosDevolucion" class="form-label">
+                        <strong>Comentarios para el empleado (requeridos):</strong>
+                        <span class="text-muted">Explique qué debe corregir en cada gasto</span>
+                    </label>
+                    <textarea class="form-control" id="comentariosDevolucion" rows="4" 
+                              placeholder="Ejemplo: 
+- Gasto de transporte: Faltó el archivo XML de la factura
+- Gasto de alimentos: El monto supera el límite autorizado
+- Gasto de hospedaje: El comprobante no es legible..."></textarea>
+                    <div class="form-text">Estos comentarios se enviarán al empleado por correo.</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">
+                        <strong>Gastos seleccionados para devolución:</strong>
+                    </label>
+                    <div id="lista-gastos-seleccionados" class="border rounded p-3" style="max-height: 200px; overflow-y: auto;"></div>
+                    <div class="form-text"><span id="contador-gastos">0</span> gastos seleccionados para devolución</div>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Importante:</strong> Los gastos que NO sean seleccionados serán <strong>aprobados automáticamente</strong>.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning" id="btn-confirmar-devolucion">
+                    <i class="fas fa-paper-plane me-1"></i> Devolver Gastos Seleccionados
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            let gastosSeleccionados = [];
+            
+            // Actualizar gastos seleccionados
+            function actualizarGastosSeleccionados() {
+                gastosSeleccionados = [];
+                $('.checkbox-gasto:checked:not(:disabled)').each(function() {
+                    gastosSeleccionados.push(parseInt($(this).val()));
+                });
+                
+                // Actualizar UI
+                $('.gasto-item').removeClass('gasto-seleccionado');
+                $('.checkbox-gasto:checked').closest('.gasto-item').addClass('gasto-seleccionado');
+            }
+            
+            // Eventos de checkboxes
+            $(document).on('change', '.checkbox-gasto', function() {
+                actualizarGastosSeleccionados();
+            });
+            
+            // Click en el item del gasto
+            $(document).on('click', '.gasto-seleccionable', function(e) {
+                if (!$(e.target).is('input') && !$(e.target).closest('a').length) {
+                    const checkbox = $(this).find('.checkbox-gasto');
+                    if (!checkbox.prop('disabled')) {
+                        checkbox.prop('checked', !checkbox.prop('checked'));
+                        checkbox.trigger('change');
+                    }
+                }
+            });
+            
+            // Botones de selección
+            $('#btn-seleccionar-todos').click(function() {
+                $('.checkbox-gasto:not(:disabled)').prop('checked', true).trigger('change');
+            });
+            
+            $('#btn-deseleccionar-todos').click(function() {
+                $('.checkbox-gasto:not(:disabled)').prop('checked', false).trigger('change');
+            });
+            
+            // Botón de devolver gastos
+            $('#btn-devolver-gastos').click(async function() {
+                // Obtener gastos que NO estén ya devueltos
+                const gastosDisponibles = $('.checkbox-gasto:not(:disabled)').map(function() {
+                    return parseInt($(this).val());
+                }).get();
+                
+                if (gastosDisponibles.length === 0) {
+                    Swal.fire({
+                        title: 'No hay gastos disponibles',
+                        text: 'Todos los gastos ya están devueltos o aprobados.',
+                        icon: 'info',
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#fd7e14',
+                        background: '#1a202c',
+                        color: '#ffffff'
+                    });
+                    return;
+                }
+                
+                if (gastosSeleccionados.length === 0) {
+                    Swal.fire({
+                        title: 'Seleccione Gastos',
+                        text: 'Debe seleccionar al menos un gasto para devolver.',
+                        icon: 'warning',
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#fd7e14',
+                        background: '#1a202c',
+                        color: '#ffffff'
+                    });
+                    return;
+                }
+                
+                try {
+                    // Obtener información de los gastos seleccionados
+                    const gastosInfo = gastosSeleccionados.map(id => {
+                        const gastoDiv = $(`.gasto-item[data-gasto-id="${id}"]`);
+                        const concepto = gastoDiv.find('.gasto-concepto').text().trim();
+                        const monto = gastoDiv.find('.gasto-monto').text().trim();
+                        return { id, concepto, monto };
+                    });
+                    
+                    // Mostrar formulario con diagnóstico
+                    const { value: formData } = await Swal.fire({
+                        title: '<h3 style="color: #ffffff; margin-bottom: 20px;">Devolver Gastos para Corrección</h3>',
+                        html: `
+                            <div style="text-align: left; color: #cbd5e0;">
+                                <div style="background: #2d3748; border: 1px solid #4a5568; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                                    <i class="fas fa-info-circle" style="color: #fd7e14; margin-right: 10px;"></i>
+                                    <span style="font-weight: 500;">Los gastos seleccionados serán devueltos al empleado para corrección.</span>
+                                </div>
+                                
+                                <div style="margin-bottom: 20px;">
+                                    <label style="font-weight: 600; display: block; margin-bottom: 10px; color: #ffffff;">
+                                        Comentarios para el empleado <span style="color: #fc8181;">*</span>
+                                    </label>
+                                    <textarea id="comentariosDevolucion" 
+                                              class="form-control" 
+                                              rows="4" 
+                                              placeholder="Explique qué debe corregir el empleado..."
+                                              style="width: 100%; padding: 12px; background: #2d3748; border: 1px solid #4a5568; border-radius: 6px; color: #ffffff; resize: vertical; font-family: inherit;"></textarea>
+                                    <div style="font-size: 13px; color: #a0aec0; margin-top: 6px;">
+                                        Estos comentarios se enviarán al empleado por correjo.
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-bottom: 20px;">
+                                    <label style="font-weight: 600; display: block; margin-bottom: 10px; color: #ffffff;">
+                                        Gastos a devolver (${gastosSeleccionados.length}):
+                                    </label>
+                                    <div style="background: #2d3748; border: 1px solid #4a5568; border-radius: 8px; padding: 16px; max-height: 200px; overflow-y: auto;">
+                                        ${gastosInfo.map(g => `
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #4a5568;">
+                                                <div style="display: flex; align-items: center;">
+                                                    <i class="fas fa-receipt" style="color: #fd7e14; margin-right: 10px; font-size: 14px;"></i>
+                                                    <span style="color: #e2e8f0;">${g.concepto}</span>
+                                                </div>
+                                                <div style="font-weight: 700; color: #48bb78;">${g.monto}</div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                
+                                <div style="background: #322659; border: 1px solid #553c9a; padding: 16px; border-radius: 8px;">
+                                    <i class="fas fa-exclamation-triangle" style="color: #d69e2e; margin-right: 10px;"></i>
+                                    <strong style="color: #e2e8f0;">Nota:</strong>
+                                    <span style="color: #cbd5e0; margin-left: 5px;">Los gastos NO seleccionados serán aprobados automáticamente.</span>
+                                </div>
+                            </div>
+                        `,
+                        background: '#1a202c',
+                        showCancelButton: true,
+                        confirmButtonText: 'Devolver Gastos',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: '#fd7e14',
+                        cancelButtonColor: '#4a5568',
+                        width: '650px',
+                        showLoaderOnConfirm: true,
+                        preConfirm: () => {
+                            const popup = Swal.getPopup();
+                            const textarea = popup.querySelector('#comentariosDevolucion');
+                            
+                            if (!textarea) {
+                                Swal.showValidationMessage('Error: No se encontró el campo de comentarios.');
+                                return false;
+                            }
+                            
+                            const comentarios = textarea.value.trim();
+                            
+                            if (!comentarios) {
+                                Swal.showValidationMessage('Debe agregar comentarios para el empleado');
+                                return false;
+                            }
+                            
+                            if (comentarios.length < 10) {
+                                Swal.showValidationMessage('Los comentarios deben tener al menos 10 caracteres (tiene ' + comentarios.length + ')');
+                                return false;
+                            }
+                            
+                            return { 
+                                comentarios: comentarios
+                            };
+                        },
+                        allowOutsideClick: () => !Swal.isLoading()
+                    });
+                    
+                    if (!formData) return;
+                    
+                    // Confirmación final
+                    const confirmResult = await Swal.fire({
+                        title: '<h3 style="color: #ffffff;">Confirmar Devolución</h3>',
+                        html: `
+                            <div style="text-align: center; color: #cbd5e0;">
+                                <div style="margin-bottom: 20px;">
+                                    <i class="fas fa-exclamation-triangle fa-3x" style="color: #fd7e14;"></i>
+                                </div>
+                                <p style="margin-bottom: 20px; font-size: 16px;">¿Está seguro de devolver <strong style="color: #ffffff;">${gastosSeleccionados.length} gastos</strong> para corrección?</p>
+                                <div style="background: #322659; border: 1px solid #553c9a; padding: 16px; border-radius: 8px; margin-top: 20px;">
+                                    <i class="fas fa-envelope" style="color: #d69e2e; margin-right: 10px;"></i>
+                                    <span style="color: #e2e8f0;">El empleado recibirá un correo con instrucciones.</span>
+                                </div>
+                            </div>
+                        `,
+                        background: '#1a202c',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, devolver',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: '#fd7e14',
+                        cancelButtonColor: '#4a5568',
+                        width: '550px'
+                    });
+                    
+                    if (!confirmResult.isConfirmed) return;
+                    
+                    // Mostrar loader
+                    Swal.fire({
+                        title: '<h3 style="color: #ffffff;">Procesando...</h3>',
+                        html: `
+                            <div style="text-align: center; color: #cbd5e0;">
+                                <div class="spinner-border" style="width: 3rem; height: 3rem; color: #fd7e14;" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                                <p style="margin-top: 20px; font-size: 16px;">Devolviendo gastos seleccionados</p>
+                            </div>
+                        `,
+                        background: '#1a202c',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        width: '450px'
+                    });
+                    
+                    // Enviar solicitud al servidor
+                    const response = await fetch('@Url.Action("ProcesarDevolucionGastos", "Finanzas")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        body: JSON.stringify({
+                            ComprobacionId: @Model.ComprobacionId,
+                            CodigoComprobacion: '@Model.CodigoComprobacion',
+                            Comentarios: formData.comentarios,
+                            GastosSeleccionados: gastosSeleccionados
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        Swal.fire({
+                            title: '<h3 style="color: #ffffff;">¡Éxito!</h3>',
+                            html: `
+                                <div style="text-align: center; color: #cbd5e0;">
+                                    <div style="margin-bottom: 20px;">
+                                        <i class="fas fa-check-circle fa-3x" style="color: #48bb78;"></i>
+                                    </div>
+                                    <p style="font-weight: 600; margin-bottom: 10px; color: #ffffff;">${result.message}</p>
+                                    <div style="background: #234e52; border: 1px solid #38a169; padding: 16px; border-radius: 8px; margin-top: 20px;">
+                                        <i class="fas fa-envelope" style="color: #38a169; margin-right: 10px;"></i>
+                                        <span>Se ha enviado un correo al empleado con las instrucciones.</span>
+                                    </div>
+                                    <div style="margin-top: 30px;">
+                                        <button onclick="location.reload()" class="btn" style="background: #fd7e14; color: #1a202c; font-weight: 600; padding: 10px 20px; margin-right: 10px; border: none; border-radius: 6px;">
+                                            <i class="fas fa-redo"></i> Actualizar Página
+                                        </button>
+                                        <a href="@Url.Action("Facturas", "Finanzas")" class="btn" style="background: #4a5568; color: #ffffff; font-weight: 600; padding: 10px 20px; border: none; border-radius: 6px; text-decoration: none;">
+                                            <i class="fas fa-list"></i> Volver al Listado
+                                        </a>
+                                    </div>
+                                </div>
+                            `,
+                            background: '#1a202c',
+                            showConfirmButton: false,
+                            width: '550px'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: '<h3 style="color: #ffffff;">Error</h3>',
+                            text: result.message || 'Ocurrió un error al procesar la devolución',
+                            icon: 'error',
+                            confirmButtonText: 'Entendido',
+                            confirmButtonColor: '#fd7e14',
+                            background: '#1a202c',
+                            color: '#ffffff'
+                        });
+                    }
+                    
+                } catch (error) {
+                    console.error('Error en devolución:', error);
+                    Swal.fire({
+                        title: '<h3 style="color: #ffffff;">Error de Conexión</h3>',
+                        text: 'No se pudo procesar la solicitud. Por favor, intente nuevamente.',
+                        icon: 'error',
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#fd7e14',
+                        background: '#1a202c',
+                        color: '#ffffff'
+                    });
+                }
+            });
+            
+            // MANTENER EL CÓDIGO EXISTENTE PARA VALIDAR, REABRIR Y RECHAZAR
+            $('.btn-validar, .btn-reabrir, .btn-rechazar').click(function() {
+                const id = $(this).data('id');
+                const codigo = $(this).data('codigo');
+                const tipo = $(this).hasClass('btn-validar') ? 'validar' :
+                             $(this).hasClass('btn-reabrir') ? 'reabrir' : 'rechazar';
+
+                let titulo = '';
+                let mensaje = '';
+
+                switch(tipo) {
+                    case 'validar':
+                        titulo = 'Validar Comprobación Completamente';
+                        mensaje = `¿Validar TODA la comprobación <strong>${codigo}</strong>?`;
+                        break;
+                    case 'reabrir':
+                        titulo = 'Reabrir Toda la Comprobación';
+                        mensaje = `¿Reabrir TODA la comprobación <strong>${codigo}</strong> para corrección del empleado?`;
+                        break;
+                    case 'rechazar':
+                        titulo = 'Rechazar Toda la Comprobación';
+                        mensaje = `¿Rechazar y eliminar TODA la comprobación <strong>${codigo}</strong>?`;
+                        break;
+                }
+
+                Swal.fire({
+                    title: titulo,
+                    html: mensaje,
+                    icon: tipo === 'rechazar' ? 'error' : 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, confirmar',
+                    cancelButtonText: 'Cancelar',
+                    input: 'textarea',
+                    inputLabel: 'Comentarios (opcional):',
+                    inputPlaceholder: 'Agregue comentarios...',
+                    background: '#1a202c',
+                    color: '#ffffff',
+                    confirmButtonColor: '#fd7e14',
+                    cancelButtonColor: '#4a5568',
+                    preConfirm: async (comentarios) => {
+                        try {
+                            let url = '';
+                            switch(tipo) {
+                                case 'validar': url = '@Url.Action("ValidarComprobacion", "Finanzas")'; break;
+                                case 'reabrir': url = '@Url.Action("ReabrirComprobacion", "Finanzas")'; break;
+                                case 'rechazar': url = '@Url.Action("RechazarComprobacion", "Finanzas")'; break;
+                            }
+
+                            const response = await fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                                },
+                                body: `id=${id}&comentarios=${encodeURIComponent(comentarios || '')}`
+                            });
+
+                            if (!response.ok) throw new Error('Error en la solicitud');
+                            return await response.json();
+                        } catch (error) {
+                            Swal.showValidationMessage(`Error: ${error.message}`);
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed && result.value) {
+                        if (result.value.success) {
+                            Swal.fire({
+                                title: '¡Éxito!',
+                                text: result.value.message,
+                                icon: 'success',
+                                confirmButtonText: 'Aceptar',
+                                confirmButtonColor: '#fd7e14',
+                                background: '#1a202c',
+                                color: '#ffffff'
+                            }).then(() => {
+                                window.location.href = '@Url.Action("Facturas", "Finanzas")';
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: result.value.message,
+                                icon: 'error',
+                                confirmButtonText: 'Entendido',
+                                confirmButtonColor: '#fd7e14',
+                                background: '#1a202c',
+                                color: '#ffffff'
+                            });
+                        }
+                    }
+                });
+            });
+            
+            // Agregar estilos minimalistas Viamtek
+            const style = document.createElement('style');
+            style.textContent = `
+                .gasto-seleccionado {
+                    border-left: 3px solid #fd7e14 !important;
+                    background-color: rgba(253, 126, 20, 0.05);
+                }
+                
+                .swal2-popup {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+                    border-radius: 12px;
+                }
+                
+                .swal2-textarea {
+                    background-color: #2d3748;
+                    border-color: #4a5568;
+                    color: #ffffff;
+                }
+                
+                .swal2-textarea:focus {
+                    border-color: #fd7e14;
+                    box-shadow: 0 0 0 3px rgba(253, 126, 20, 0.2);
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+}

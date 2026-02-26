@@ -1,0 +1,675 @@
+﻿@using SVV.ViewModels
+@model ComprobacionViewModel
+
+@{
+    ViewData["Title"] = "Comprobar Gastos - " + Model.CodigoSolicitud;
+    var categoriasGasto = ViewBag.CategoriasGasto as List<SVV.Models.CategoriasGasto>;
+}
+
+<div class="comprobacion-container">
+    <!-- Header -->
+    <div class="comprobacion-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="comprobacion-title">Comprobar Gastos</h1>
+                <p class="comprobacion-subtitle">Solicitud: @Model.CodigoSolicitud</p>
+            </div>
+            <div>
+                <a asp-action="Index" class="btn-comprobacion-secondary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i> Volver al Listado
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="alert-comprobacion alert-comprobacion-info">
+        <div class="comprobacion-card-header text-white">
+            <h6 class="card-title mb-0">
+                <i class="fas fa-info-circle me-2"></i>¿Cómo utilizar el sistema?
+            </h6>
+        </div>
+        <div class="comprobacion-card-body">
+            <!-- Lista compacta usando Bootstrap -->
+            <div class="d-flex flex-column gap-2">
+                <div class="d-flex align-items-start">
+                    <span class="badge bg-primary me-2 mt-1">1</span>
+                    <div class="flex-grow-1">
+                        <strong class="d-block">Sube el XML de la factura</strong>
+                        <small class="text-muted">El sistema validará y autocompletará los campos automáticamente</small>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-start">
+                    <span class="badge bg-primary me-2 mt-1">2</span>
+                    <div class="flex-grow-1">
+                        <strong class="d-block">Revisa y ajusta los campos</strong>
+                        <small class="text-muted">Verifica la información y modifica si es necesario</small>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-start">
+                    <span class="badge bg-primary me-2 mt-1">3</span>
+                    <div class="flex-grow-1">
+                        <strong class="d-block">Sube PDF y guarda</strong>
+                        <small class="text-muted">Adjunta el PDF y guarda el gasto</small>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-start">
+                    <span class="badge bg-primary me-2 mt-1">4</span>
+                    <div class="flex-grow-1">
+                        <strong class="d-block">Completa el informe final</strong>
+                        <small class="text-muted">Describe actividades y resultados del viaje</small>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-start">
+                    <span class="badge bg-primary me-2 mt-1">5</span>
+                    <div class="flex-grow-1">
+                        <strong class="d-block">Envía a Finanzas</strong>
+                        <small class="text-muted">Finaliza el proceso enviando la comprobación</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-warning mt-3 mb-0 p-2">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Importante:</strong> El archivo XML es obligatorio para cada gasto. El sistema validará
+                automáticamente que las facturas sean genuinas y estén a nombre de <strong>CUVITEK SOFTWARE</strong>.
+            </div>
+        </div>
+    </div>   <!-- Alertas -->
+    @if (DateTime.Now > Model.FechaLimiteComprobacion)
+    {
+        <div class="alert-comprobacion alert-comprobacion-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>¡Periodo vencido!</strong> La fecha límite para comprobar gastos ha expirado.
+        </div>
+    }
+
+    <!-- Información de la Solicitud -->
+    <div class="comprobacion-card">
+        <div class="comprobacion-card-header">
+            <h6 class="card-title">
+                <i class="fas fa-info-circle me-2"></i>Información de la Solicitud
+            </h6>
+        </div>
+        <div class="comprobacion-card-body">
+            <div class="row">
+                <div class="col-md-3 mb-2">
+                    <strong><i class="fas fa-user me-1"></i>Empleado:</strong><br>
+                    <span style="color: var(--primary-text);">@Model.EmpleadoNombre</span>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <strong><i class="fas fa-map-marker-alt me-1"></i>Destino:</strong><br>
+                    <span style="color: var(--primary-text);">@Model.Destino</span>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <strong><i class="fas fa-calendar me-1"></i>Fechas de Viaje:</strong><br>
+                    <span style="color: var(--primary-text);">@Model.FechaSalida.ToString("dd/MM/yyyy") - @Model.FechaRegreso.ToString("dd/MM/yyyy")</span>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <strong><i class="fas fa-dollar-sign me-1"></i>Anticipo Autorizado:</strong><br>
+                    <span style="color: var(--viamtek-green); font-weight: bold;">@Model.AnticipoAutorizado.ToString("C")</span>
+                </div>
+
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-6">
+                    <strong><i class="fas fa-clock me-1"></i>Fecha Límite:</strong>
+                    @{
+                        var fechaLimiteClass = DateTime.Now > Model.FechaLimiteComprobacion ? "dias-peligro" : "dias-normal";
+                    }
+                    <span class="dias-restantes @fechaLimiteClass" style="margin-left: 0.5rem; padding: 0.25rem 0.75rem;">
+                        @Model.FechaLimiteComprobacion.ToString("dd/MM/yyyy")
+                    </span>
+                </div>
+                <div class="col-md-6">
+                    <strong><i class="fas fa-receipt me-1"></i>Total Comprobado:</strong>
+                    <span class="total-comprobado" id="totalComprobado">@Model.TotalComprobado.ToString("C")</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DESGLOSE DE LA COTIZACIÓN AUTORIZADA -->
+    <div class="comprobacion-card">
+        <div class="comprobacion-card-header cotizacion-header">
+            <h6 class="card-title">
+                <i class="fas fa-file-invoice-dollar me-2"></i>Desglose de la Cotización Autorizada
+            </h6>
+        </div>
+        <div class="comprobacion-card-body">
+            @if (ViewBag.TieneCotizacion == true)
+            {
+                var cotizacion = ViewBag.Cotizacion as CotizacionesFinanzas;
+                var transportePrecios = ViewBag.TransportePrecios as List<ConceptoItemViewModel>;
+                var gasolinaPrecios = ViewBag.GasolinaPrecios as List<ConceptoItemViewModel>;
+                var uberTaxiPrecios = ViewBag.UberTaxiPrecios as List<ConceptoItemViewModel>;
+                var casetasPrecios = ViewBag.CasetasPrecios as List<ConceptoItemViewModel>;
+                var hospedajePrecios = ViewBag.HospedajePrecios as List<ConceptoItemViewModel>;
+                var alimentosPrecios = ViewBag.AlimentosPrecios as List<ConceptoItemViewModel>;
+
+                <!-- Detalles por Concepto (Acordeón) -->
+                <div class="accordion" id="cotizacionAccordion">
+                    <!-- Transporte -->
+                    @if (transportePrecios != null && transportePrecios.Count > 0)
+                    {
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="transporteHeading">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#transporteCollapse" aria-expanded="false" aria-controls="transporteCollapse">
+                                    <i class="fas fa-bus me-2"></i> Transporte - @transportePrecios.Count precio(s)
+                                    <span class="ms-auto text-success">@cotizacion.TransporteTotal.ToString("C")</span>
+                                </button>
+                            </h2>
+                            <div id="transporteCollapse" class="accordion-collapse collapse" aria-labelledby="transporteHeading"
+                                 data-bs-parent="#cotizacionAccordion">
+                                <div class="accordion-body">
+                                    <table class="table table-sm table-dark">
+                                        <thead>
+                                            <tr>
+                                                <th width="50">#</th>
+                                                <th>Descripción</th>
+                                                <th class="text-end">Precio Unitario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (int i = 0; i < transportePrecios.Count; i++)
+                                            {
+                                                var precio = transportePrecios[i];
+                                                <tr>
+                                                    <td>@(i + 1)</td>
+                                                    <td>@(precio.Descripcion ?? "Sin descripción")</td>
+                                                    <td class="text-end">@precio.Precio.ToString("C")</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Gasolina -->
+                    @if (gasolinaPrecios != null && gasolinaPrecios.Count > 0)
+                    {
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="gasolinaHeading">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#gasolinaCollapse" aria-expanded="false" aria-controls="gasolinaCollapse">
+                                    <i class="fas fa-gas-pump me-2"></i> Gasolina - @gasolinaPrecios.Count precio(s)
+                                    <span class="ms-auto text-success">@cotizacion.GasolinaTotal.ToString("C")</span>
+                                </button>
+                            </h2>
+                            <div id="gasolinaCollapse" class="accordion-collapse collapse" aria-labelledby="gasolinaHeading"
+                                 data-bs-parent="#cotizacionAccordion">
+                                <div class="accordion-body">
+                                    <table class="table table-sm table-dark">
+                                        <thead>
+                                            <tr>
+                                                <th width="50">#</th>
+                                                <th>Descripción</th>
+                                                <th class="text-end">Precio Unitario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (int i = 0; i < gasolinaPrecios.Count; i++)
+                                            {
+                                                var precio = gasolinaPrecios[i];
+                                                <tr>
+                                                    <td>@(i + 1)</td>
+                                                    <td>@(precio.Descripcion ?? "Sin descripción")</td>
+                                                    <td class="text-end">@precio.Precio.ToString("C")</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Uber/Taxi -->
+                    @if (uberTaxiPrecios != null && uberTaxiPrecios.Count > 0)
+                    {
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="ubertaxiHeading">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#ubertaxiCollapse" aria-expanded="false" aria-controls="ubertaxiCollapse">
+                                    <i class="fas fa-taxi me-2"></i> UBER / TAXI - @uberTaxiPrecios.Count precio(s)
+                                    <span class="ms-auto text-success">@cotizacion.UberTaxiTotal.ToString("C")</span>
+                                </button>
+                            </h2>
+                            <div id="ubertaxiCollapse" class="accordion-collapse collapse" aria-labelledby="ubertaxiHeading"
+                                 data-bs-parent="#cotizacionAccordion">
+                                <div class="accordion-body">
+                                    <table class="table table-sm table-dark">
+                                        <thead>
+                                            <tr>
+                                                <th width="50">#</th>
+                                                <th>Descripción</th>
+                                                <th class="text-end">Precio Unitario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (int i = 0; i < uberTaxiPrecios.Count; i++)
+                                            {
+                                                var precio = uberTaxiPrecios[i];
+                                                <tr>
+                                                    <td>@(i + 1)</td>
+                                                    <td>@(precio.Descripcion ?? "Sin descripción")</td>
+                                                    <td class="text-end">@precio.Precio.ToString("C")</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Casetas -->
+                    @if (casetasPrecios != null && casetasPrecios.Count > 0)
+                    {
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="casetasHeading">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#casetasCollapse" aria-expanded="false" aria-controls="casetasCollapse">
+                                    <i class="fas fa-road me-2"></i> Casetas - @casetasPrecios.Count precio(s)
+                                    <span class="ms-auto text-success">@cotizacion.CasetasTotal.ToString("C")</span>
+                                </button>
+                            </h2>
+                            <div id="casetasCollapse" class="accordion-collapse collapse" aria-labelledby="casetasHeading"
+                                 data-bs-parent="#cotizacionAccordion">
+                                <div class="accordion-body">
+                                    <table class="table table-sm table-dark">
+                                        <thead>
+                                            <tr>
+                                                <th width="50">#</th>
+                                                <th>Descripción</th>
+                                                <th class="text-end">Precio Unitario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (int i = 0; i < casetasPrecios.Count; i++)
+                                            {
+                                                var precio = casetasPrecios[i];
+                                                <tr>
+                                                    <td>@(i + 1)</td>
+                                                    <td>@(precio.Descripcion ?? "Sin descripción")</td>
+                                                    <td class="text-end">@precio.Precio.ToString("C")</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Hospedaje -->
+                    @if (hospedajePrecios != null && hospedajePrecios.Count > 0)
+                    {
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="hospedajeHeading">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#hospedajeCollapse" aria-expanded="false" aria-controls="hospedajeCollapse">
+                                    <i class="fas fa-hotel me-2"></i> Hospedaje - @hospedajePrecios.Count precio(s)
+                                    <span class="ms-auto text-success">@cotizacion.HospedajeTotal.ToString("C")</span>
+                                </button>
+                            </h2>
+                            <div id="hospedajeCollapse" class="accordion-collapse collapse" aria-labelledby="hospedajeHeading"
+                                 data-bs-parent="#cotizacionAccordion">
+                                <div class="accordion-body">
+                                    <table class="table table-sm table-dark">
+                                        <thead>
+                                            <tr>
+                                                <th width="50">#</th>
+                                                <th>Descripción</th>
+                                                <th class="text-end">Precio Unitario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (int i = 0; i < hospedajePrecios.Count; i++)
+                                            {
+                                                var precio = hospedajePrecios[i];
+                                                <tr>
+                                                    <td>@(i + 1)</td>
+                                                    <td>@(precio.Descripcion ?? "Sin descripción")</td>
+                                                    <td class="text-end">@precio.Precio.ToString("C")</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Alimentos -->
+                    @if (alimentosPrecios != null && alimentosPrecios.Count > 0)
+                    {
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="alimentosHeading">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#alimentosCollapse" aria-expanded="false" aria-controls="alimentosCollapse">
+                                    <i class="fas fa-utensils me-2"></i> Alimentos - @alimentosPrecios.Count precio(s)
+                                    <span class="ms-auto text-success">@cotizacion.AlimentosTotal.ToString("C")</span>
+                                </button>
+                            </h2>
+                            <div id="alimentosCollapse" class="accordion-collapse collapse" aria-labelledby="alimentosHeading"
+                                 data-bs-parent="#cotizacionAccordion">
+                                <div class="accordion-body">
+                                    <table class="table table-sm table-dark">
+                                        <thead>
+                                            <tr>
+                                                <th width="50">#</th>
+                                                <th>Descripción</th>
+                                                <th class="text-end">Precio Unitario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (int i = 0; i < alimentosPrecios.Count; i++)
+                                            {
+                                                var precio = alimentosPrecios[i];
+                                                <tr>
+                                                    <td>@(i + 1)</td>
+                                                    <td>@(precio.Descripcion ?? "Sin descripción")</td>
+                                                    <td class="text-end">@precio.Precio.ToString("C")</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- TOTAL AUTORIZADO (no es un acordeón, es un elemento fijo) -->
+                    <div class="total-autorizado-item">
+                        <div class="d-flex justify-content-between align-items-center w-100 py-3 px-4">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-file-invoice-dollar me-2 text-warning"></i>
+                                <strong class="text-white">TOTAL AUTORIZADO PARA GASTOS</strong>
+                            </div>
+                            <span class="text-warning fw-bold fs-5">@cotizacion.TotalAutorizado.ToString("C")</span>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <i class="fas fa-file-invoice-dollar fa-3x mb-3" style="color: var(--secondary-text);"></i>
+                    <h5 style="color: var(--secondary-text);">No hay cotización disponible</h5>
+                    <p style="color: var(--secondary-text);" class="mb-0">Esta solicitud no tiene una cotización aprobada asociada.</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Formulario para Agregar Gastos -->
+    <div class="comprobacion-card">
+        <div class="comprobacion-card-header">
+            <h6 class="card-title">
+                <i class="fas fa-plus-circle me-2"></i>Agregar Nuevo Gasto
+            </h6>
+        </div>
+        <div class="comprobacion-card-body">
+            <form asp-action="GuardarGasto" method="post" enctype="multipart/form-data" id="formGasto" class="needs-validation" novalidate>
+                <input type="hidden" asp-for="SolicitudId" />
+                <input type="hidden" id="fechaSalidaHidden" value="@Model.FechaSalida.ToString("yyyy-MM-dd")" />
+                <input type="hidden" id="fechaRegresoHidden" value="@Model.FechaRegreso.ToString("yyyy-MM-dd")" />
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="form-label-comprobacion">Categoría de Gasto *</label>
+                            <select id="StyleSelect" name="CategoriaGastoId" class="form-select-comprobacion" required>
+                                <option value="">Seleccione categoría</option>
+                                @if (categoriasGasto != null)
+                                {
+                                    foreach (var categoria in categoriasGasto)
+                                    {
+                                        <option value="@categoria.Id">@categoria.Nombre</option>
+                                    }
+                                }
+                            </select>
+                            <div class="invalid-feedback-comprobacion">Seleccione una categoría</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="form-label-comprobacion">Concepto *</label>
+                            <input type="text" name="Concepto" class="form-control-comprobacion" placeholder="Ej. Transporte, Alimentación..." required>
+                            <div class="invalid-feedback-comprobacion">Ingrese un concepto</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="form-label-comprobacion">Fecha Gasto *</label>
+                            <input type="date" name="FechaGasto" class="form-control-comprobacion" required>
+                            <div class="invalid-feedback-comprobacion">Seleccione fecha</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="form-label-comprobacion">Monto *</label>
+                            <input type="number" step="0.01" name="Monto" class="form-control-comprobacion" placeholder="0.00" required>
+                            <div class="invalid-feedback-comprobacion">Ingrese monto</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="form-label-comprobacion">Proveedor</label>
+                            <input type="text" name="Proveedor" class="form-control-comprobacion" placeholder="Nombre proveedor">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-2">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="form-label-comprobacion">Medio de Pago</label>
+                            <select id="StyleSelect" name="MedioPago" class="form-select-comprobacion">
+                                <option value="">Seleccione medio</option>
+                                <option value="TARJETA_CREDITO">Tarjeta Crédito</option>
+                                <option value="TARJETA_DEBITO">Tarjeta Débito</option>
+                                <option value="TRANSFERENCIA">Transferencia</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="form-label-comprobacion">Lugar del Gasto</label>
+                            <input type="text" name="LugarGasto" class="form-control-comprobacion" placeholder="Ciudad o establecimiento">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label-comprobacion">Descripción</label>
+                            <input type="text" name="Descripcion" class="form-control-comprobacion" placeholder="Descripción adicional del gasto">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- En tu comprobar.cshtml, modifica la sección de archivos -->
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="upload-area">
+                            <div class="upload-icon">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div class="upload-text">Factura PDF</div>
+                            <input type="file" name="ArchivoPDF" class="form-control-comprobacion mt-2" accept=".pdf">
+                            <div class="upload-hint">Formatos aceptados: PDF (Máx. 5MB)</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="upload-area required-xml">
+                            <div class="upload-icon">
+                                <i class="fas fa-file-code"></i>
+                            </div>
+                            <div class="upload-text">Factura XML *</div>
+                            <input type="file" name="ArchivoXML" class="form-control-comprobacion mt-2" accept=".xml" required
+                                   onchange="validarXML(this)">
+                            <div class="upload-hint">Requerido para validación SAT (Máx. 2MB)</div>
+                            <div id="xmlValidationResult" class="validation-message mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn-comprobacion-primary">
+                        <i class="fas fa-save me-1"></i> Guardar Gasto
+                    </button>
+                    <button type="reset" class="btn-comprobacion-secondary">
+                        <i class="fas fa-undo me-1"></i> Limpiar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Gastos Registrados -->
+    <div class="comprobacion-card">
+        <div class="comprobacion-card-header d-flex justify-content-between align-items-center">
+            <h6 class="card-title">
+                <i class="fas fa-list me-2"></i>Gastos Registrados
+            </h6>
+            <div class="d-flex align-items-center">
+                <span class="me-3"><strong>Total: </strong><span id="totalComprobadoHeader" style="color: var(--viamtek-green);">@Model.TotalComprobado.ToString("C")</span></span>
+                @if (Model.Gastos.Any())
+                {
+                    <form id="formEnviarFinanzas" asp-action="EnviarAFianzas" method="post" class="mb-0">
+                        <input type="hidden" name="solicitudId" value="@Model.SolicitudId" />
+                        <button type="button" class="btn-comprobacion-primary btn-sm" id="btnEnviarFinanzas">
+                            <i class="fas fa-paper-plane me-1"></i> Enviar a Finanzas
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+        <div class="comprobacion-card-body">
+            @if (Model.Gastos.Any())
+            {
+                <div class="comprobacion-table-responsive">
+                    <table class="comprobacion-table" id="tablaGastos" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Categoría</th>
+                                <th>Concepto</th>
+                                <th>Fecha</th>
+                                <th>Monto</th>
+                                <th>Proveedor</th>
+                                <th>Medio Pago</th>
+                                <th>Facturas</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var gasto in Model.Gastos)
+                            {
+                                var categoriaNombre = categoriasGasto?.FirstOrDefault(c => c.Id == gasto.CategoriaGastoId)?.Nombre ?? "N/A";
+
+                                <tr id="gasto-@gasto.Id">
+                                    <td>@categoriaNombre</td>
+                                    <td>@gasto.Concepto</td>
+                                    <td>@gasto.FechaGasto.ToString("dd/MM/yyyy")</td>
+                                    <td style="color: var(--viamtek-green); font-weight: bold;">@gasto.Monto.ToString("C")</td>
+                                    <td>@(gasto.Proveedor ?? "N/A")</td>
+                                    <td>@(gasto.MedioPago ?? "N/A")</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            @if (!string.IsNullOrEmpty(gasto.FacturaPDF))
+                                            {
+                                                <a href="~/@gasto.FacturaPDF" target="_blank" class="btn-comprobacion-secondary btn-sm"
+                                                   title="Ver PDF" data-bs-toggle="tooltip">
+                                                    <i class="fas fa-file-pdf" style="color: #dc3545;"></i>
+                                                </a>
+                                            }
+                                            @if (!string.IsNullOrEmpty(gasto.FacturaXML))
+                                            {
+                                                <a href="~/@gasto.FacturaXML" target="_blank" class="btn-comprobacion-secondary btn-sm"
+                                                   title="Ver XML" data-bs-toggle="tooltip">
+                                                    <i class="fas fa-file-code" style="color: var(--viamtek-green);"></i>
+                                                </a>
+                                            }
+                                            @if (string.IsNullOrEmpty(gasto.FacturaPDF) && string.IsNullOrEmpty(gasto.FacturaXML))
+                                            {
+                                                <span style="color: var(--secondary-text); font-size: 0.8rem;">Sin facturas</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn-comprobacion-secondary btn-sm btn-eliminar-gasto"
+                                                style="background: rgba(220, 53, 69, 0.2); border-color: #dc3545;"
+                                                title="Eliminar gasto" data-bs-toggle="tooltip"
+                                                data-gasto-id="@gasto.Id"
+                                                data-gasto-concepto="@gasto.Concepto"
+                                                data-gasto-monto="@gasto.Monto.ToString("C")">
+                                            <i class="fas fa-trash" style="color: #fc8181;"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-receipt fa-4x" style="color: var(--secondary-text); margin-bottom: 1rem;"></i>
+                    <h5 style="color: var(--secondary-text); margin-bottom: 0.5rem;">No hay gastos registrados</h5>
+                    <p style="color: var(--secondary-text);">Comienza agregando un gasto utilizando el formulario superior.</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Formulario para el Informe -->
+    <div class="comprobacion-card">
+        <div class="comprobacion-card-header">
+            <h6 class="card-title">
+                <i class="fas fa-file-alt me-2"></i>Informe de Actividades y Resultados
+            </h6>
+        </div>
+        <div class="comprobacion-card-body">
+            <form asp-action="GuardarInforme" method="post" id="formInforme">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="SolicitudId" value="@Model.SolicitudId" />
+
+                <div class="informe-section">
+                    <label asp-for="DescripcionActividades" class="informe-label">Descripción de Actividades Realizadas *</label>
+                    <textarea asp-for="DescripcionActividades" class="informe-textarea" rows="4"
+                              placeholder="Describe detalladamente las actividades que realizaste durante el viaje..." required></textarea>
+                    <div class="invalid-feedback-comprobacion">Este campo es requerido</div>
+                    <small style="color: var(--secondary-text);">Mínimo 50 caracteres</small>
+                </div>
+
+                <div class="informe-section mt-3">
+                    <label asp-for="ResultadosViaje" class="informe-label">Resultados y Logros Obtenidos *</label>
+                    <textarea asp-for="ResultadosViaje" class="informe-textarea" rows="4"
+                              placeholder="Describe los resultados, logros o beneficios obtenidos del viaje..." required></textarea>
+                    <div class="invalid-feedback-comprobacion">Este campo es requerido</div>
+                    <small style="color: var(--secondary-text);">Mínimo 30 caracteres</small>
+                </div>
+
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn-comprobacion-primary" id="btnGuardarInforme">
+                        <i class="fas fa-save me-1"></i> Guardar Informe
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/comprobaciones.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/comprobaciones.js" asp-append-version="true"></script>
+}

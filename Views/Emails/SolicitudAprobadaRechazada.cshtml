@@ -1,0 +1,173 @@
+﻿@model dynamic
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        .button {
+            background: #007bff;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 15px 0;
+        }
+
+        .details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #007bff;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .approved {
+            color: #155724;
+            background: #d4edda;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #28a745;
+        }
+
+        .rejected {
+            color: #721c24;
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 Sistema de Viáticos</h1>
+            <p>Actualización de Estado de Solicitud</p>
+        </div>
+
+        <div class="content">
+            @if (Model.Aprobada)
+            {
+                <h2>✅ ¡Solicitud Aprobada!</h2>
+                <div class="approved">
+                    <p><strong>Tu solicitud de viáticos ha sido aprobada.</strong></p>
+                    <p>Puedes proceder con los preparativos de tu viaje.</p>
+                </div>
+            }
+            else
+            {
+                <h2>❌ Solicitud Rechazada</h2>
+                <div class="rejected">
+                    <p><strong>Tu solicitud de viáticos ha sido rechazada.</strong></p>
+                    <p>Puedes revisar los detalles y contactar al aprobador si necesitas más información.</p>
+                </div>
+            }
+
+            <div class="details">
+                <p><span class="label">Número de Solicitud:</span> @Model.Solicitud.CodigoSolicitud</p>
+                <p><span class="label">Destino:</span> @Model.Solicitud.Destino</p>
+                <p><span class="label">Motivo:</span> @Model.Solicitud.Motivo</p>
+                <p>
+                    <span class="label">Fechas de Viaje:</span>
+                    Del @Model.Solicitud.FechaSalida.ToString("dd/MM/yyyy")
+                    al @Model.Solicitud.FechaRegreso.ToString("dd/MM/yyyy")
+                </p>
+                <p><span class="label">Aprobador/Rechazador:</span> @Model.Aprobador</p>
+
+                @if (!string.IsNullOrEmpty(Model.Comentarios))
+                {
+                    <p><span class="label">Comentarios:</span> @Model.Comentarios</p>
+                }
+
+                <p>
+                    <span class="label">Estado Actual:</span>
+                    @if (Model.Aprobada)
+                    {
+                        <span class="status-badge" style="background: #d4edda; color: #155724;">✅ Aprobada</span>
+                    }
+                    else
+                    {
+                        <span class="status-badge" style="background: #f8d7da; color: #721c24;">❌ Rechazada</span>
+                    }
+                </p>
+            </div>
+
+            <p>Para ver los detalles completos de la solicitud, puedes acceder al sistema mediante el siguiente enlace:</p>
+
+            <div style="text-align: center; margin: 25px 0;">
+                <a href="@Model.Url" class="button">🔍 Ver Detalles de la Solicitud</a>
+            </div>
+
+            @if (Model.Aprobada)
+            {
+                <p style="font-size: 14px; color: #666;">
+                    <strong>Próximos pasos:</strong> Tu solicitud ha sido aprobada. Si requieres anticipo, el departamento de Finanzas se pondrá en contacto contigo.
+                </p>
+            }
+            else
+            {
+                <p style="font-size: 14px; color: #666;">
+                    <strong>Nota:</strong> Puedes modificar la solicitud y volver a enviarla para aprobación, o contactar al aprobador para más detalles.
+                </p>
+            }
+        </div>
+
+        <div class="footer">
+            <p>📧 Este es un mensaje automático generado por el Sistema de Viáticos.</p>
+            <p>Por favor, no respondas a este correo.</p>
+            <p>&copy; @DateTime.Now.Year - Sistema de Viáticos | Viamtek</p>
+        </div>
+    </div>
+</body>
+</html>

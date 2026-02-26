@@ -1,0 +1,543 @@
+﻿@model SVV.ViewModels.DetallesCompletosViewModel
+@{
+    ViewData["Title"] = "Detalles Completos - " + Model.CodigoComprobacion;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Calcular duración del viaje
+    var duracionViaje = 0;
+    if (Model.FechaSalida != DateOnly.MinValue && Model.FechaRegreso != DateOnly.MinValue)
+    {
+        var salida = Model.FechaSalida.ToDateTime(TimeOnly.MinValue);
+        var regreso = Model.FechaRegreso.ToDateTime(TimeOnly.MinValue);
+        duracionViaje = (regreso - salida).Days + 1;
+    }
+}
+
+@section Styles {
+    <style>
+        .detalles-container {
+            background: #1a202c;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .seccion-detalles {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .seccion-titulo {
+            color: #5cc87b;
+            border-bottom: 2px solid #5cc87b;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .info-label {
+            color: #a0aec0;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .monto-total {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .monto-positivo {
+            color: #5cc87b;
+        }
+
+        .monto-negativo {
+            color: #fc8181;
+        }
+
+        .tabla-detalles {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+            .tabla-detalles th {
+                background: rgba(92, 200, 123, 0.1);
+                color: #5cc87b;
+                border: none;
+                padding: 12px 15px;
+            }
+
+            .tabla-detalles td {
+                color: #e2e8f0;
+                border-color: rgba(255, 255, 255, 0.1);
+                padding: 12px 15px;
+            }
+
+        .badge-estado {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .badge-pendiente {
+            background: #f6ad55;
+            color: #1a202c;
+        }
+
+        .badge-completada {
+            background: #5cc87b;
+            color: #1a202c;
+        }
+
+        .badge-validada {
+            background: #63b3ed;
+            color: #1a202c;
+        }
+
+        .badge-aprobada {
+            background: #68d391;
+            color: #1a202c;
+        }
+
+        .badge-rechazada {
+            background: #fc8181;
+            color: #1a202c;
+        }
+    </style>
+}
+
+<div class="detalles-container">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="text-white mb-1">
+                <i class="fas fa-file-alt me-2"></i>Detalles Completos
+            </h1>
+            <p class="text-muted mb-0">
+                Información consolidada de solicitud, comprobación y cotización
+            </p>
+        </div>
+        <div class="btn-group">
+            <a asp-action="Reportes" asp-controller="Finanzas" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Volver a Reportes
+            </a>
+            <button class="btn btn-primary" onclick="window.print()">
+                <i class="fas fa-print me-2"></i> Imprimir
+            </button>
+        </div>
+    </div>
+
+    <!-- Códigos de referencia -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="seccion-detalles text-center">
+                <div class="info-label">Código Solicitud</div>
+                <div class="info-value h4 text-primary">@Model.CodigoSolicitud</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="seccion-detalles text-center">
+                <div class="info-label">Código Comprobación</div>
+                <div class="info-value h4 text-success">@Model.CodigoComprobacion</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="seccion-detalles text-center">
+                <div class="info-label">Código Cotización</div>
+                <div class="info-value h4 text-warning">
+                    @(string.IsNullOrEmpty(Model.CodigoCotizacion) ? "No aplica" : Model.CodigoCotizacion)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INFORMACIÓN GENERAL -->
+    <div class="seccion-detalles">
+        <h3 class="seccion-titulo">
+            <i class="fas fa-info-circle me-2"></i>Información General
+        </h3>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Empleado</div>
+                <div class="info-value">@Model.EmpleadoNombre</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Departamento</div>
+                <div class="info-value">@Model.Departamento</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Proyecto</div>
+                <div class="info-value">@Model.Proyecto</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Destino</div>
+                <div class="info-value">@Model.Destino</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Tipo de Viático</div>
+                <div class="info-value">@Model.TipoViatico</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Duración del Viaje</div>
+                <div class="info-value">@duracionViaje días</div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Periodo del Viaje</div>
+                    <div class="info-value">
+                        @Model.FechaSalida.ToString("dd/MM/yyyy") al @Model.FechaRegreso.ToString("dd/MM/yyyy")
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Motivo del Viaje</div>
+                    <div class="info-value">@Model.Motivo</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESUMEN FINANCIERO -->
+    <div class="seccion-detalles">
+        <h3 class="seccion-titulo">
+            <i class="fas fa-calculator me-2"></i>Resumen Financiero
+        </h3>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="info-item text-center">
+                    <div class="info-label">Total Anticipo</div>
+                    <div class="info-value monto-total">@Model.TotalAnticipo.ToString("C")</div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="info-item text-center">
+                    <div class="info-label">Total Gastado</div>
+                    <div class="info-value monto-total">@Model.TotalGastosComprobados.ToString("C")</div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="info-item text-center">
+                    <div class="info-label">Diferencia</div>
+                    <div class="info-value monto-total @(Model.Diferencia >= 0 ? "monto-positivo" : "monto-negativo")">
+                        @Model.Diferencia.ToString("C")
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Estado Solicitud</div>
+                    <div class="info-value">
+                        @if (Model.EstadoSolicitud == "PENDIENTE")
+                        {
+                            <span class="badge-estado badge-pendiente">@Model.EstadoSolicitud</span>
+                        }
+                        else if (Model.EstadoSolicitud == "APROBADA")
+                        {
+                            <span class="badge-estado badge-aprobada">@Model.EstadoSolicitud</span>
+                        }
+                        else if (Model.EstadoSolicitud == "COMPLETADA")
+                        {
+                            <span class="badge-estado badge-completada">@Model.EstadoSolicitud</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">@Model.EstadoSolicitud</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Estado Comprobación</div>
+                    <div class="info-value">
+                        @if (Model.EstadoComprobacion == "PENDIENTE")
+                        {
+                            <span class="badge-estado badge-pendiente">@Model.EstadoComprobacion</span>
+                        }
+                        else if (Model.EstadoComprobacion == "VALIDADA")
+                        {
+                            <span class="badge-estado badge-validada">@Model.EstadoComprobacion</span>
+                        }
+                        else if (Model.EstadoComprobacion == "COMPLETADA")
+                        {
+                            <span class="badge-estado badge-completada">@Model.EstadoComprobacion</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">@Model.EstadoComprobacion</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.EscenarioLiquidacion))
+        {
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="info-item">
+                        <div class="info-label">Escenario de Liquidación</div>
+                        <div class="info-value">@Model.EscenarioLiquidacion</div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- ANTICIPOS -->
+    @if (Model.Anticipos.Any())
+    {
+        <div class="seccion-detalles">
+            <h3 class="seccion-titulo">
+                <i class="fas fa-money-bill-wave me-2"></i>Anticipos Solicitados
+            </h3>
+
+            <div class="table-responsive">
+                <table class="table tabla-detalles">
+                    <thead>
+                        <tr>
+                            <th>Código Anticipo</th>
+                            <th class="text-end">Monto Solicitado</th>
+                            <th class="text-end">Monto Autorizado</th>
+                            <th>Estado</th>
+                            <th>Fecha Solicitud</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var anticipo in Model.Anticipos)
+                        {
+                            <tr>
+                                <td>@anticipo.CodigoAnticipo</td>
+                                <td class="text-end">@anticipo.MontoSolicitado.ToString("C")</td>
+                                <td class="text-end">@anticipo.MontoAutorizado.ToString("C")</td>
+                                <td>
+                                    @if (anticipo.Estado == "APROBADO")
+                                    {
+                                        <span class="badge bg-success">@anticipo.Estado</span>
+                                    }
+                                    else if (anticipo.Estado == "PENDIENTE")
+                                    {
+                                        <span class="badge bg-warning">@anticipo.Estado</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">@anticipo.Estado</span>
+                                    }
+                                </td>
+                                <td>@anticipo.FechaSolicitud.ToString("dd/MM/yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2" class="text-end"><strong>Total Solicitado:</strong></td>
+                            <td class="text-end"><strong>@Model.Anticipos.Sum(a => a.MontoSolicitado).ToString("C")</strong></td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    }
+
+    <!-- GASTOS REALES -->
+    @if (Model.Gastos.Any())
+    {
+        <div class="seccion-detalles">
+            <h3 class="seccion-titulo">
+                <i class="fas fa-receipt me-2"></i>Gastos Reales
+            </h3>
+
+            <div class="table-responsive">
+                <table class="table tabla-detalles">
+                    <thead>
+                        <tr>
+                            <th>Concepto</th>
+                            <th>Categoría</th>
+                            <th class="text-end">Monto</th>
+                            <th>Fecha</th>
+                            <th>Proveedor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var gasto in Model.Gastos)
+                        {
+                            <tr>
+                                <td>@gasto.Concepto</td>
+                                <td>@gasto.Categoria</td>
+                                <td class="text-end">@gasto.Monto.ToString("C")</td>
+                                <td>@gasto.FechaGasto.ToString("dd/MM/yyyy")</td>
+                                <td>@gasto.Proveedor</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2" class="text-end"><strong>Total Gastado:</strong></td>
+                            <td class="text-end"><strong>@Model.Gastos.Sum(g => g.Monto).ToString("C")</strong></td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    }
+
+    <!-- INFORMACIÓN DE COTIZACIÓN -->
+    @if (!string.IsNullOrEmpty(Model.CodigoCotizacion))
+    {
+        <div class="seccion-detalles">
+            <h3 class="seccion-titulo">
+                <i class="fas fa-file-invoice-dollar me-2"></i>Información de Cotización
+            </h3>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Código Cotización</div>
+                    <div class="info-value">@Model.CodigoCotizacion</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Total Autorizado</div>
+                    <div class="info-value">@Model.TotalAutorizadoCotizacion.ToString("C")</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Estado Cotización</div>
+                    <div class="info-value">@Model.EstadoCotizacion</div>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <a asp-action="DetallesCotizacion" asp-controller="Finanzas"
+                   asp-route-id="@Model.CotizacionId"
+                   class="btn btn-outline-warning">
+                    <i class="fas fa-external-link-alt me-2"></i>Ver detalles completos de cotización
+                </a>
+            </div>
+        </div>
+    }
+
+    <!-- DESCRIPCIÓN Y RESULTADOS -->
+    @if (!string.IsNullOrEmpty(Model.DescripcionActividades) || !string.IsNullOrEmpty(Model.ResultadosViaje))
+    {
+        <div class="seccion-detalles">
+            <h3 class="seccion-titulo">
+                <i class="fas fa-clipboard-list me-2"></i>Informe del Viaje
+            </h3>
+
+            <div class="row">
+                @if (!string.IsNullOrEmpty(Model.DescripcionActividades))
+                {
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Descripción de Actividades</div>
+                            <div class="info-value">@Html.Raw(Model.DescripcionActividades.Replace("\n", "<br>"))</div>
+                        </div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.ResultadosViaje))
+                {
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Resultados del Viaje</div>
+                            <div class="info-value">@Html.Raw(Model.ResultadosViaje.Replace("\n", "<br>"))</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- BOTONES DE ACCIÓN -->
+    <div class="seccion-detalles">
+        <h3 class="seccion-titulo">
+            <i class="fas fa-external-link-alt me-2"></i>Acceso Rápido a Vistas Detalladas
+        </h3>
+
+        <div class="row text-center">
+            <div class="col-md-4 mb-3">
+                <a asp-action="Detalles" asp-controller="Solicitudes" asp-route-id="@Model.SolicitudId"
+                   class="btn btn-primary w-100 py-3">
+                    <i class="fas fa-file-alt fa-2x mb-2"></i><br>
+                    <strong>Ver Solicitud de Viaje</strong><br>
+                    <small>@Model.CodigoSolicitud</small>
+                </a>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <a asp-action="DetallesFactura" asp-controller="Finanzas" asp-route-id="@Model.ComprobacionId"
+                   class="btn btn-success w-100 py-3">
+                    <i class="fas fa-receipt fa-2x mb-2"></i><br>
+                    <strong>Ver Comprobación de Gastos</strong><br>
+                    <small>@Model.CodigoComprobacion</small>
+                </a>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.CodigoCotizacion))
+            {
+                <div class="col-md-4 mb-3">
+                    <a asp-action="DetallesCotizacion" asp-controller="Finanzas" asp-route-id="@Model.CotizacionId"
+                       class="btn btn-warning w-100 py-3">
+                        <i class="fas fa-file-invoice-dollar fa-2x mb-2"></i><br>
+                        <strong>Ver Cotización</strong><br>
+                        <small>@Model.CodigoCotizacion</small>
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="col-md-4 mb-3">
+                    <div class="btn btn-secondary w-100 py-3" disabled>
+                        <i class="fas fa-times-circle fa-2x mb-2"></i><br>
+                        <strong>Sin Cotización</strong><br>
+                        <small>No aplica</small>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>, 

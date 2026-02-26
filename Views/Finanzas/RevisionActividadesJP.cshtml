@@ -1,0 +1,946 @@
+﻿@model IEnumerable<SVV.Models.ComprobacionesViaje>
+
+@{
+    ViewData["Title"] = "Revisión de Actividades";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Agregar referencia al CSS -->
+@section Styles {
+    <link rel="stylesheet" href="~/css/revision-actividades-jp.css" />
+}
+
+<div class="revision-container">
+    <!-- Encabezado -->
+    <div class="revision-header">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h1 class="revision-title">Revisión de Actividades de Viaje</h1>
+                <p class="revision-subtitle"> Gestión de comprobaciones</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-warning text-white p-2">
+                    <i class="fas fa-clipboard-check me-1"></i>
+                    Rol: Autorizador/Jefe Directo
+                </span>
+                <button class="btn btn-primary" onclick="location.reload()">
+                    <i class="fas fa-sync-alt me-1"></i>Actualizar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="estadisticas-revision">
+        <div class="estadistica-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="estadistica-icono">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="ms-3">
+                        <div class="estadistica-texto">Pendientes de Revisión</div>
+                        <div class="estadistica-numero" id="contadorPendientes">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="estadistica-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="estadistica-icono">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="ms-3">
+                        <div class="estadistica-texto">En Mi Departamento</div>
+                        <div class="estadistica-numero" id="contadorDepartamento">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="estadistica-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="estadistica-icono">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="ms-3">
+                        <div class="estadistica-texto">Revisadas Hoy</div>
+                        <div class="estadistica-numero" id="contadorHoy">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="estadistica-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="estadistica-icono">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="ms-3">
+                        <div class="estadistica-texto">Total Actividades</div>
+                        <div class="estadistica-numero" id="totalActividades">@Model?.Count()</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card-filtros">
+        <div class="card-header">
+            <h6 class="card-title m-0">
+                <i class="fas fa-filter me-2"></i>Filtros de Revisión
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Empleado</label>
+                    <select id="filtroEmpleado" class="form-select">
+                        <option value="">Todos los empleados</option>
+                        @if (Model != null)
+                        {
+                            var empleados = Model.Select(c => c.SolicitudViaje?.Empleado)
+                            .Where(e => e != null)
+                            .DistinctBy(e => e.Id)
+                            .OrderBy(e => e.Nombre);
+                            foreach (var emp in empleados)
+                            {
+                                <option value="@emp.Id">@emp.Nombre @emp.Apellidos</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Proyecto</label>
+                    <select id="filtroProyecto" class="form-select">
+                        <option value="">Todos los proyectos</option>
+                        @if (Model != null)
+                        {
+                            var proyectos = Model.Select(c => c.SolicitudViaje?.NombreProyecto)
+                            .Where(p => !string.IsNullOrEmpty(p))
+                            .Distinct()
+                            .OrderBy(p => p);
+                            foreach (var proyecto in proyectos)
+                            {
+                                <option value="@proyecto">@proyecto</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Prioridad</label>
+                    <select id="filtroPrioridad" class="form-select">
+                        <option value="">Todas</option>
+                        <option value="alta">Alta</option>
+                        <option value="media">Media</option>
+                        <option value="baja">Baja</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button id="btnAplicarFiltros" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-1"></i>Aplicar Filtros
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla principal -->
+    <div class="card-tabla">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="card-title m-0">
+                    <i class="fas fa-list-check me-2"></i>Actividades Pendientes de Revisión
+                </h6>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-revision" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Empleado</th>
+                            <th>Solicitud</th>
+                            <th>Actividades</th>
+                            <th>Resultados</th>
+                            <th>Diferencia</th>
+                            <th>Fecha Viaje</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var comprobacion in Model)
+                            {
+                                <tr data-empleado="@comprobacion.SolicitudViaje?.EmpleadoId"
+                                    data-proyecto="@comprobacion.SolicitudViaje?.NombreProyecto"
+                                    data-departamento="@comprobacion.SolicitudViaje?.Empleado?.Departamento">
+                                    <td>@comprobacion.Id</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm me-2">
+                                                <div class="avatar-title bg-primary rounded-circle text-white">
+                                                    @comprobacion.SolicitudViaje?.Empleado?.Nombre?.Substring(0, 1)@comprobacion.SolicitudViaje?.Empleado?.Apellidos?.Substring(0, 1)
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <strong>@comprobacion.SolicitudViaje?.Empleado?.Nombre @comprobacion.SolicitudViaje?.Empleado?.Apellidos</strong><br>
+                                                <small class="text-muted">@comprobacion.SolicitudViaje?.Empleado?.Departamento</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a asp-controller="Solicitudes" asp-action="Detalles" asp-route-id="@comprobacion.SolicitudViajeId" target="_blank" class="text-decoration-none">
+                                            @comprobacion.SolicitudViaje?.CodigoSolicitud
+                                        </a><br>
+                                        <small class="text-muted">@comprobacion.SolicitudViaje?.NombreProyecto</small>
+                                    </td>
+                                    <td>
+                                        <div class="actividades-resumen">
+                                            @if (!string.IsNullOrEmpty(comprobacion.DescripcionActividades))
+                                            {
+                                                var actividades = comprobacion.DescripcionActividades.Length > 100 ?
+                                                comprobacion.DescripcionActividades.Substring(0, 100) + "..." :
+                                                comprobacion.DescripcionActividades;
+                                                <span>@actividades</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Sin descripción</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="resultados-resumen">
+                                            @if (!string.IsNullOrEmpty(comprobacion.ResultadosViaje))
+                                            {
+                                                var resultados = comprobacion.ResultadosViaje.Length > 100 ?
+                                                comprobacion.ResultadosViaje.Substring(0, 100) + "..." :
+                                                comprobacion.ResultadosViaje;
+                                                <span>@resultados</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Sin resultados</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        @{
+                                            var diferencia = comprobacion.Diferencia ?? 0;
+                                            var claseDiferencia = diferencia > 0 ? "diferencia-positiva" :
+                                            diferencia < 0 ? "diferencia-negativa" : "diferencia-cero";
+                                        }
+                                        <span class="@claseDiferencia fw-bold">
+                                            @diferencia.ToString("C")
+                                        </span>
+                                        <br>
+                                        <small class="text-muted">
+                                            @if (diferencia > 0)
+                                            {
+                                                <span>Falta pagar</span>
+                                            }
+                                            else if (diferencia < 0)
+                                            {
+                                                <span>Reintegrar</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Saldada</span>
+                                            }
+                                        </small>
+                                    </td>
+                                    <td>
+                                        @if (comprobacion.SolicitudViaje?.FechaSalida != null && comprobacion.SolicitudViaje?.FechaRegreso != null)
+                                        {
+                                            <div>
+                                                <small><strong>Inicio:</strong> @comprobacion.SolicitudViaje.FechaSalida.ToString("dd/MM/yyyy")</small><br>
+                                                <small><strong>Fin:</strong> @comprobacion.SolicitudViaje.FechaRegreso.ToString("dd/MM/yyyy")</small>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">N/A</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (comprobacion.EstadoComprobacion != null)
+                                        {
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-clock me-1"></i>@comprobacion.EstadoComprobacion.Codigo
+                                            </span>
+                                            <br>
+                                            <small class="text-muted">
+                                                @if (comprobacion.RequiereAprobacionJefe == true)
+                                                {
+                                                    <i class="fas fa-exclamation-circle text-warning me-1"></i>
+                                                    <span>Requiere aprobación</span>
+                                                }
+                                            </small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-primary btn-revisar" data-id="@comprobacion.Id">
+                                                <i class="fas fa-search me-1"></i>Revisar
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="9" class="text-center">
+                                    <div class="py-5">
+                                        <i class="fas fa-clipboard-check fa-3x text-gray-300 mb-3"></i>
+                                        <h5 class="text-gray-500">No hay actividades pendientes de revisión</h5>
+                                        <p class="text-muted">Todas las comprobaciones han sido revisadas.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de revisiones -->
+    <div class="card-tabla">
+        <div class="card-header">
+            <h6 class="card-title m-0">
+                <i class="fas fa-history me-2"></i>Mis Revisiones Recientes
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="timeline" id="historialRevisiones">
+                <div class="text-center py-3">
+                    <i class="fas fa-spinner fa-spin me-2"></i>Cargando historial...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de revisión -->
+<div class="modal fade" id="modalRevision" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-search me-2"></i>Revisión de Actividades
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="revisionContenido">
+                Cargando...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-danger" id="btnRechazarRevision">
+                    <i class="fas fa-times me-1"></i>Solicitar Correcciones
+                </button>
+                <button type="button" class="btn btn-success" id="btnAprobarRevision">
+                    <i class="fas fa-check me-1"></i>Aprobar Actividades
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para solicitar correcciones -->
+<div class="modal fade" id="modalCorrecciones" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Solicitar Correcciones
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="comentariosCorreccion" class="form-label">Comentarios/Correcciones requeridas:</label>
+                    <textarea class="form-control" id="comentariosCorreccion" rows="4"
+                              placeholder="Describe qué correcciones o ajustes son necesarios..."></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tipo de corrección:</label>
+                    <select class="form-select" id="tipoCorreccion">
+                        <option value="ACTIVIDADES">Actividades mal descritas</option>
+                        <option value="RESULTADOS">Resultados incompletos</option>
+                        <option value="EVIDENCIAS">Falta de evidencias</option>
+                        <option value="OTRO">Otro</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnEnviarCorrecciones">Enviar Correcciones</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let comprobacionActualId = null;
+
+        $(document).ready(function() {
+            console.log('=== REVISION JP JS INICIALIZADO ===');
+            actualizarEstadisticas();
+            cargarHistorialRevisiones();
+            inicializarEventListeners();
+        });
+
+        function inicializarEventListeners() {
+            $('#btnAplicarFiltros').click(function() {
+                aplicarFiltros();
+            });
+
+            // Usar delegación de eventos para botones dinámicos
+            $(document).on('click', '.btn-revisar', function() {
+                comprobacionActualId = $(this).data('id');
+                cargarRevision(comprobacionActualId);
+            });
+
+            $('#btnAprobarRevision').click(function() {
+                if (comprobacionActualId) {
+                    aprobarRevision(comprobacionActualId);
+                } else {
+                    mostrarError('No hay comprobación seleccionada');
+                }
+            });
+
+            $('#btnRechazarRevision').click(function() {
+                $('#modalRevision').modal('hide');
+                $('#modalCorrecciones').modal('show');
+            });
+
+            $('#btnEnviarCorrecciones').click(function() {
+                if (comprobacionActualId) {
+                    enviarCorrecciones(comprobacionActualId);
+                } else {
+                    mostrarError('No hay comprobación seleccionada');
+                }
+            });
+
+            // Limpiar campos al cerrar modal de correcciones
+            $('#modalCorrecciones').on('hidden.bs.modal', function() {
+                $('#comentariosCorreccion').val('');
+                $('#tipoCorreccion').val('ACTIVIDADES');
+            });
+        }
+
+        function actualizarEstadisticas() {
+            try {
+                var totalPendientes = 0;
+                var enMiDepartamento = 0;
+                var revisadasHoy = 0;
+                var hoy = new Date().toLocaleDateString();
+
+                $('tbody tr').each(function() {
+                    var estadoBadge = $(this).find('.badge').text().trim();
+                    var fechaCelda = $(this).find('td').eq(6).text();
+
+                    if (estadoBadge.includes('EN_REVISION_JP')) {
+                        totalPendientes++;
+                    }
+
+                    // Contar revisiones de hoy
+                    if (fechaCelda.includes(hoy)) {
+                        revisadasHoy++;
+                    }
+                });
+
+                $('#contadorPendientes').text(totalPendientes);
+                $('#contadorDepartamento').text(enMiDepartamento);
+                $('#contadorHoy').text(revisadasHoy);
+                $('#totalActividades').text($('tbody tr').length);
+
+                console.log('Estadísticas actualizadas:', {
+                    pendientes: totalPendientes,
+                    hoy: revisadasHoy,
+                    total: $('tbody tr').length
+                });
+            } catch (error) {
+                console.error('Error al actualizar estadísticas:', error);
+            }
+        }
+
+        function aplicarFiltros() {
+            try {
+                var filtroEmpleado = $('#filtroEmpleado').val();
+                var filtroProyecto = $('#filtroProyecto').val();
+                var filtroPrioridad = $('#filtroPrioridad').val();
+                var visibleCount = 0;
+
+                $('tbody tr').each(function() {
+                    var mostrar = true;
+                    var empleado = $(this).data('empleado');
+                    var proyecto = $(this).data('proyecto');
+                    var prioridad = $(this).find('.badge').text().toLowerCase();
+
+                    if (filtroEmpleado && empleado != filtroEmpleado) {
+                        mostrar = false;
+                    }
+
+                    if (filtroProyecto && proyecto != filtroProyecto) {
+                        mostrar = false;
+                    }
+
+                    if (filtroPrioridad && !prioridad.includes(filtroPrioridad.toLowerCase())) {
+                        mostrar = false;
+                    }
+
+                    if (mostrar) {
+                        $(this).show();
+                        visibleCount++;
+                    } else {
+                        $(this).hide();
+                    }
+                });
+
+                // Actualizar contador
+                $('#totalActividades').text(visibleCount);
+
+                mostrarMensaje('success', `Mostrando ${visibleCount} de ${$('tbody tr').length} comprobaciones`);
+            } catch (error) {
+                console.error('Error al aplicar filtros:', error);
+            }
+        }
+
+        function cargarRevision(id) {
+            mostrarLoading('Cargando detalles de la comprobación...');
+
+            $.ajax({
+                url: '/Finanzas/CargarRevisionJP',
+                type: 'GET',
+                data: { id: id },
+                success: function(data) {
+                    Swal.close();
+                    $('#revisionContenido').html(data);
+                    $('#modalRevision').modal('show');
+
+                    // Activar tooltips dentro del modal
+                    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                        return new bootstrap.Tooltip(tooltipTriggerEl);
+                    });
+
+                    console.log('Revisión cargada para ID:', id);
+                },
+                error: function(xhr) {
+                    Swal.close();
+
+                    let errorMessage = 'Error al cargar la revisión';
+                    if (xhr.status === 404) {
+                        errorMessage = 'La comprobación no fue encontrada.';
+                    } else if (xhr.status === 403) {
+                        errorMessage = 'No tienes permisos para ver esta revisión.';
+                    }
+
+                    $('#revisionContenido').html(`
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            ${errorMessage}
+                        </div>
+                    `);
+                    $('#modalRevision').modal('show');
+
+                    console.error('Error cargando revisión:', {
+                        status: xhr.status,
+                        statusText: xhr.statusText
+                    });
+                }
+            });
+        }
+
+        function cargarHistorialRevisiones() {
+            $.ajax({
+                url: '/Finanzas/ObtenerHistorialRevisiones',
+                type: 'GET',
+                success: function(data) {
+                    $('#historialRevisiones').html(data);
+                },
+                error: function(xhr) {
+                    $('#historialRevisiones').html(`
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Error al cargar historial de revisiones
+                        </div>
+                    `);
+                }
+            });
+        }
+
+        function aprobarRevision(id) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            Swal.fire({
+                title: '¿Aprobar actividades?',
+                html: '<div class="text-start">' +
+                      '<p>Esta acción aprobará las actividades y resultados reportados.</p>' +
+                      '<p>La comprobación será enviada a Finanzas para procesar el pago/reintegro.</p>' +
+                      '<p>¿Deseas continuar?</p>' +
+                      '</div>',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, aprobar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: 'var(--viamtek-green)',
+                cancelButtonColor: '#6c757d',
+                background: 'var(--card-bg)',
+                color: 'var(--primary-text)',
+                customClass: {
+                    popup: 'sweetalert-dark',
+                    confirmButton: 'btn-sweet-confirm',
+                    cancelButton: 'btn-sweet-cancel'
+                },
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    mostrarLoading('Procesando aprobación...');
+
+                    $.ajax({
+                        url: '/Finanzas/AprobarRevisionJP',
+                        type: 'POST',
+                        headers: {
+                            'RequestVerificationToken': token
+                        },
+                        data: {
+                            id: id,
+                            __RequestVerificationToken: token
+                        },
+                        success: function(response) {
+                            Swal.close();
+
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: '¡Aprobado!',
+                                    html: `
+                                        <div class="text-start">
+                                            <p>${response.message}</p>
+                                            <div style="background: rgba(16, 185, 129, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                                                <strong>Estado actualizado:</strong> APROBADO_JD<br>
+                                                <strong>Próximo paso:</strong> Finanzas procesará el pago<br>
+                                                <small class="text-muted">Se ha notificado al departamento de Finanzas</small>
+                                            </div>
+                                        </div>
+                                    `,
+                                    confirmButtonText: 'Continuar',
+                                    confirmButtonColor: 'var(--viamtek-green)',
+                                    background: 'var(--card-bg)',
+                                    color: 'var(--primary-text)',
+                                    customClass: {
+                                        popup: 'sweetalert-dark',
+                                        confirmButton: 'btn-sweet-confirm'
+                                    },
+                                    timer: 3000,
+                                    timerProgressBar: true,
+                                    willClose: () => {
+                                        $('#modalRevision').modal('hide');
+                                        location.reload();
+                                    }
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: response.message,
+                                    icon: 'error',
+                                    confirmButtonText: 'Reintentar',
+                                    confirmButtonColor: '#e74c3c',
+                                    background: 'var(--card-bg)',
+                                    color: 'var(--primary-text)',
+                                    customClass: {
+                                        popup: 'sweetalert-dark',
+                                        confirmButton: 'btn-sweet-danger'
+                                    }
+                                });
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.close();
+
+                            let errorMessage = 'Error al procesar la solicitud';
+
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMessage = xhr.responseJSON.message;
+                            } else if (xhr.status === 500) {
+                                errorMessage = 'Error interno del servidor. Por favor, contacta a soporte.';
+                            } else if (xhr.status === 404) {
+                                errorMessage = 'El recurso solicitado no fue encontrado.';
+                            } else if (xhr.status === 403) {
+                                errorMessage = 'No tienes permisos para realizar esta acción.';
+                            }
+
+                            Swal.fire({
+                                title: 'Error del Sistema',
+                                html: `
+                                    <div class="text-start">
+                                        <p>${errorMessage}</p>
+                                        <div style="background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                                            <strong>Detalles técnicos:</strong><br>
+                                            <small>Estado: ${xhr.status} ${xhr.statusText}</small><br>
+                                            <small>Error: ${error}</small>
+                                        </div>
+                                        <small class="text-warning">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            Si el error persiste, contacta al equipo de soporte.
+                                        </small>
+                                    </div>
+                                `,
+                                icon: 'error',
+                                confirmButtonText: 'Entendido',
+                                confirmButtonColor: '#e74c3c',
+                                background: 'var(--card-bg)',
+                                color: 'var(--primary-text)',
+                                customClass: {
+                                    popup: 'sweetalert-dark',
+                                    confirmButton: 'btn-sweet-danger'
+                                },
+                                showClass: {
+                                    popup: 'animate__animated animate__shakeX'
+                                }
+                            });
+
+                            console.error('Error en aprobarRevision:', {
+                                status: xhr.status,
+                                statusText: xhr.statusText,
+                                response: xhr.responseText,
+                                error: error
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function enviarCorrecciones(id) {
+            var comentarios = $('#comentariosCorreccion').val();
+            var tipoCorreccion = $('#tipoCorreccion').val();
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            if (!comentarios.trim()) {
+                Swal.fire({
+                    title: 'Advertencia',
+                    text: 'Por favor ingresa los comentarios de corrección.',
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: 'var(--viamtek-green)',
+                    background: 'var(--card-bg)',
+                    color: 'var(--primary-text)',
+                    customClass: {
+                        popup: 'sweetalert-dark',
+                        confirmButton: 'btn-sweet-confirm'
+                    }
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: '¿Enviar correcciones?',
+                html: '<div class="text-start">' +
+                      '<p>La comprobación será devuelta al empleado para correcciones.</p>' +
+                      '<p>¿Deseas continuar?</p>' +
+                      '</div>',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, enviar correcciones',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#6c757d',
+                background: 'var(--card-bg)',
+                color: 'var(--primary-text)',
+                customClass: {
+                    popup: 'sweetalert-dark',
+                    confirmButton: 'btn-sweet-danger',
+                    cancelButton: 'btn-sweet-cancel'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    mostrarLoading('Enviando correcciones...');
+
+                    $.ajax({
+                        url: '/Finanzas/RechazarRevisionJP',
+                        type: 'POST',
+                        headers: {
+                            'RequestVerificationToken': token
+                        },
+                        data: {
+                            id: id,
+                            comentarios: comentarios,
+                            tipoCorreccion: tipoCorreccion,
+                            __RequestVerificationToken: token
+                        },
+                        success: function(response) {
+                            Swal.close();
+
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: '¡Correcciones enviadas!',
+                                    html: `
+                                        <div class="text-start">
+                                            <p>${response.message}</p>
+                                            <div style="background: rgba(16, 185, 129, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                                                <strong>Estado actualizado:</strong> RECHAZADO_JD<br>
+                                                <strong>Acción:</strong> Empleado recibirá notificación para corregir<br>
+                                                <small class="text-muted">Se ha enviado notificación al empleado</small>
+                                            </div>
+                                        </div>
+                                    `,
+                                    confirmButtonText: 'Continuar',
+                                    confirmButtonColor: 'var(--viamtek-green)',
+                                    background: 'var(--card-bg)',
+                                    color: 'var(--primary-text)',
+                                    customClass: {
+                                        popup: 'sweetalert-dark',
+                                        confirmButton: 'btn-sweet-confirm'
+                                    },
+                                    timer: 3000,
+                                    timerProgressBar: true,
+                                    willClose: () => {
+                                        $('#modalCorrecciones').modal('hide');
+                                        location.reload();
+                                    }
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: response.message,
+                                    icon: 'error',
+                                    confirmButtonText: 'Reintentar',
+                                    confirmButtonColor: '#e74c3c',
+                                    background: 'var(--card-bg)',
+                                    color: 'var(--primary-text)',
+                                    customClass: {
+                                        popup: 'sweetalert-dark',
+                                        confirmButton: 'btn-sweet-danger'
+                                    }
+                                });
+                            }
+                        },
+                        error: function(xhr) {
+                            Swal.close();
+
+                            let errorMessage = 'Error al procesar la solicitud';
+                            if (xhr.status === 500) {
+                                errorMessage = 'Error interno del servidor.';
+                            }
+
+                            Swal.fire({
+                                title: 'Error',
+                                text: errorMessage,
+                                icon: 'error',
+                                confirmButtonText: 'Entendido',
+                                confirmButtonColor: '#e74c3c',
+                                background: 'var(--card-bg)',
+                                color: 'var(--primary-text)',
+                                customClass: {
+                                    popup: 'sweetalert-dark',
+                                    confirmButton: 'btn-sweet-danger'
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        // FUNCIONES DE UTILIDAD
+        function mostrarLoading(mensaje) {
+            Swal.fire({
+                title: mensaje,
+                html: `
+                    <div class="text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--viamtek-green);"></i>
+                        </div>
+                        <p>Procesando solicitud...</p>
+                        <div class="progress" style="height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                 style="width: 100%; background: var(--button-gradient);"></div>
+                        </div>
+                    </div>
+                `,
+                allowEscapeKey: false,
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                background: 'var(--card-bg)',
+                color: 'var(--primary-text)',
+                customClass: {
+                    popup: 'sweetalert-dark'
+                }
+            });
+        }
+
+        function mostrarMensaje(tipo, mensaje) {
+            const iconos = {
+                success: 'success',
+                error: 'error',
+                warning: 'warning',
+                info: 'info'
+            };
+
+            Swal.fire({
+                title: tipo === 'success' ? '¡Éxito!' : 'Información',
+                text: mensaje,
+                icon: iconos[tipo] || 'info',
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: tipo === 'success' ? 'var(--viamtek-green)' : '#3085d6',
+                background: 'var(--card-bg)',
+                color: 'var(--primary-text)',
+                customClass: {
+                    popup: 'sweetalert-dark',
+                    confirmButton: 'btn-sweet-confirm'
+                },
+                timer: 3000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        }
+
+        function mostrarError(mensaje) {
+            Swal.fire({
+                title: 'Error',
+                text: mensaje,
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#e74c3c',
+                background: 'var(--card-bg)',
+                color: 'var(--primary-text)',
+                customClass: {
+                    popup: 'sweetalert-dark',
+                    confirmButton: 'btn-sweet-danger'
+                }
+            });
+        }
+
+        // Función para actualizar automáticamente cada 30 segundos (opcional)
+        function autoActualizar() {
+            setInterval(function() {
+                if (!$('#modalRevision').hasClass('show') && !$('#modalCorrecciones').hasClass('show')) {
+                    location.reload();
+                }
+            }, 30000); // 30 segundos
+        }
+
+        // Iniciar auto-actualización después de 1 minuto
+        setTimeout(autoActualizar, 60000);
+    </script>
+}

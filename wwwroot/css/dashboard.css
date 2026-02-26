@@ -1,0 +1,1091 @@
+﻿/* --- Paleta de Colores (Actualizada para Mejor Contraste) --- */
+:root {
+    /* Colores base del tema Dark/Login */
+    --viamtek-green: #5cc87b; /* Verde claro/menta para acentos */
+    --viamtek-dark-green: #308184; /* Verde oscuro/petróleo para gradientes y fondos */
+    --color-white: #ffffff;
+    --color-black: #000000;
+    --main-bg-color: #0f1419; /* Fondo principal gris oscuro neutro */
+    --card-bg-transparent: rgba(25, 35, 45, 0.75); /* Fondo transparente para cards */
+    --card-bg-blur: rgba(30, 40, 50, 0.85);
+    --border-color: rgba(92, 200, 123, 0.4); /* Bordes verdes más visibles */
+    --border-light: rgba(255, 255, 255, 0.15);
+    --primary-text: var(--color-white);
+    --secondary-text: #c8d6e5;
+    --accent-glow: rgba(92, 200, 123, 0.35); /* Resplandor más visible */
+    /* Nuevos gradientes con mejor contraste */
+    --bg-gradient: linear-gradient(135deg, #0a0f14 0%, #1a252f 50%, #0f1419 100%);
+    --button-gradient: linear-gradient(180deg, var(--viamtek-dark-green), var(--viamtek-green));
+    --card-gradient: linear-gradient(135deg, rgba(40, 50, 60, 0.7), rgba(30, 40, 50, 0.9));
+    /* Colores de estado adaptados al tema oscuro */
+    --status-success: var(--viamtek-green);
+    --status-warning: #ffc107;
+    --status-info: #17a2b8;
+    --status-danger: #dc3545;
+}
+
+/* --- ANIMACIONES --- */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* --- ESTILOS GLOBALES --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--bg-gradient);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    color: var(--primary-text);
+    line-height: 1.6;
+    position: relative;
+    overflow-x: hidden;
+}
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 20% 30%, rgba(48, 129, 132, 0.08) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(92, 200, 123, 0.06) 0%, transparent 40%), radial-gradient(circle at 40% 80%, rgba(48, 129, 132, 0.05) 0%, transparent 40%), linear-gradient(135deg, rgba(15, 20, 25, 0.97) 0%, rgba(25, 35, 45, 0.95) 100%);
+        z-index: -1;
+    }
+
+    /* Patrón de ruido sutil para textura */
+    body::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+        z-index: -1;
+        pointer-events: none;
+    }
+
+/* --- NAVBAR (Mejor contraste) --- */
+.navbar-viamtek {
+    background: rgba(20, 25, 30, 0.95) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
+    animation: slideDown 0.6s ease-out;
+}
+
+    .navbar-viamtek .navbar-brand,
+    .navbar-viamtek .nav-link,
+    .navbar-viamtek .dropdown-toggle {
+        color: var(--primary-text) !important;
+        transition: color 0.2s;
+    }
+
+        .navbar-viamtek .nav-link:hover,
+        .navbar-viamtek .dropdown-toggle:hover {
+            color: var(--viamtek-green) !important;
+            text-shadow: 0 0 2px var(--accent-glow);
+        }
+
+.dropdown-menu {
+    background: rgba(30, 35, 40, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+    .dropdown-menu .dropdown-header,
+    .dropdown-menu .dropdown-item {
+        color: var(--primary-text);
+    }
+
+        .dropdown-menu .dropdown-item:hover {
+            background-color: rgba(92, 200, 123, 0.2);
+            color: var(--viamtek-green);
+        }
+
+/* --- DASHBOARD HEADER (Más contraste) --- */
+.dashboard-container {
+    padding-top: 20px;
+    animation: fadeIn 0.6s ease-out;
+}
+
+.dashboard-header {
+    background: var(--card-bg-transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 25px;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 25px;
+    animation: slideDown 0.6s ease-out;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(135deg, rgba(35, 45, 55, 0.8), rgba(25, 35, 45, 0.9));
+}
+
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: var(--button-gradient);
+        box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+.dashboard-title {
+    font-weight: 300;
+    color: var(--primary-text);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.user-name {
+    font-weight: 600;
+    color: var(--viamtek-green);
+    text-shadow: 0 0 10px var(--accent-glow);
+}
+
+.dashboard-subtitle {
+    color: var(--secondary-text);
+    font-size: 1rem;
+}
+
+.bg-viamtek {
+    background: var(--button-gradient) !important;
+    color: white;
+    font-weight: 500;
+    padding: 0.4em 0.8em;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(48, 129, 132, 0.5);
+}
+
+/* --- SECCIONES Y TÍTULOS --- */
+.section-title {
+    font-weight: 500;
+    color: var(--viamtek-green);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+    margin-top: 40px;
+    margin-bottom: 20px !important;
+    animation: slideDown 0.6s ease-out 0.1s both;
+    text-shadow: 0 0 3px var(--accent-glow);
+}
+
+/* --- STATS CARDS (NÚMEROS MÁS COMPACTOS) --- */
+.stats-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, rgba(40, 50, 60, 0.8), rgba(30, 40, 50, 0.9));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 18px;
+    border: 1px solid var(--border-color);
+    border-left: 6px solid;
+    transition: all 0.3s ease;
+    position: relative;
+    animation: slideUp 0.6s ease-out 0.2s both;
+    box-shadow: 0 8px 35px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    min-height: 120px;
+}
+
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(92, 200, 123, 0.05), transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 45px var(--accent-glow);
+        border-left-width: 8px;
+    }
+
+        .stats-card:hover::before {
+            opacity: 1;
+        }
+
+.stats-icon {
+    font-size: 2rem;
+    color: var(--border-color);
+    opacity: 1;
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    text-shadow: 0 0 3px var(--accent-glow);
+}
+
+.stats-content {
+    flex: 1;
+    z-index: 2;
+}
+
+    .stats-content h3 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--primary-text);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        margin-bottom: 0.3rem;
+        line-height: 1.2;
+        letter-spacing: -0.5px;
+    }
+
+    .stats-content p {
+        color: var(--secondary-text);
+        font-size: 0.7rem;
+        margin-bottom: 0;
+        opacity: 0.9;
+        line-height: 1.2;
+    }
+
+/* Números más compactos específicamente para montos de dinero */
+.stats-card.info h3,
+.stats-card.secondary h3 {
+    font-size: 1.24rem;
+    letter-spacing: -0.5px;
+}
+
+/* Clases específicas para números ultra compactos */
+.compact-number {
+    font-size: 1.3rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 0.1rem !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.5px;
+}
+
+.compact-label {
+    font-size: 0.65rem !important;
+    margin-bottom: 0 !important;
+    opacity: 0.9;
+    line-height: 1.1 !important;
+}
+
+/* Colores de las tarjetas */
+.stats-card.primary {
+    border-left-color: var(--status-info);
+}
+
+    .stats-card.primary .stats-content h3 {
+        color: var(--status-info);
+        text-shadow: 0 0 8px rgba(23, 162, 184, 0.3);
+    }
+
+.stats-card.warning {
+    border-left-color: var(--status-warning);
+}
+
+    .stats-card.warning .stats-content h3 {
+        color: var(--status-warning);
+        text-shadow: 0 0 8px rgba(255, 193, 7, 0.3);
+    }
+
+.stats-card.info {
+    border-left-color: var(--viamtek-green);
+}
+
+    .stats-card.info .stats-content h3 {
+        color: var(--viamtek-green);
+        text-shadow: 0 0 3px var(--accent-glow);
+    }
+
+.stats-card.success {
+    border-left-color: var(--status-success);
+}
+
+    .stats-card.success .stats-content h3 {
+        color: var(--status-success);
+        text-shadow: 0 0 3px rgba(92, 200, 123, 0.3);
+    }
+
+/* --- CARDS DE ACCIONES RÁPIDAS (Mejor contraste) --- */
+.quick-actions-card, .recent-activity-card {
+    background: linear-gradient(135deg, rgba(40, 50, 60, 0.8), rgba(30, 40, 50, 0.9));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 25px;
+    border: 1px solid var(--border-color);
+    height: 100%;
+    animation: slideUp 0.6s ease-out 0.3s both;
+    box-shadow: 0 8px 35px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+    .quick-actions-card::before, .recent-activity-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(92, 200, 123, 0.03), transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .quick-actions-card:hover, .recent-activity-card:hover {
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        border-color: rgba(92, 200, 123, 0.6);
+    }
+
+        .quick-actions-card:hover::before, .recent-activity-card:hover::before {
+            opacity: 1;
+        }
+
+.card-title {
+    font-weight: 500;
+    color: var(--viamtek-green);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--border-color);
+    text-shadow: 0 0 3px var(--accent-glow);
+}
+
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.quick-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 15px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    text-decoration: none;
+    color: var(--secondary-text);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    animation: slideUp 0.6s ease-out 0.4s both;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+    .quick-action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .quick-action-btn:hover {
+        background: var(--button-gradient);
+        color: var(--color-white);
+        border-color: var(--viamtek-green);
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(92, 200, 123, 0.5);
+    }
+
+        .quick-action-btn:hover::before {
+            left: 100%;
+        }
+
+    .quick-action-btn i {
+        font-size: 1.8rem;
+        margin-bottom: 8px;
+        color: var(--viamtek-green);
+        transition: color 0.3s ease;
+        text-shadow: 0 0 3px var(--accent-glow);
+    }
+
+    .quick-action-btn:hover i {
+        color: var(--color-white);
+    }
+
+/* Efecto ripple para botones de acción rápida */
+.quick-action-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.4);
+    transform: scale(0);
+    animation: ripple-animation 0.6s linear;
+}
+
+/* --- TABLA DE SOLICITUDES (Mejor contraste) --- */
+.table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--primary-text);
+    --bs-table-hover-bg: rgba(92, 200, 123, 0.15);
+    animation: slideUp 0.6s ease-out 0.5s both;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 35px rgba(0, 0, 0, 0.3);
+}
+
+    .table thead th {
+        border-bottom: 2px solid var(--viamtek-green);
+        font-weight: 600;
+        color: var(--viamtek-green);
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        background: rgba(35, 45, 55, 0.9);
+        backdrop-filter: blur(15px);
+        padding: 1rem;
+        text-shadow: 0 0 3px var(--accent-glow);
+    }
+
+    .table tbody tr {
+        border-top: 1px solid var(--border-light);
+        transition: all 0.3s ease;
+        background: rgba(30, 40, 50, 0.7);
+    }
+
+        .table tbody tr:nth-child(even) {
+            background: rgba(35, 45, 55, 0.7);
+        }
+
+        .table tbody tr:last-child {
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .table tbody tr:hover {
+            background: rgba(48, 129, 132, 0.25);
+            border-left: 4px solid var(--viamtek-green);
+        }
+
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+/* --- STATUS BADGES (Más visibles) --- */
+.status-badge {
+    padding: 0.4em 1em;
+    border-radius: 50rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    display: inline-block;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+    .status-badge.pending {
+        background-color: rgba(255, 193, 7, 0.25);
+        color: var(--status-warning);
+        border: 1px solid var(--status-warning);
+        text-shadow: 0 0 5px rgba(255, 193, 7, 0.3);
+    }
+
+    .status-badge.review {
+        background-color: rgba(220, 53, 69, 0.25);
+        color: var(--status-danger);
+        border: 1px solid var(--status-danger);
+        text-shadow: 0 0 5px rgba(220, 53, 69, 0.3);
+    }
+
+    .status-badge.approved {
+        background-color: rgba(92, 200, 123, 0.25);
+        color: var(--status-success);
+        border: 1px solid var(--status-success);
+        text-shadow: 0 0 5px var(--accent-glow);
+    }
+
+/* --- BOTONES MEJORADOS --- */
+.btn-gradient {
+    background: var(--button-gradient);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(48, 129, 132, 0.5);
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    animation: slideUp 0.6s ease-out 0.4s both;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+    .btn-gradient::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-gradient:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(92, 200, 123, 0.6);
+        color: white;
+    }
+
+        .btn-gradient:hover::before {
+            left: 100%;
+        }
+
+/* --- SCROLLBAR PERSONALIZADO --- */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--button-gradient);
+    border-radius: 8px;
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, var(--viamtek-dark-green), var(--viamtek-green));
+        box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+/* --- DASHBOARD.CSS RESPONSIVE --- */
+/* Manteniendo todos los estilos existentes y agregando mejoras responsivas */
+
+/* --- RESPONSIVE IMPROVEMENTS --- */
+
+/* Pantallas grandes (1200px+) */
+@media (min-width: 1200px) {
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: clamp(0.75rem, 1.5vw, 1.5rem);
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+}
+
+/* Tabletas grandes (992px - 1199px) */
+@media (min-width: 992px) and (max-width: 1199px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: clamp(0.75rem, 2vw, 1.25rem);
+    }
+
+    .dashboard-content-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: clamp(1rem, 2.5vh, 1.5rem);
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    }
+}
+
+/* Tabletas (768px - 991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+    .dashboard-container {
+        padding: clamp(0.75rem, 2vw, 1rem);
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: clamp(0.5rem, 1.5vw, 1rem);
+    }
+
+    .stats-card {
+        min-height: clamp(100px, 12vh, 120px);
+        padding: clamp(1rem, 2vw, 1.25rem);
+    }
+
+    .stats-content h3 {
+        font-size: clamp(1.1rem, 3vw, 1.4rem);
+    }
+
+    .stats-content p {
+        font-size: clamp(0.65rem, 1.8vw, 0.75rem);
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        gap: clamp(0.75rem, 1.5vw, 1rem);
+    }
+
+    .quick-action-btn {
+        padding: clamp(0.75rem, 2vh, 1rem) clamp(0.5rem, 1vw, 0.75rem);
+        font-size: clamp(0.75rem, 2vw, 0.85rem);
+    }
+
+        .quick-action-btn i {
+            font-size: clamp(1.4rem, 4vw, 1.8rem);
+        }
+}
+
+/* Móviles grandes (576px - 767px) */
+@media (min-width: 576px) and (max-width: 767px) {
+    .dashboard-header {
+        padding: clamp(1rem, 3vh, 1.5rem);
+        margin-bottom: clamp(1rem, 2.5vh, 1.5rem);
+        border-radius: clamp(0.75rem, 2vw, 1rem);
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: clamp(0.75rem, 2vh, 1rem);
+    }
+
+    .stats-card {
+        min-height: clamp(90px, 10vh, 110px);
+        padding: clamp(1rem, 2.5vh, 1.25rem);
+    }
+
+    .stats-icon {
+        font-size: clamp(1.5rem, 4vw, 1.8rem);
+        right: clamp(0.75rem, 2vw, 1rem);
+        top: clamp(0.75rem, 2vw, 1rem);
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: clamp(0.5rem, 1.5vw, 0.75rem);
+    }
+
+    .quick-action-btn {
+        padding: clamp(0.75rem, 2vh, 0.9rem) clamp(0.4rem, 1vw, 0.6rem);
+        border-radius: clamp(0.5rem, 1.5vw, 0.75rem);
+    }
+
+    .table-responsive {
+        border-radius: clamp(0.5rem, 1.5vw, 0.75rem);
+        overflow: hidden;
+    }
+
+    .table thead th {
+        padding: clamp(0.75rem, 2vh, 1rem);
+        font-size: clamp(0.75rem, 2vw, 0.85rem);
+    }
+
+    .table tbody td {
+        padding: clamp(0.75rem, 2vh, 1rem);
+        font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+    }
+}
+
+/* Móviles pequeños (<= 575px) */
+@media (max-width: 575px) {
+    .dashboard-container {
+        padding: clamp(0.5rem, 1.5vw, 0.75rem);
+    }
+
+    .dashboard-header {
+        padding: clamp(0.75rem, 2.5vh, 1.25rem);
+        margin-bottom: clamp(0.75rem, 2vh, 1.25rem);
+        border-radius: clamp(0.5rem, 1.5vw, 0.75rem);
+        text-align: center;
+    }
+
+    .dashboard-title {
+        font-size: clamp(1.25rem, 5vw, 1.5rem);
+    }
+
+    .dashboard-subtitle {
+        font-size: clamp(0.85rem, 3.5vw, 1rem);
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: clamp(0.5rem, 1.5vh, 0.75rem);
+    }
+
+    .stats-card {
+        min-height: clamp(80px, 8vh, 100px);
+        padding: clamp(0.75rem, 2vh, 1rem);
+        border-radius: clamp(0.5rem, 1.5vw, 0.75rem);
+    }
+
+    .stats-content h3 {
+        font-size: clamp(1rem, 4vw, 1.3rem);
+        margin-bottom: 0.2rem;
+    }
+
+    .stats-content p {
+        font-size: clamp(0.6rem, 2.5vw, 0.7rem);
+    }
+
+    .compact-number {
+        font-size: clamp(0.9rem, 3.5vw, 1.1rem) !important;
+    }
+
+    .compact-label {
+        font-size: clamp(0.55rem, 2.2vw, 0.65rem) !important;
+    }
+
+    .stats-icon {
+        font-size: clamp(1.3rem, 5vw, 1.6rem);
+        right: clamp(0.5rem, 1.5vw, 0.75rem);
+        top: clamp(0.5rem, 1.5vw, 0.75rem);
+    }
+
+    .quick-actions-card,
+    .recent-activity-card {
+        padding: clamp(1rem, 2.5vh, 1.25rem);
+        border-radius: clamp(0.5rem, 1.5vw, 0.75rem);
+        margin-bottom: clamp(0.75rem, 2vh, 1rem);
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: clamp(0.5rem, 1.5vw, 0.75rem);
+    }
+
+    .quick-action-btn {
+        padding: clamp(0.6rem, 1.8vh, 0.8rem) clamp(0.3rem, 1vw, 0.5rem);
+        border-radius: clamp(0.4rem, 1.2vw, 0.6rem);
+        font-size: clamp(0.7rem, 2.8vw, 0.8rem);
+    }
+
+        .quick-action-btn i {
+            font-size: clamp(1.2rem, 4.5vw, 1.5rem);
+            margin-bottom: clamp(0.4rem, 1vh, 0.6rem);
+        }
+
+    .card-title {
+        font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+        margin-bottom: clamp(1rem, 2.5vh, 1.25rem);
+    }
+
+    .section-title {
+        font-size: clamp(0.95rem, 4vw, 1.15rem);
+        margin-top: clamp(1.5rem, 4vh, 2rem);
+        margin-bottom: clamp(1rem, 2.5vh, 1.25rem) !important;
+    }
+
+    .btn-gradient {
+        width: 100%;
+        padding: clamp(0.6rem, 2vh, 0.8rem) clamp(1rem, 3vw, 1.5rem);
+        font-size: clamp(0.8rem, 3vw, 0.9rem);
+        border-radius: clamp(0.5rem, 1.5vw, 0.75rem);
+        margin-bottom: clamp(0.5rem, 1.5vh, 0.75rem);
+    }
+
+    .status-badge {
+        font-size: clamp(0.7rem, 2.5vw, 0.8rem);
+        padding: clamp(0.3rem, 1vh, 0.4rem) clamp(0.6rem, 1.5vw, 0.8rem);
+    }
+}
+
+/* Dispositivos muy pequeños (<= 380px) */
+@media (max-width: 380px) {
+    .quick-actions-grid {
+        grid-template-columns: 1fr;
+        gap: clamp(0.4rem, 1.2vh, 0.6rem);
+    }
+
+    .quick-action-btn {
+        padding: clamp(0.75rem, 2vh, 0.9rem);
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: clamp(0.5rem, 1.5vw, 0.75rem);
+    }
+
+        .quick-action-btn i {
+            margin-bottom: 0;
+            font-size: clamp(1.1rem, 4vw, 1.3rem);
+        }
+
+    .stats-card {
+        padding: clamp(0.6rem, 1.8vh, 0.8rem);
+    }
+
+    .stats-content h3 {
+        font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+    }
+}
+
+/* Orientación horizontal en móviles */
+@media (max-width: 767px) and (orientation: landscape) {
+    .dashboard-container {
+        padding: clamp(0.4rem, 1vw, 0.6rem);
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: clamp(0.4rem, 1vw, 0.6rem);
+    }
+
+    .stats-card {
+        min-height: clamp(70px, 12vh, 90px);
+        padding: clamp(0.6rem, 1.5vh, 0.8rem);
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+        gap: clamp(0.4rem, 1vw, 0.6rem);
+    }
+}
+
+/* Safe areas para dispositivos con notch */
+@supports(padding: max(0px)) {
+    .dashboard-container {
+        padding-left: max(clamp(0.5rem, 1.5vw, 0.75rem), env(safe-area-inset-left));
+        padding-right: max(clamp(0.5rem, 1.5vw, 0.75rem), env(safe-area-inset-right));
+    }
+}
+
+/* Mejoras de rendimiento para animaciones en móviles */
+@media (max-width: 768px) {
+    .stats-card,
+    .quick-actions-card,
+    .recent-activity-card {
+        transition-duration: 0.2s;
+    }
+
+        .stats-card:hover {
+            transform: translateY(-4px);
+        }
+}
+
+/* Scroll suave para toda la aplicación */
+.dashboard-container {
+    scroll-behavior: smooth;
+}
+
+/* Mejora de accesibilidad en touch */
+@media (max-width: 768px) {
+    .quick-action-btn,
+    .btn-gradient {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* Asegurar que las tablas sean responsive */
+.table-responsive {
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Estados de carga responsivos */
+@media (max-width: 768px) {
+    .spinner-border-sm {
+        width: 0.8rem;
+        height: 0.8rem;
+    }
+
+    .btn-text {
+        font-size: clamp(0.8rem, 2.8vw, 0.9rem);
+    }
+}
+
+/* Ajustes específicos para el dashboard header en móviles */
+@media (max-width: 575px) {
+    .dashboard-header::before {
+        height: 3px;
+    }
+
+    .bg-viamtek {
+        padding: 0.3em 0.6em;
+        font-size: 0.8rem;
+        border-radius: 6px;
+    }
+}
+
+/* Grid layout responsivo para el contenido principal */
+.dashboard-content-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(1rem, 2.5vh, 1.5rem);
+}
+
+@media (min-width: 992px) {
+    .dashboard-content-grid {
+        grid-template-columns: 2fr 1fr;
+        gap: clamp(1.5rem, 3vw, 2rem);
+    }
+}
+
+/* Asegurar que todos los contenedores sean fluidos */
+.stats-grid {
+    display: grid;
+    gap: clamp(1rem, 2vh, 1.25rem);
+    width: 100%;
+}
+
+/* Correcciones para elementos específicos en vista móvil */
+@media (max-width: 575px) {
+    /* Asegurar que los textos no se solapen */
+    .stats-content {
+        min-width: 0; /* Permite que el texto se ajuste */
+    }
+
+    /* Mejorar la legibilidad de los badges en móviles */
+    .status-badge {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100px;
+    }
+}
+
+/* --- ESTILOS PARA EL BOTÓN DE ACTUALIZAR --- */
+.btn-disabled {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+    .btn-disabled:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+.btn-success-animation {
+    position: relative;
+    overflow: hidden;
+}
+
+    .btn-success-animation::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(92, 200, 123, 0.3);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        animation: success-pulse 0.6s ease-out;
+    }
+
+@keyframes success-pulse {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 0.7;
+    }
+
+    100% {
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+    }
+}
+
+/* Spinner personalizado para el botón */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
+/* Estilos para el texto del botón */
+.btn-text {
+    margin-left: 0.25rem;
+}
+
+/* Mejoras para SweetAlert2 dark theme */
+.swal2-dark-popup {
+    background: var(--card-bg) !important;
+    color: var(--primary-text) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+    .swal2-dark-popup .swal2-title {
+        color: var(--viamtek-green) !important;
+        font-weight: 600 !important;
+    }
+
+    .swal2-dark-popup .swal2-icon {
+        border-color: var(--viamtek-green) !important;
+        color: var(--viamtek-green) !important;
+    }
+
+    .swal2-dark-popup .swal2-timer-progress-bar {
+        background: var(--button-gradient) !important;
+    }
+
+/* Toast personalizado */
+.swal2-toast {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}

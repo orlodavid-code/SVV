@@ -1,0 +1,611 @@
+﻿/* --- Paleta de Colores --- */
+:root {
+    /* Colores base proporcionados */
+    --viamtek-green: #5cc87b; /* Verde claro/menta para acentos */
+    --viamtek-dark-green: #308184; /* Verde oscuro/petróleo para gradientes */
+    --color-white: #ffffff;
+    --color-black: #000000;
+    /* Colores del Diseño Minimalista */
+    --main-bg-color: #1a1a1a; /* Color de fondo si no carga el video */
+    --panel-left-bg: rgba(0, 0, 0, 0.7); /* Panel izquierdo: Negro con 70% opacidad */
+    --panel-right-bg: rgba(0, 0, 0, 0); /* Panel derecho: Completamente transparente */
+    --border-color: #333333; /* Bordes y líneas divisorias sutiles */
+    --primary-text: var(--color-white);
+    --secondary-text: #aaaaaa;
+    /* Gradientes */
+    --button-gradient: linear-gradient(90deg, var(--viamtek-dark-green), var(--viamtek-green));
+    --accent-glow: rgba(92, 200, 123, 0.2); /* Resplandor sutil */
+    --viamtek-panel-gradient: linear-gradient( 180deg, /* Degradado de arriba a abajo */
+    /* INICIO (Parte de arriba, donde está el logo): NEGRO con 90% opacidad */
+    rgba(25, 50, 20, 0.5) 5%,
+    /* FINAL (Parte de abajo, para el texto): Menta/Verde Petróleo con 70% opacidad */
+    rgba(48, 129, 132, 0.7) 70% );
+    --separation-gap: 40px;
+}
+
+/* --- Fondo de Video con Capa de Opacidad --- */
+.video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -2; /* Detrás de todo el contenido */
+    background-color: var(--main-bg-color); /* Color de respaldo si el video falla */
+}
+
+#myVideo {
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    object-fit: cover; /* Asegura que el video cubra todo el espacio */
+}
+
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* REDUCIR OPACIDAD: 60% (0.6) A 40% (0.4) o 50% (0.5) */
+    background: rgba(0, 0, 0, 0.5); /* Capa oscura encima del video (40% opacidad) */
+    z-index: -1;
+}
+/* --- Estilos Generales del Body --- */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-text);
+    position: relative; /* Para que el contenido esté sobre el video */
+    overflow: hidden; /* Evita scrolls inesperados */
+}
+
+.login-container {
+    width: 100%;
+    max-width: 950px;
+    padding: var(--separation-gap); /* Padding para contener la separación */
+    box-sizing: border-box; /* Incluir padding en el ancho */
+}
+
+/* --- Estilo de la Caja Principal (Contenedor de 2 Paneles) --- */
+.login-box {
+    display: flex;
+    /* La opacidad se manejará en cada panel ahora, no en el contenedor principal */
+    background: none;
+    border-radius: 20px;
+    overflow: hidden;
+    /* Sombra más suave y moderna para toda la caja */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 50px rgba(48, 129, 132, 0.1);
+    backdrop-filter: blur(5px); /* Desenfoque del fondo subyacente */
+}
+
+/* --- Panel Izquierdo: Bienvenida --- */
+.welcome-panel {
+    flex: 1;
+    min-width: 45%;
+    /* APLICAR EL NUEVO DEGRADADO SEMITRANSPARENTE */
+    background-color: transparent; /* Asegurar que no haya color sólido debajo */
+    background-image: var(--viamtek-panel-gradient); /* Aplicar el degradado */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* El logo arriba, el texto abajo */
+    align-items: center;
+    text-align: center;
+    /* POCO PADDING: Mucho menos aire. Ej: 20px arriba/abajo, 40px lados */
+    padding: 15px 35px;
+    border-radius: 20px 20px 20px 20px; /* Eliminar los radios internos que pusiste (10px) */
+    margin-right: var(--separation-gap);
+    box-sizing: border-box;
+    /* Eliminamos el background-image anterior (radial-gradient) */
+    background-image: var(--viamtek-panel-gradient);
+}
+
+.logo-area {
+    margin-bottom: 0px; /* Espacio debajo del logo */
+}
+
+.welcome-panel .logo {
+    /* Logo más pequeño para que se sienta como un header dentro del panel */
+    max-width: 250px;
+    max-height: 300px;
+    /* El brillo se ve genial con el degradado */
+    filter: drop-shadow(0 0 10px var(--viamtek-green));
+    animation: pulseGlow 2s infinite alternate;
+}
+
+/* Y el texto de bienvenida abajo para mantener la separación vertical */
+.welcome-section {
+    /* Asegurar que el texto se empuje hacia la parte inferior */
+    margin-top: auto;
+    margin-bottom: 20px; /* Un poco de margen en la parte inferior para que no toque el borde */
+}
+
+@keyframes pulseGlow {
+    from {
+        filter: drop-shadow(0 0 5px var(--viamtek-green));
+    }
+
+    to {
+        filter: drop-shadow(0 0 15px var(--viamtek-green));
+    }
+}
+
+.company-name {
+    display: none; /* Mantener oculto si solo queremos el logo */
+}
+
+.company-tagline {
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+.welcome-title {
+    color: var(--color-white);
+    font-weight: 700;
+    font-size: 2.2rem;
+    line-height: 1.1;
+    margin-bottom: 10px;
+}
+
+.welcome-subtitle {
+    /* CAMBIO: Usar blanco puro para que contraste mejor */
+    color: var(--color-white);
+    font-size: 1.05rem;
+    font-weight: 300;
+    opacity: 0.8; /* Mantenemos una ligera opacidad si quieres que se vea más tenue */
+}
+
+/* --- Panel Derecho: Formulario --- */
+.form-panel {
+    flex: 1;
+    min-width: 55%;
+    background-color: var(--panel-right-bg); /* Completamente transparente */
+    padding: 40px 42px;
+    border-radius: 20px; /* Redondeamos todas las esquinas para este panel */
+    box-sizing: border-box;
+    /* Aplicamos una sombra sutil directamente al panel derecho para definirlo */
+    box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.5);
+}
+
+.login-title {
+    color: var(--primary-text);
+    font-weight: 600;
+    font-size: 1.6rem;
+    margin-bottom: 30px;
+}
+
+/* --- Estilos de Formulario Transparente --- */
+.form-label {
+    color: var(--secondary-text);
+    font-weight: 500;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.transparent-input .form-control {
+    background-color: rgba(255, 255, 255, 0.05); /* Fondo muy sutil para el input */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Borde sutil */
+    color: var(--primary-text);
+    padding: 15px 12px;
+    height: 50px;
+    border-radius: 8px;
+    transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s;
+}
+
+    .transparent-input .form-control::placeholder {
+        color: var(--secondary-text);
+        opacity: 0.7;
+    }
+
+    .transparent-input .form-control:focus {
+        background-color: rgba(255, 255, 255, 0.1); /* Un poco más visible al enfocar */
+        border-color: var(--viamtek-green);
+        box-shadow: 0 0 0 0.15rem var(--accent-glow);
+    }
+
+.input-group-text {
+    /* Estilos para los iconos a la izquierda del input */
+    background-color: rgba(255, 255, 255, 0.05); /* Mismo fondo sutil */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: none; /* Quita el borde derecho para que se fusione con el input */
+    color: var(--secondary-text);
+    height: 50px; /* Misma altura que el input */
+    border-radius: 8px 0 0 8px; /* Solo las esquinas izquierdas */
+    padding: 0 13px;
+    display: flex; /* Para centrar el icono verticalmente */
+    align-items: center;
+}
+
+/* Botón de alternar contraseña */
+.toggle-password-btn {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: none;
+    color: var(--secondary-text);
+    height: 50px;
+    border-radius: 0 8px 8px 0;
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+
+    .toggle-password-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: var(--viamtek-green);
+        color: var(--viamtek-green);
+    }
+
+/* Checkbox y Enlace */
+.form-check-input {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+    .form-check-input:checked {
+        background-color: var(--viamtek-green);
+        border-color: var(--viamtek-green);
+    }
+
+.form-check-label {
+    color: var(--secondary-text);
+}
+
+.forgot-password {
+    color: var(--secondary-text);
+    text-decoration: none;
+}
+
+    .forgot-password:hover {
+        color: var(--viamtek-green);
+        text-decoration: underline;
+    }
+
+/* --- Botón de Login (Gradiente con Tus Colores) --- */
+.btn-login {
+    background: var(--button-gradient);
+    border: none;
+    padding: 15px;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 8px;
+    color: var(--color-white);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+}
+
+    .btn-login:hover {
+        opacity: 0.95;
+        transform: translateY(-1px);
+        box-shadow: 0 5px 20px var(--accent-glow);
+    }
+/* Mobile: Layout vertical con scroll */
+@media (max-width: 767px) {
+    body {
+        display: block;
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
+    }
+
+    .login-container {
+        min-height: auto;
+        display: block;
+    }
+
+    .login-box {
+        flex-direction: column;
+        max-width: 100%;
+        border-radius: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+        min-height: auto; /* Cambiado de 100vh a auto */
+        display: block;
+    }
+
+    .welcome-panel {
+        min-width: 100%;
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 0;
+        border-radius: 0;
+        padding: clamp(1.5rem, 8vh, 2.5rem) clamp(1rem, 5vw, 2rem); /* Reducido padding superior */
+        min-height: 30vh; /* Reducido de 40vh a 30vh */
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Centra el contenido verticalmente */
+    }
+
+        .welcome-panel .logo {
+            max-width: min(45vw, 180px); /* Reducido ligeramente */
+            max-height: min(15vh, 120px); /* Reducido */
+            width: auto;
+            height: auto;
+            margin-bottom: clamp(0.75rem, 3vh, 1.5rem);
+        }
+
+    .welcome-title {
+        font-size: clamp(1.4rem, 5.5vw, 1.8rem); /* Reducido */
+        line-height: 1.2;
+        margin-bottom: 0.5rem;
+    }
+
+    .welcome-subtitle {
+        font-size: clamp(0.85rem, 3.2vw, 1rem); /* Reducido */
+        max-width: min(85vw, 350px);
+        line-height: 1.3;
+    }
+
+    .form-panel {
+        min-width: 100%;
+        width: 100%;
+        padding: clamp(1.5rem, 6vh, 2.5rem) clamp(1.25rem, 5vw, 2rem); /* Reducido padding */
+        border-radius: 20px 20px 0 0;
+        margin-top: -15px; /* Reducido el solapamiento */
+        position: relative;
+        z-index: 2;
+        flex-grow: 1;
+        min-height: auto;
+    }
+
+    .login-title {
+        font-size: clamp(1.25rem, 4.5vw, 1.5rem); /* Reducido */
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem; /* Espaciado consistente */
+    }
+
+    .form-label {
+        font-size: clamp(0.8rem, 2.8vw, 0.9rem);
+        margin-bottom: 0.5rem;
+    }
+
+    .transparent-input .form-control {
+        height: clamp(42px, 7vh, 48px); /* Reducido */
+        padding: clamp(0.625rem, 1.5vh, 0.875rem) clamp(0.75rem, 2vw, 1rem);
+        font-size: clamp(0.95rem, 3.2vw, 1.05rem);
+    }
+
+    .input-group-text,
+    .toggle-password-btn {
+        height: clamp(42px, 7vh, 48px); /* Reducido */
+        min-width: clamp(38px, 9vw, 48px);
+    }
+
+    .btn-login {
+        padding: clamp(0.75rem, 2.5vh, 0.875rem);
+        font-size: clamp(0.95rem, 3.2vw, 1.05rem);
+        min-height: clamp(42px, 7vh, 48px);
+        margin-top: 0.5rem; /* Espacio extra arriba del botón */
+    }
+
+    .login-options {
+        margin: 1.5rem 0 1.75rem; /* Reducido espaciado */
+        gap: 0.75rem;
+    }
+}
+
+/* Ajustes específicos para iPhone SE (375x667) y pantallas pequeñas */
+@media (max-width: 380px) and (max-height: 700px) {
+    .welcome-panel {
+        padding: clamp(1.25rem, 6vh, 2rem) clamp(0.875rem, 4vw, 1.5rem);
+        min-height: 28vh;
+    }
+
+        .welcome-panel .logo {
+            max-width: min(40vw, 150px);
+            max-height: min(12vh, 100px);
+            margin-bottom: clamp(0.5rem, 2vh, 1rem);
+        }
+
+    .welcome-title {
+        font-size: clamp(1.3rem, 5vw, 1.6rem);
+        margin-bottom: 0.375rem;
+    }
+
+    .welcome-subtitle {
+        font-size: clamp(0.8rem, 3vw, 0.9rem);
+    }
+
+    .form-panel {
+        padding: clamp(1.25rem, 5vh, 2rem) clamp(1rem, 4vw, 1.5rem);
+        margin-top: -12px;
+    }
+
+    .login-title {
+        font-size: clamp(1.2rem, 4vw, 1.4rem);
+        margin-bottom: 1.25rem;
+    }
+
+    .transparent-input .form-control {
+        height: 40px;
+        font-size: 15px;
+    }
+
+    .input-group-text,
+    .toggle-password-btn {
+        height: 40px;
+    }
+
+    .btn-login {
+        min-height: 42px;
+        margin-top: 0.75rem;
+    }
+}
+
+/* Ajustes para iPhone XR/12 Pro (alturas alrededor de 800-900px) */
+@media (max-width: 430px) and (min-height: 800px) and (max-height: 900px) {
+    .welcome-panel {
+        min-height: 32vh;
+        padding: clamp(1.75rem, 9vh, 3rem) clamp(1rem, 5vw, 2rem);
+    }
+
+        .welcome-panel .logo {
+            max-width: min(42vw, 170px);
+            max-height: min(16vh, 130px);
+        }
+}
+
+/* Tablet: 768px - 1023px */
+@media (min-width: 768px) and (max-width: 1023px) {
+    body {
+        align-items: center;
+        padding: 1.5rem 1rem;
+        display: flex;
+    }
+
+    .login-container {
+        max-width: 90vw;
+        padding: 0;
+    }
+
+    .login-box {
+        max-width: 750px; /* Reducido ligeramente */
+        margin: 0 auto;
+    }
+
+    .welcome-panel {
+        padding: clamp(1.5rem, 6vh, 2.5rem) clamp(1.25rem, 4vw, 2rem);
+    }
+
+        .welcome-panel .logo {
+            max-width: min(32vw, 200px);
+            max-height: min(22vh, 160px);
+        }
+
+    .welcome-title {
+        font-size: clamp(1.6rem, 3.5vw, 2rem);
+    }
+
+    .form-panel {
+        padding: clamp(1.75rem, 7vh, 2.5rem) clamp(1.75rem, 4vw, 2.5rem);
+    }
+}
+
+/* Desktop: 1024px+ */
+@media (min-width: 1024px) {
+    body {
+        align-items: center;
+        padding: 2rem;
+        display: flex;
+    }
+
+    .login-container {
+        max-width: min(95vw, 1100px);
+        padding: 0;
+    }
+
+    .login-box {
+        max-width: min(88vw, 950px);
+    }
+
+    .welcome-panel {
+        padding: clamp(1.75rem, 7vh, 3.5rem) clamp(1.75rem, 4vw, 2.5rem);
+    }
+
+        .welcome-panel .logo {
+            max-width: min(28vw, 260px);
+            max-height: min(28vh, 220px);
+        }
+
+    .welcome-title {
+        font-size: clamp(1.8rem, 3.5vw, 2.3rem);
+    }
+
+    .form-panel {
+        padding: clamp(2.25rem, 9vh, 3.5rem) clamp(2.25rem, 5vw, 3rem);
+    }
+}
+
+/* Soporte para orientación horizontal en móviles */
+@media (max-width: 767px) and (orientation: landscape) {
+    body {
+        display: flex;
+        align-items: center;
+    }
+
+    .login-container {
+        display: flex;
+        min-height: 100vh;
+    }
+
+    .login-box {
+        flex-direction: row;
+        min-height: auto;
+        max-height: 85vh;
+    }
+
+    .welcome-panel {
+        min-height: 85vh;
+        width: 45%;
+        margin-right: var(--separation-gap);
+        border-radius: 20px 0 0 20px;
+        padding: clamp(1rem, 5vh, 2rem) clamp(1rem, 4vw, 1.5rem);
+    }
+
+        .welcome-panel .logo {
+            max-width: min(25vw, 120px);
+            max-height: min(15vh, 100px);
+        }
+
+    .form-panel {
+        width: 55%;
+        margin-top: 0;
+        border-radius: 0 20px 20px 0;
+        padding: clamp(1.5rem, 6vh, 2.5rem) clamp(1.25rem, 4vw, 2rem);
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+}
+
+/* Prevenir zoom en iOS en inputs */
+@media (max-width: 767px) {
+    .form-control {
+        font-size: 16px;
+    }
+
+    /* Asegurar que el botón sea siempre visible */
+    .btn-login {
+        position: relative;
+        z-index: 10;
+    }
+}
+
+/* Safe areas para dispositivos con notch */
+@supports(padding: max(0px)) {
+    .welcome-panel {
+        padding-top: max(clamp(1.5rem, 8vh, 2.5rem), env(safe-area-inset-top));
+        padding-bottom: max(clamp(1rem, 4vh, 1.5rem), env(safe-area-inset-bottom));
+    }
+
+    .form-panel {
+        padding-bottom: max(clamp(1.5rem, 6vh, 2.5rem), env(safe-area-inset-bottom));
+    }
+}
+
+/* Mejora de scroll suave */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Asegurar que el contenido sea scrollable en móviles */
+@media (max-width: 767px) {
+    .login-box {
+        overflow: visible;
+    }
+
+    body {
+        -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+    }
+}

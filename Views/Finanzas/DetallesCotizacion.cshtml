@@ -1,0 +1,465 @@
+﻿@model CotizacionesFinanzas
+@using SVV.ViewModels
+@{
+    ViewData["Title"] = "Detalles de Cotización";
+
+    // Calcular duración del viaje
+    var duracion = 0;
+    if (Model.SolicitudViaje.FechaSalida != DateOnly.MinValue && Model.SolicitudViaje.FechaRegreso != DateOnly.MinValue)
+    {
+        duracion = (Model.SolicitudViaje.FechaRegreso.ToDateTime(TimeOnly.MinValue) -
+                   Model.SolicitudViaje.FechaSalida.ToDateTime(TimeOnly.MinValue)).Days + 1;
+    }
+
+    // ✅ OBTENER LOS PRECIOS DESDE VIEWBAG (cargados en el controlador)
+    var transportePrecios = ViewBag.TransportePrecios as List<ConceptoItemViewModel> ?? new List<ConceptoItemViewModel>();
+    var gasolinaPrecios = ViewBag.GasolinaPrecios as List<ConceptoItemViewModel> ?? new List<ConceptoItemViewModel>();
+    var uberTaxiPrecios = ViewBag.UberTaxiPrecios as List<ConceptoItemViewModel> ?? new List<ConceptoItemViewModel>();
+    var casetasPrecios = ViewBag.CasetasPrecios as List<ConceptoItemViewModel> ?? new List<ConceptoItemViewModel>();
+    var hospedajePrecios = ViewBag.HospedajePrecios as List<ConceptoItemViewModel> ?? new List<ConceptoItemViewModel>();
+    var alimentosPrecios = ViewBag.AlimentosPrecios as List<ConceptoItemViewModel> ?? new List<ConceptoItemViewModel>();
+}
+
+<div class="container-fluid">
+    <h4 class="section-title">Detalles de Cotización</h4>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="solicitud-card">
+                <div class="solicitud-card-body">
+                    <!-- Información de la Cotización -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-accent">Información de la Cotización</h6>
+                            <p><strong>Código:</strong> @Model.CodigoCotizacion</p>
+                            <p>
+                                <strong>Estado:</strong>
+                                @if (Model.Estado == "PENDIENTE")
+                                {
+                                    <span class="badge bg-warning">@Model.Estado</span>
+                                }
+                                else if (Model.Estado == "APROBADA")
+                                {
+                                    <span class="badge bg-success">@Model.Estado</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">@Model.Estado</span>
+                                }
+                            </p>
+                            <p><strong>Fecha Creación:</strong> @Model.FechaCotizacion?.ToString("dd/MM/yyyy")</p>
+                            @if (Model.FechaAprobacion.HasValue)
+                            {
+                                <p><strong>Fecha Aprobación:</strong> @Model.FechaAprobacion.Value.ToString("dd/MM/yyyy")</p>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-accent">Información de la Solicitud</h6>
+                            <p><strong>Código Solicitud:</strong> @Model.SolicitudViaje.CodigoSolicitud</p>
+                            <p><strong>Empleado:</strong> @Model.SolicitudViaje.Empleado.Nombre @Model.SolicitudViaje.Empleado.Apellidos</p>
+                            <p><strong>Destino:</strong> @Model.SolicitudViaje.Destino</p>
+                            <p><strong>Proyecto:</strong> @Model.SolicitudViaje.NombreProyecto</p>
+                            <p><strong>Ubicación Base:</strong> @Model.SolicitudViaje.Empleado.UbicacionBase</p>
+                        </div>
+                    </div>
+
+                    <!-- RUTA DE VIAJE - INCLUYENDO TAXI -->
+                    <div class="ruta-viaje mb-4">
+                        <h6 class="text-accent mb-3">Ruta de Viaje</h6>
+                        <div class="ruta-item">
+                            <div class="ruta-icon">
+                                <i class="fas fa-play"></i>
+                            </div>
+                            <div class="ruta-text">Origen: @Model.SolicitudViaje.Empleado.UbicacionBase</div>
+                        </div>
+
+                        <!-- TAXI A DOMICILIO - SE MUESTRA EN LA RUTA -->
+                        @if (Model.SolicitudViaje.RequiereTaxiDomicilio == true)
+                        {
+                            <div class="ruta-taxi-section">
+                                <div class="ruta-flecha">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <div class="taxi-badge">
+                                        <i class="fas fa-taxi me-1"></i> Taxi a domicilio
+                                    </div>
+                                </div>
+                                <div class="ruta-item taxi-origen">
+                                    <div class="ruta-icon taxi-icon">
+                                        <i class="fas fa-home"></i>
+                                    </div>
+                                    <div class="ruta-text">
+                                        <strong>Recogida:</strong> @Model.SolicitudViaje.DireccionTaxiOrigen
+                                    </div>
+                                </div>
+                                <div class="ruta-flecha">
+                                    <i class="fas fa-arrow-down"></i>
+                                </div>
+                                <div class="ruta-item taxi-destino">
+                                    <div class="ruta-icon taxi-icon">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <div class="ruta-text">
+                                        <strong>Destino taxi:</strong> @Model.SolicitudViaje.DireccionTaxiDestino
+                                    </div>
+                                </div>
+                                <div class="ruta-flecha">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <div class="taxi-badge">
+                                        <i class="fas fa-sync-alt me-1"></i> Continúa viaje
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="ruta-flecha">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                        }
+
+                        <div class="ruta-item">
+                            <div class="ruta-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="ruta-text">Destino: @Model.SolicitudViaje.Destino</div>
+                        </div>
+                    </div>
+
+                    <!-- INFORMACIÓN ADICIONAL DEL VIAJE -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-accent">Detalles del Viaje</h6>
+                            <p><strong>Fechas:</strong> @Model.SolicitudViaje.FechaSalida.ToString("dd/MM/yyyy") - @Model.SolicitudViaje.FechaRegreso.ToString("dd/MM/yyyy")</p>
+                            <p><strong>Duración:</strong> @duracion días</p>
+                            <p><strong>Medio Principal:</strong> @Model.SolicitudViaje.MedioTrasladoPrincipal</p>
+                            <p>
+                                <strong>Taxi a Domicilio:</strong>
+                                @if (Model.SolicitudViaje.RequiereTaxiDomicilio == true)
+                                {
+                                    <text>Sí</text>
+                                }
+                                else
+                                {
+                                    <text>No</text>
+                                }
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-accent">Hospedaje y Personas</h6>
+                            <p>
+                                <strong>Requiere Hospedaje:</strong>
+                                @if (Model.SolicitudViaje.RequiereHospedaje == true)
+                                {
+                                    <text>Sí (@Model.SolicitudViaje.NochesHospedaje noches)</text>
+                                }
+                                else
+                                {
+                                    <text>No</text>
+                                }
+                            </p>
+                            <p><strong>Número de Personas:</strong> @Model.SolicitudViaje.NumeroPersonas</p>
+                            @if (!string.IsNullOrEmpty(Model.SolicitudViaje.EmpresaVisitada))
+                            {
+                                <p><strong>Empresa Visitada:</strong> @Model.SolicitudViaje.EmpresaVisitada</p>
+                            }
+                        </div>
+                    </div>
+
+                    <h6 class="text-accent mb-3">Resumen de la Cotización</h6>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-dark table-hover">
+                            <thead>
+                                <tr>
+                                    <th>CONCEPTO</th>
+                                    <th class="text-end">NÚMERO DE PRECIOS</th>
+                                    <th class="text-end">TOTAL AUTORIZADO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Transporte</td>
+                                    <td class="text-end">@(Model.TransporteCantidad?.ToString("N0") ?? "0")</td>
+                                    <td class="text-end">@(Model.TransporteTotal.ToString("C"))</td>
+                                </tr>
+                                <tr>
+                                    <td>Gasolina</td>
+                                    <td class="text-end">@(Model.GasolinaCantidad?.ToString("N0") ?? "0")</td>
+                                    <td class="text-end">@(Model.GasolinaTotal.ToString("C"))</td>
+                                </tr>
+                                <tr>
+                                    <td>UBER / TAXI</td>
+                                    <td class="text-end">@(Model.UberTaxiCantidad?.ToString("N0") ?? "0")</td>
+                                    <td class="text-end">@(Model.UberTaxiTotal.ToString("C"))</td>
+                                </tr>
+                                <tr>
+                                    <td>Casetas</td>
+                                    <td class="text-end">@(Model.CasetasCantidad?.ToString("N0") ?? "0")</td>
+                                    <td class="text-end">@(Model.CasetasTotal.ToString("C"))</td>
+                                </tr>
+                                <tr>
+                                    <td>Hospedaje</td>
+                                    <td class="text-end">@(Model.HospedajeCantidad?.ToString("N0") ?? "0")</td>
+                                    <td class="text-end">@(Model.HospedajeTotal.ToString("C"))</td>
+                                </tr>
+                                <tr>
+                                    <td>Alimentos</td>
+                                    <td class="text-end">@(Model.AlimentosCantidad?.ToString("N0") ?? "0")</td>
+                                    <td class="text-end">@(Model.AlimentosTotal.ToString("C"))</td>
+                                </tr>
+                                <tr class="table-active">
+                                    <td colspan="2"><strong>TOTAL GENERAL AUTORIZADO</strong></td>
+                                    <td class="text-end"><strong>@Model.TotalAutorizado.ToString("C")</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- ✅ TABLAS DETALLADAS DE PRECIOS INDIVIDUALES -->
+                    <h6 class="text-accent mb-3">Desglose Detallado de Precios</h6>
+
+                    <!-- Transporte -->
+                    @if (transportePrecios.Any())
+                    {
+                        <div class="concepto-detalle mb-4">
+                            <h6 class="text-success mb-2">🚗 Transporte (@transportePrecios.Count precios)</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-dark">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Precio</th>
+                                            <th>Descripción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (int i = 0; i < transportePrecios.Count; i++)
+                                        {
+                                            <tr>
+                                                <td>@(i + 1)</td>
+                                                <td class="text-end">@transportePrecios[i].Precio.ToString("C")</td>
+                                                <td>@(transportePrecios[i].Descripcion ?? "Sin descripción")</td>
+                                            </tr>
+                                        }
+                                        <tr class="table-active">
+                                            <td colspan="2"><strong>Subtotal Transporte</strong></td>
+                                            <td class="text-end"><strong>@Model.TransporteTotal.ToString("C")</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Gasolina -->
+                    @if (gasolinaPrecios.Any())
+                    {
+                        <div class="concepto-detalle mb-4">
+                            <h6 class="text-success mb-2">⛽ Gasolina (@gasolinaPrecios.Count precios)</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-dark">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Precio</th>
+                                            <th>Descripción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (int i = 0; i < gasolinaPrecios.Count; i++)
+                                        {
+                                            <tr>
+                                                <td>@(i + 1)</td>
+                                                <td class="text-end">@gasolinaPrecios[i].Precio.ToString("C")</td>
+                                                <td>@(gasolinaPrecios[i].Descripcion ?? "Sin descripción")</td>
+                                            </tr>
+                                        }
+                                        <tr class="table-active">
+                                            <td colspan="2"><strong>Subtotal Gasolina</strong></td>
+                                            <td class="text-end"><strong>@Model.GasolinaTotal.ToString("C")</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Uber/Taxi -->
+                    @if (uberTaxiPrecios.Any())
+                    {
+                        <div class="concepto-detalle mb-4">
+                            <h6 class="text-success mb-2">🚕 UBER / TAXI (@uberTaxiPrecios.Count precios)</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-dark">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Precio</th>
+                                            <th>Descripción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (int i = 0; i < uberTaxiPrecios.Count; i++)
+                                        {
+                                            <tr>
+                                                <td>@(i + 1)</td>
+                                                <td class="text-end">@uberTaxiPrecios[i].Precio.ToString("C")</td>
+                                                <td>@(uberTaxiPrecios[i].Descripcion ?? "Sin descripción")</td>
+                                            </tr>
+                                        }
+                                        <tr class="table-active">
+                                            <td colspan="2"><strong>Subtotal UBER/TAXI</strong></td>
+                                            <td class="text-end"><strong>@Model.UberTaxiTotal.ToString("C")</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Casetas -->
+                    @if (casetasPrecios.Any())
+                    {
+                        <div class="concepto-detalle mb-4">
+                            <h6 class="text-success mb-2">🛣️ Casetas (@casetasPrecios.Count precios)</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-dark">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Precio</th>
+                                            <th>Descripción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (int i = 0; i < casetasPrecios.Count; i++)
+                                        {
+                                            <tr>
+                                                <td>@(i + 1)</td>
+                                                <td class="text-end">@casetasPrecios[i].Precio.ToString("C")</td>
+                                                <td>@(casetasPrecios[i].Descripcion ?? "Sin descripción")</td>
+                                            </tr>
+                                        }
+                                        <tr class="table-active">
+                                            <td colspan="2"><strong>Subtotal Casetas</strong></td>
+                                            <td class="text-end"><strong>@Model.CasetasTotal.ToString("C")</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Hospedaje -->
+                    @if (hospedajePrecios.Any())
+                    {
+                        <div class="concepto-detalle mb-4">
+                            <h6 class="text-success mb-2">🏨 Hospedaje (@hospedajePrecios.Count precios)</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-dark">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Precio</th>
+                                            <th>Descripción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (int i = 0; i < hospedajePrecios.Count; i++)
+                                        {
+                                            <tr>
+                                                <td>@(i + 1)</td>
+                                                <td class="text-end">@hospedajePrecios[i].Precio.ToString("C")</td>
+                                                <td>@(hospedajePrecios[i].Descripcion ?? "Sin descripción")</td>
+                                            </tr>
+                                        }
+                                        <tr class="table-active">
+                                            <td colspan="2"><strong>Subtotal Hospedaje</strong></td>
+                                            <td class="text-end"><strong>@Model.HospedajeTotal.ToString("C")</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Alimentos -->
+                    @if (alimentosPrecios.Any())
+                    {
+                        <div class="concepto-detalle mb-4">
+                            <h6 class="text-success mb-2">🍽️ Alimentos (@alimentosPrecios.Count precios)</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-dark">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Precio</th>
+                                            <th>Descripción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (int i = 0; i < alimentosPrecios.Count; i++)
+                                        {
+                                            <tr>
+                                                <td>@(i + 1)</td>
+                                                <td class="text-end">@alimentosPrecios[i].Precio.ToString("C")</td>
+                                                <td>@(alimentosPrecios[i].Descripcion ?? "Sin descripción")</td>
+                                            </tr>
+                                        }
+                                        <tr class="table-active">
+                                            <td colspan="2"><strong>Subtotal Alimentos</strong></td>
+                                            <td class="text-end"><strong>@Model.AlimentosTotal.ToString("C")</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Información de Aprobación -->
+                    @if (Model.RevisadoPor != null)
+                    {
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h6 class="text-accent">Información de Aprobación</h6>
+                                <p><strong>Aprobado por:</strong> @Model.RevisadoPor.Nombre @Model.RevisadoPor.Apellidos</p>
+                                <p><strong>Fecha de aprobación:</strong> @Model.FechaAprobacion?.ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Observaciones -->
+                    @if (!string.IsNullOrEmpty(Model.Observaciones))
+                    {
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h6 class="text-accent">Observaciones</h6>
+                                <p class="text-white">@Model.Observaciones</p>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Botones -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <a asp-action="Cotizaciones" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Volver a Cotizaciones
+                            </a>
+                            @if (Model.Estado == "PENDIENTE")
+                            {
+                                <form asp-action="AprobarCotizacion" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@Model.Id" />
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-check me-2"></i>Aprobar Cotización
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/cotizaciones.css" asp-append-version="true" />
+}

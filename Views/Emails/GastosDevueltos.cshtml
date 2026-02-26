@@ -1,0 +1,165 @@
+﻿@model dynamic
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: #fd7e14;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        .button {
+            background: #fd7e14;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 15px 0;
+        }
+
+        .details {
+            background: #ffe5d0;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #fd7e14;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #856404;
+        }
+
+        .status-correccion {
+            color: #856404;
+            background: #fff3cd;
+            padding: 5px 10px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .gasto-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 4px;
+            border-left: 3px solid #fd7e14;
+        }
+
+        .deadline {
+            color: #856404;
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✏️ Gastos Devueltos para Corrección</h1>
+            <p>Sistema de Viáticos - Validación de Gastos</p>
+        </div>
+
+        <div class="content">
+            <h2>¡Correcciones Requeridas en Gastos!</h2>
+            <p>Hola <strong>@Model.EmpleadoNombre</strong>,</p>
+
+            <div class="details">
+                <p><span class="label">Código de Comprobación:</span> @Model.CodigoComprobacion</p>
+                <p>
+                    <span class="label">Total de gastos devueltos:</span> @(Model.GastosDevueltos != null ? Model.GastosDevueltos.Count : 0)
+                </p>
+                <p><span class="label">Estado:</span> <span class="status-correccion">✏️ Correcciones Pendientes</span></p>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ComentariosFinanzas))
+            {
+                <div style="background: #e8f4fc; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <p><strong>📝 Comentarios de Finanzas:</strong></p>
+                    <p>@Model.ComentariosFinanzas</p>
+                </div>
+            }
+
+            <p><strong>📋 Gastos que requieren corrección:</strong></p>
+
+            @foreach (var gasto in Model.GastosDevueltos)
+            {
+                <div class="gasto-item">
+                    <p><strong>Concepto:</strong> @gasto.Concepto</p>
+                    <p>
+                        <strong>Monto:</strong>
+                        @(gasto.Monto != null
+                                            ? ((decimal)gasto.Monto).ToString("C")
+                                            : "$0.00")
+                                                  </p>
+
+                    <p><strong>Fecha:</strong> @(gasto.Fecha ?? "—")</p>
+
+
+                    <p><strong>Proveedor:</strong> @gasto.Proveedor</p>
+                </div>
+            }
+
+            <div class="deadline">
+                ⏰ <strong>Fecha límite para corrección:</strong> @Model.FechaLimite
+            </div>
+
+            <p><strong>🔧 Acción requerida:</strong> Debes corregir los gastos señalados y reenviar la comprobación.</p>
+
+            <div style="text-align: center; margin: 25px 0;">
+                <a href="@Model.Url" class="button">✏️ Corregir Gastos</a>
+            </div>
+
+            <p style="font-size: 14px; color: #666;">
+                <strong>Nota:</strong> Solo los gastos devueltos requieren corrección.
+                Los gastos aprobados permanecerán sin cambios.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>📧 Este es un mensaje automático generado por el Sistema de Viáticos.</p>
+            <p>Por favor, no respondas a este correo.</p>
+            <p>&copy; @DateTime.Now.Year - Sistema de Viáticos | Viamtek</p>
+        </div>
+    </div>
+</body>
+</html>

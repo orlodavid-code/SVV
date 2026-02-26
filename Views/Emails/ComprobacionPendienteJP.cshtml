@@ -1,0 +1,127 @@
+﻿@model dynamic
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: #ffc107;
+            color: #856404;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        .button {
+            background: #ffc107;
+            color: #856404;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .details {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #856404;
+        }
+
+        .status-pendiente {
+            color: #856404;
+            background: #fff3cd;
+            padding: 5px 10px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⏳ Revisión Pendiente de Comprobación</h1>
+            <p>Sistema de Viáticos - Jefe de Proceso</p>
+        </div>
+
+        <div class="content">
+            <h2>¡Revisión de Actividades Pendiente!</h2>
+            <p>Hola <strong>@Model.JefeNombre</strong>,</p>
+
+            <div class="details">
+                <p><span class="label">Código de Comprobación:</span> @Model.CodigoComprobacion</p>
+                <p><span class="label">Empleado:</span> @Model.EmpleadoNombre</p>
+                <p><span class="label">Escenario:</span> @Model.Escenario</p>
+                <p><span class="label">Fecha de Validación:</span> @Model.Fecha</p>
+                <p><span class="label">Estado:</span> <span class="status-pendiente">⏳ Pendiente de Revisión JP</span></p>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Comentarios))
+            {
+                <div style="background: #e8f4fc; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <p><strong>💼 Comentarios de Finanzas:</strong></p>
+                    <p>@Model.Comentarios</p>
+                </div>
+            }
+
+            <p>
+                <strong>📋 Acción requerida:</strong> Debe revisar las actividades realizadas durante el viaje
+                y el informe presentado por el empleado para determinar si se procede con el pago/reintegro.
+            </p>
+
+            <div style="text-align: center; margin: 25px 0;">
+                <a href="@Model.Url" class="button">📝 Revisar Actividades</a>
+            </div>
+
+            <p style="font-size: 14px; color: #666;">
+                <strong>Nota:</strong> Esta revisión es necesaria antes de que Finanzas pueda procesar el
+                @(Model.Escenario == "REPOSICION_EMPRESA" ? "pago a la empresa" : "reintegro al colaborador").
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>📧 Este es un mensaje automático generado por el Sistema de Viáticos.</p>
+            <p>Por favor, no respondas a este correo.</p>
+            <p>&copy; @DateTime.Now.Year - Sistema de Viáticos | Viamtek</p>
+        </div>
+    </div>
+</body>
+</html>

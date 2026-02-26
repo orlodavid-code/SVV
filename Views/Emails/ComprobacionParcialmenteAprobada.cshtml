@@ -1,0 +1,196 @@
+﻿@model dynamic
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        .button {
+            background: #007bff;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 15px 0;
+        }
+
+        .details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #007bff;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .partial {
+            color: #0056b3;
+            background: #cce5ff;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+            margin: 15px 0;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 13px;
+            display: inline-block;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+            .summary-item:last-child {
+                border-bottom: none;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 Sistema de Viáticos</h1>
+            <p>Comprobación Parcialmente Aprobada</p>
+        </div>
+
+        <div class="content">
+            <h2>⚠️ Comprobación Parcialmente Aprobada</h2>
+
+            <div class="partial">
+                <p><strong>Estimado/a @Model.EmpleadoNombre,</strong></p>
+                <p>Tu comprobación <strong>@Model.CodigoComprobacion</strong> ha sido <strong>parcialmente aprobada</strong> por el Departamento de Finanzas.</p>
+            </div>
+
+            <div class="details">
+                <p><span class="label">Código de Comprobación:</span> @Model.CodigoComprobacion</p>
+                <p><span class="label">Fecha de Revisión:</span> @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
+                <p>
+                    <span class="label">Estado:</span>
+                    <span class="status-badge" style="background: #cce5ff; color: #0056b3;">⚠️ Parcialmente Aprobada</span>
+                </p>
+            </div>
+
+            <h3>📊 Resumen de Aprobación:</h3>
+            <div class="details">
+                <div class="summary-item">
+                    <span>Gastos Totales Presentados:</span>
+                    <span>@Model.GastosTotales.ToString("C")</span>
+                </div>
+                <div class="summary-item">
+                    <span>Gastos Aprobados:</span>
+                    <span style="color: #28a745;">@Model.GastosAprobados.ToString("C")</span>
+                </div>
+                <div class="summary-item">
+                    <span>Gastos Devueltos para Corrección:</span>
+                    <span style="color: #dc3545;">@Model.GastosDevueltos.ToString("C")</span>
+                </div>
+            </div>
+
+            <h3>📝 Comentarios de Finanzas:</h3>
+            <div class="details">
+                <p>@Model.Comentarios</p>
+            </div>
+
+            <h3>🔄 Próximos Pasos:</h3>
+            <div class="details">
+                <p><strong>Para los gastos aprobados:</strong></p>
+                <ul>
+                    <li>Se procederá con el proceso de liquidación</li>
+                    <li>El reembolso se procesará en los próximos días</li>
+                </ul>
+
+                <p><strong>Para los gastos devueltos:</strong></p>
+                <ul>
+                    <li>Debes corregir la documentación requerida</li>
+                    <li>Subir los documentos faltantes o corregidos</li>
+                    <li>Reenviar la comprobación para revisión</li>
+                </ul>
+            </div>
+
+            @if (Model.TieneGastosDevueltos)
+            {
+                <div style="text-align: center; margin: 25px 0;">
+                    <a href="@Model.UrlCorreccion" class="button" style="background: #ffc107; color: #856404;">
+                        🔧 Corregir Gastos Devueltos
+                    </a>
+                </div>
+            }
+
+            <div style="text-align: center; margin: 15px 0;">
+                <a href="@Model.UrlConsulta" class="button">
+                    📊 Consultar Estado en el Sistema
+                </a>
+            </div>
+
+            <div class="details">
+                <p><strong>📅 Plazos Importantes:</strong></p>
+                <ul>
+                    <li><strong>Reembolso de gastos aprobados:</strong> 5-10 días hábiles</li>
+                    @if (Model.TieneGastosDevueltos)
+                    {
+                        <li><strong>Corrección de gastos devueltos:</strong> Hasta @Model.FechaLimiteCorreccion</li>
+                    }
+                </ul>
+            </div>
+
+            <p style="font-size: 14px; color: #666;">
+                <strong>Nota:</strong> Los gastos devueltos que no sean corregidos dentro del plazo establecido serán considerados como rechazados.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>📧 Este es un mensaje automático generado por el Sistema de Viáticos.</p>
+            <p>Por favor, no respondas a este correo.</p>
+            <p>&copy; @DateTime.Now.Year - Sistema de Viáticos | Viamtek</p>
+        </div>
+    </div>
+</body>
+</html>

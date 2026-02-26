@@ -1,0 +1,240 @@
+﻿@model IEnumerable<SVV.Models.Empleados>
+
+@{
+    ViewData["Title"] = "Gestión de Empleados";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="container-fluid">
+    <div class="admin-header">
+        <h1 class="admin-title"><i class="fas fa-users-cog me-2"></i>Gestión de Empleados</h1>
+        <p class="admin-subtitle">Administra los usuarios, roles y permisos del sistema de viáticos.</p>
+    </div>
+
+    <div class="admin-card-header">
+        <h5 class="title mb-1"><i class="fas fa-list me-2"></i>Lista de Empleados</h5>
+        <div class="d-flex gap-2">
+            <a asp-action="CrearEmpleado" class="btn btn-gradient">
+                <i class="fas fa-plus me-1"></i>Nuevo Empleado
+            </a>
+            <a asp-action="ExportarEmpleadosExcel" id="btnExportarExcel" class="btn btn-success">
+                <i class="fas fa-file-excel me-1"></i>Exportar a Excel
+            </a>
+        </div>
+    </div>
+
+    <div class="admin-card-body">
+        <div class="table-responsive" id="rolSelect">
+            <table id="empleadosTable" class="table table-striped table-hover align-middle" width="100%" cellspacing="0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nombre Completo</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Puesto</th>
+                        <th>Jefe Directo</th>
+                        <th class="text-center">Remoto</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Nombre @item.Apellidos</td>
+                            <td>@item.Email</td>
+                            <td>
+                                <span class="badge bg-success">@item.Rol?.Nombre</span>
+                            </td>
+                            <td>@item.Puesto</td>
+                            <td>@(item.JefeDirecto?.Nombre ?? "N/A")</td>
+                            <td class="text-center">
+                                @if (item.ColaboradorRemoto == true)
+                                {
+                                    <i class="fas fa-check-circle text-success" title="Sí"></i>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-times-circle text-secondary" title="No"></i>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a asp-action="EditarEmpleado" asp-route-id="@item.Id"
+                                       class="btn btn-outline-warning" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-outline-danger btn-delete"
+                                       data-id="@item.Id"
+                                       data-name="@(item.Nombre + " " + item.Apellidos)"
+                                       title="Desactivar">
+                                        <i class="fas fa-user-slash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar DataTable
+            $('#empleadosTable').DataTable({
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
+                },
+                pageLength: 10,
+                responsive: true,
+                autoWidth: false
+            });
+
+            // Evento para desactivar empleados
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const employeeId = this.getAttribute('data-id');
+                    const employeeName = this.getAttribute('data-name');
+                    mostrarConfirmacionDesactivar(employeeId, employeeName);
+                });
+            });
+
+            // Evento para exportar a Excel
+            document.getElementById('btnExportarExcel')?.addEventListener('click', function(e) {
+                e.preventDefault();
+                mostrarConfirmacionExportarExcel();
+            });
+        });
+
+        function mostrarConfirmacionDesactivar(employeeId, employeeName) {
+            Swal.fire({
+                title: '¿Desactivar Empleado?',
+                html: `
+                    <div class="text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-user-slash fa-3x text-warning"></i>
+                        </div>
+                        <p>¿Estás seguro de desactivar al siguiente empleado?</p>
+                        <div class="alert-comprobacion-info" style="text-align: left; padding: 1rem; margin: 1rem 0;">
+                            <strong>Empleado:</strong> ${employeeName}<br>
+                            <strong>Acción:</strong> <span class="text-warning">DESACTIVAR</span>
+                        </div>
+                        <small class="text-warning">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            <strong>Importante:</strong> El empleado ya no podrá acceder al sistema, pero podrás reactivarlo después.
+                        </small>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fas fa-user-slash me-2"></i>Sí, desactivar',
+                cancelButtonText: '<i class="fas fa-times me-2"></i>Cancelar',
+                background: 'var(--card-bg)',
+                color: 'var(--primary-text)',
+                customClass: {
+                    popup: 'sweetalert-dark',
+                    confirmButton: 'btn-sweet-danger',
+                    cancelButton: 'btn-sweet-cancel'
+                },
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Desactivando Empleado...',
+                        html: `
+                            <div class="text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-spinner fa-spin fa-2x text-warning"></i>
+                                </div>
+                                <p>Procesando la desactivación del empleado</p>
+                                <div class="progress" style="height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                         style="width: 100%; background: linear-gradient(45deg, #e74c3c, #c0392b);"></div>
+                                </div>
+                            </div>
+                        `,
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        background: 'var(--card-bg)',
+                        color: 'var(--primary-text)',
+                        customClass: { popup: 'sweetalert-dark' }
+                    });
+
+                    setTimeout(() => {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '@Url.Action("DesactivarEmpleado", "Admin")';
+
+                        const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                        const tokenInput = document.createElement('input');
+                        tokenInput.type = 'hidden';
+                        tokenInput.name = '__RequestVerificationToken';
+                        tokenInput.value = csrfToken;
+                        form.appendChild(tokenInput);
+
+                        const idInput = document.createElement('input');
+                        idInput.type = 'hidden';
+                        idInput.name = 'id';
+                        idInput.value = employeeId;
+                        form.appendChild(idInput);
+
+                        document.body.appendChild(form);
+                        form.submit();
+                    }, 1500);
+                }
+            });
+        }
+
+        function mostrarConfirmacionExportarExcel() {
+            const totalEmpleados = @Model.Count();
+            Swal.fire({
+                title: '¿Exportar Empleados a Excel?',
+                html: `
+                    <div class="text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-file-excel fa-3x" style="color: var(--viamtek-green);"></i>
+                        </div>
+                        <p>¿Estás seguro de que deseas descargar el listado de empleados en formato Excel?</p>
+                        <div class="alert-comprobacion-info" style="text-align: left; padding: 1rem; margin: 1rem 0;">
+                            <strong>Total de empleados:</strong> <span class="text-success">${totalEmpleados}</span><br>
+                            <strong>Formato:</strong> <span class="text-info">Archivo .xlsx</span>
+                        </div>
+                        <small class="text-info">
+                            <i class="fas fa-info-circle me-1"></i>
+                            El archivo incluirá todas las columnas visibles en la tabla
+                        </small>
+                    </div>
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: 'var(--viamtek-green)',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fas fa-download me-2"></i>Sí, descargar Excel',
+                cancelButtonText: '<i class="fas fa-times me-2"></i>Cancelar',
+                background: 'var(--card-bg)',
+                color: 'var(--primary-text)',
+                customClass: {
+                    popup: 'sweetalert-dark',
+                    confirmButton: 'btn-sweet-confirm',
+                    cancelButton: 'btn-sweet-cancel'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '@Url.Action("ExportarEmpleadosExcel", "Admin")';
+                }
+            });
+        }
+    </script>
+}

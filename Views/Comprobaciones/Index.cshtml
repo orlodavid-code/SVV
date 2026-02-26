@@ -1,0 +1,432 @@
+﻿@model List<SVV.Models.SolicitudesViaje>
+@{
+    ViewData["Title"] = "Comprobar Gastos";
+
+    // Obtener las listas desde ViewBag (usando los nombres CORRECTOS del controlador)
+    var solicitudesAprobadas = ViewBag.SolicitudesAprobadas as List<SVV.Models.SolicitudesViaje> ?? new List<SVV.Models.SolicitudesViaje>();
+    var comprobacionesPendientes = ViewBag.ComprobacionesPendientes as List<SVV.Models.ComprobacionesViaje> ?? new List<SVV.Models.ComprobacionesViaje>();
+    var comprobacionesEnProceso = ViewBag.ComprobacionesEnProceso as List<SVV.Models.ComprobacionesViaje> ?? new List<SVV.Models.ComprobacionesViaje>();
+    var comprobacionesConCorrecciones = ViewBag.ComprobacionesConCorrecciones as List<SVV.Models.ComprobacionesViaje> ?? new List<SVV.Models.ComprobacionesViaje>();
+    var comprobacionesAutomaticas = ViewBag.ComprobacionesAutomaticas as List<SVV.Models.ComprobacionesViaje> ?? new List<SVV.Models.ComprobacionesViaje>();
+
+    bool mostrarAlertaExpiracion = ViewBag.MostrarAlertaExpiracion as bool? ?? false;
+}
+
+<div class="comprobacion-container">
+    <!-- HEADER -->
+    <div class="comprobacion-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="comprobacion-title">Comprobar Gastos</h1>
+                <p class="comprobacion-subtitle">Gestiona la comprobación de gastos de tus viajes aprobados</p>
+            </div>
+            <div class="alert-comprobacion alert-comprobacion-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Tienes 5 días después de tu regreso para comprobar gastos
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 1: SOLICITUDES APROBADAS SIN COMPROBACIÓN -->
+    @if (solicitudesAprobadas.Any())
+    {
+        <div class="comprobacion-card">
+            <div class="comprobacion-card-header">
+                <h6 class="card-title">
+                    <i class="fas fa-list me-2"></i>Solicitudes Aprobadas Pendientes de Comprobación
+                </h6>
+            </div>
+            <div class="comprobacion-card-body">
+                <div class="comprobacion-table-responsive">
+                    <table class="comprobacion-table" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Destino</th>
+                                <th>Fechas de Viaje</th>
+                                <th>Anticipo Autorizado</th>
+                                <th>Fecha Límite</th>
+                                <th>Días Restantes</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var solicitud in solicitudesAprobadas)
+                            {
+                                var fechaLimite = solicitud.FechaRegreso.AddDays(5);
+                                var diasRestantes = (fechaLimite.ToDateTime(TimeOnly.MinValue) - DateTime.Now).Days;
+                                var alertClass = diasRestantes <= 1 ? "dias-peligro" :
+                                diasRestantes <= 3 ? "dias-advertencia" : "dias-normal";
+
+                                <tr>
+                                    <td>
+                                        <strong style="color: var(--viamtek-green);">@solicitud.CodigoSolicitud</strong>
+                                    </td>
+                                    <td>@solicitud.Destino</td>
+                                    <td>
+                                        <small>@solicitud.FechaSalida.ToString("dd/MM/yyyy") - @solicitud.FechaRegreso.ToString("dd/MM/yyyy")</small>
+                                    </td>
+                                    <td style="color: var(--viamtek-green); font-weight: bold;">
+                                        @(solicitud.Anticipos?.Sum(a => a.MontoAutorizado ?? 0).ToString("C") ?? "$0")
+                                    </td>
+                                    <td>@fechaLimite.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <span class="dias-restantes @alertClass">
+                                            @diasRestantes días
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a asp-action="Comprobar" asp-route-id="@solicitud.Id"
+                                           class="btn-comprobacion-primary btn-sm">
+                                            <i class="fas fa-receipt me-1"></i>Comprobar Gastos
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- SECCIÓN 2: COMPROBACIONES PENDIENTES (Estado 1) - REABIERTAS POR FINANZAS O NO ENVIADAS -->
+    @if (comprobacionesPendientes.Any())
+    {
+        <div class="comprobacion-card mt-4">
+            <div class="comprobacion-card-header bg-warning bg-opacity-10">
+                <h5 class="card-title mb-0 text-warning">
+                    <i class="fas fa-clock me-2"></i>Comprobaciones Pendientes de Enviar
+                </h5>
+                <p class="text-muted mb-0 mt-1 small">
+                    Estas comprobaciones están en estado PENDIENTE. Debes completarlas y enviarlas a Finanzas.
+                </p>
+            </div>
+            <div class="comprobacion-card-body">
+                <div class="comprobacion-table-responsive">
+                    <table class="comprobacion-table" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Código Comprobación</th>
+                                <th>Solicitud</th>
+                                <th>Destino</th>
+                                <th>Fecha Creación</th>
+                                <th>Total Comprobado</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var comprobacion in comprobacionesPendientes)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong class="text-warning">@comprobacion.CodigoComprobacion</strong>
+                                    </td>
+                                    <td>@comprobacion.SolicitudViaje?.CodigoSolicitud</td>
+                                    <td>@comprobacion.SolicitudViaje?.Destino</td>
+                                    <td> @(comprobacion.FechaComprobacion.HasValue? comprobacion.FechaComprobacion.Value.ToString("dd/MM/yyyy HH:mm") : "N/A")</td>
+                                    <td class="fw-bold text-success">
+                                        @(comprobacion.TotalGastosComprobados?.ToString("C") ?? "$0.00")
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning">PENDIENTE</span>
+                                    </td>
+                                    <td>
+                                        <a asp-action="Comprobar" asp-route-id="@comprobacion.SolicitudViajeId"
+                                           class="btn btn-warning btn-sm">
+                                            <i class="fas fa-edit me-1"></i> Continuar
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- SECCIÓN 3: COMPROBACIONES EN PROCESO (Estado 2) - EN REVISIÓN POR FINANZAS -->
+    @if (comprobacionesEnProceso.Any())
+    {
+        <div class="comprobacion-card mt-4">
+            <div class="comprobacion-card-header bg-info bg-opacity-10">
+                <h5 class="card-title mb-0 text-info">
+                    <i class="fas fa-hourglass-half me-2"></i>Comprobaciones en Revisión por Finanzas
+                </h5>
+                <p class="text-muted mb-0 mt-1 small">
+                    Estas comprobaciones están siendo revisadas por el área de Finanzas.
+                </p>
+            </div>
+            <div class="comprobacion-card-body">
+                <div class="comprobacion-table-responsive">
+                    <table class="comprobacion-table" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Código Comprobación</th>
+                                <th>Solicitud</th>
+                                <th>Destino</th>
+                                <th>Fecha Envío</th>
+                                <th>Total Comprobado</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var comprobacion in comprobacionesEnProceso)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong style="color: #63b3ed;">@comprobacion.CodigoComprobacion</strong>
+                                    </td>
+                                    <td>@comprobacion.SolicitudViaje?.CodigoSolicitud</td>
+                                    <td>@comprobacion.SolicitudViaje?.Destino</td>
+                                    <td> @(comprobacion.FechaComprobacion.HasValue? comprobacion.FechaComprobacion.Value.ToString("dd/MM/yyyy HH:mm") : "N/A")</td>
+                                    <td style="font-weight: bold; color: var(--viamtek-green);">
+                                        @(comprobacion.TotalGastosComprobados?.ToString("C") ?? "$0")
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">EN PROCESO</span>
+                                    </td>
+                                    <td>
+                                        <a asp-action="Comprobar" asp-route-id="@comprobacion.SolicitudViajeId"
+                                           class="btn-comprobacion-secondary btn-sm">
+                                            <i class="fas fa-eye me-1"></i>Ver Detalles
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- SECCIÓN 4: COMPROBACIONES CON CORRECCIONES PENDIENTES (Estados 8 y 9) -->
+    @if (comprobacionesConCorrecciones.Any())
+    {
+        <div class="comprobacion-card mt-4">
+            <div class="comprobacion-card-header bg-danger bg-opacity-10">
+                <h5 class="card-title mb-0 text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Comprobaciones que Requieren Corrección
+                </h5>
+                <p class="text-muted mb-0 mt-1 small">
+                    Tienes comprobaciones con gastos devueltos por Finanzas que necesitas corregir.
+                </p>
+            </div>
+            <div class="comprobacion-card-body">
+                <div class="comprobacion-table-responsive">
+                    <table class="comprobacion-table" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Código Comprobación</th>
+                                <th>Solicitud</th>
+                                <th>Destino</th>
+                                <th>Fecha Comprobación</th>
+                                <th>Total Comprobado</th>
+                                <th>Estado</th>
+                                <th>Gastos Devueltos</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var comprobacion in comprobacionesConCorrecciones)
+                            {
+                                int gastosDevueltos = 0;
+                                if (comprobacion.SolicitudViaje?.GastosReales != null)
+                                {
+                                    foreach (var gasto in comprobacion.SolicitudViaje.GastosReales)
+                                    {
+                                        if (gasto.EstadoGasto?.Codigo == "DEVUELTO_CORRECCION")
+                                        {
+                                            gastosDevueltos++;
+                                        }
+                                    }
+                                }
+
+                                <tr>
+                                    <td>
+                                        <strong class="text-warning">@comprobacion.CodigoComprobacion</strong>
+                                    </td>
+                                    <td>@comprobacion.SolicitudViaje?.CodigoSolicitud</td>
+                                    <td>@comprobacion.SolicitudViaje?.Destino</td>
+                                    <td>@(comprobacion.FechaComprobacion?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
+                                    <td class="fw-bold text-success">
+                                        @(comprobacion.TotalGastosComprobados?.ToString("C") ?? "$0.00")
+                                    </td>
+                                    <td>
+                                        @{
+                                            string badgeClass = "";
+                                            string estadoText = "";
+
+                                            if (comprobacion.EstadoComprobacionId == 8)
+                                            {
+                                                badgeClass = "bg-warning bg-opacity-10 text-warning";
+                                                estadoText = "REEMBOLSO PARCIAL";
+                                            }
+                                            else if (comprobacion.EstadoComprobacionId == 9)
+                                            {
+                                                badgeClass = "bg-danger bg-opacity-10 text-danger";
+                                                estadoText = "CORRECCIONES PENDIENTES";
+                                            }
+                                            else
+                                            {
+                                                badgeClass = "bg-secondary bg-opacity-10";
+                                                estadoText = comprobacion.EstadoComprobacion?.Codigo ?? "DESCONOCIDO";
+                                            }
+                                        }
+                                        <span class="badge @badgeClass border border-warning">@estadoText</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning text-dark">
+                                            @gastosDevueltos gasto(s)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a asp-action="CorregirGastos" asp-route-id="@comprobacion.Id"
+                                           class="btn btn-danger btn-sm">
+                                            <i class="fas fa-edit me-1"></i> Corregir Gastos
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- SECCIÓN 5: COMPROBACIONES AUTOMÁTICAS -->
+    @if (comprobacionesAutomaticas.Any())
+    {
+        <div class="comprobacion-card mt-4">
+            <div class="comprobacion-card-header">
+                <h6 class="card-title">
+                    <i class="fas fa-robot me-2"></i>Comprobaciones Automáticas
+                </h6>
+            </div>
+            <div class="comprobacion-card-body">
+                <div class="comprobacion-table-responsive">
+                    <table class="comprobacion-table" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Código Comprobación</th>
+                                <th>Solicitud</th>
+                                <th>Fecha Comprobación</th>
+                                <th>Total Comprobado</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var comprobacion in comprobacionesAutomaticas)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong style="color: #a0aec0;">@comprobacion.CodigoComprobacion</strong>
+                                    </td>
+                                    <td>@comprobacion.SolicitudViaje?.CodigoSolicitud</td>
+                                    <td>@comprobacion.FechaComprobacion?.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td style="font-weight: bold; color: var(--viamtek-green);">
+                                        @(comprobacion.TotalGastosComprobados?.ToString("C") ?? "$0")
+                                    </td>
+                                    <td>
+                                        @{
+                                            var badgeClass = "";
+                                            var estadoText = "";
+
+                                            switch (comprobacion.EstadoComprobacionId)
+                                            {
+                                                case 1:
+                                                    badgeClass = "badge-estado-pendiente";
+                                                    estadoText = "PENDIENTE";
+                                                    break;
+                                                case 2:
+                                                    badgeClass = "badge-estado-proceso";
+                                                    estadoText = "EN PROCESO";
+                                                    break;
+                                                case 3:
+                                                    badgeClass = "badge-estado-validada";
+                                                    estadoText = "VALIDADA FINANZAS";
+                                                    break;
+                                                case 4:
+                                                    badgeClass = "badge-estado-saldada";
+                                                    estadoText = "SALDADA";
+                                                    break;
+                                                case 5:
+                                                    badgeClass = "badge-estado-reposicion";
+                                                    estadoText = "REPOSICIÓN EMPRESA";
+                                                    break;
+                                                case 6:
+                                                    badgeClass = "badge-estado-reposicion";
+                                                    estadoText = "REPOSICIÓN COLABORADOR";
+                                                    break;
+                                                case 7:
+                                                    badgeClass = "comprobacion-badge bg-dark";
+                                                    estadoText = "CERRADA";
+                                                    break;
+                                                default:
+                                                    badgeClass = "badge-estado-pendiente";
+                                                    estadoText = "DESCONOCIDO";
+                                                    break;
+                                            }
+                                        }
+                                        <span class="comprobacion-badge @badgeClass">@estadoText</span>
+                                    </td>
+                                    <td>
+                                        <a asp-action="Comprobar" asp-route-id="@comprobacion.SolicitudViajeId"
+                                           class="btn-comprobacion-secondary btn-sm">
+                                            <i class="fas fa-eye me-1"></i>Ver Detalles
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- SI NO HAY NADA QUE MOSTRAR -->
+    @if (!solicitudesAprobadas.Any() &&
+        !comprobacionesPendientes.Any() &&
+        !comprobacionesEnProceso.Any() &&
+        !comprobacionesConCorrecciones.Any() &&
+        !comprobacionesAutomaticas.Any())
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-check-circle fa-4x" style="color: var(--viamtek-green); margin-bottom: 1rem;"></i>
+            <h5 style="color: var(--viamtek-green); margin-bottom: 0.5rem;">No tienes comprobaciones pendientes</h5>
+            <p style="color: var(--secondary-text);">No tienes solicitudes aprobadas para comprobar ni comprobaciones en proceso.</p>
+        </div>
+    }
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/comprobaciones.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            document.querySelectorAll('tbody tr').forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                });
+
+                row.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = '';
+                });
+            });
+        });
+    </script>
+}

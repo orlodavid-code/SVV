@@ -1,0 +1,918 @@
+﻿@model SVV.Models.SolicitudesViaje
+
+@{
+    ViewData["Title"] = "Detalles de Solicitud - Aprobación";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var fechaVacia = DateOnly.MinValue;
+    var duracionViaje = 0;
+
+    if (Model?.FechaSalida != null && Model?.FechaRegreso != null && Model.FechaSalida != fechaVacia && Model.FechaRegreso != fechaVacia)
+    {
+        var salida = Model.FechaSalida.ToDateTime(TimeOnly.MinValue);
+        var regreso = Model.FechaRegreso.ToDateTime(TimeOnly.MinValue);
+        duracionViaje = (regreso - salida).Days + 1;
+    }
+
+    var estadoCodigo = Model?.Estado?.Codigo ?? "PENDIENTE";
+    var totalSolicitado = Model?.RequiereAnticipo == true ? Model.MontoAnticipo ?? 0 : 0;
+    
+    // Verificar si hubo cambio de tipo de viático
+    var flujoAprobacion = Model?.FlujoAprobaciones?.OrderByDescending(f => f.CreatedAt).FirstOrDefault();
+    var contieneCambioTipo = flujoAprobacion?.Comentarios?.Contains("Tipo de viático cambiado") ?? false;
+    var comentarioCambio = flujoAprobacion?.Comentarios ?? "";
+}
+
+@functions {
+    string GetBadgeClass(string estado)
+    {
+        if (string.IsNullOrEmpty(estado)) return "badge bg-secondary";
+        estado = estado.ToUpper();
+        if (estado.Contains("PENDIENTE") || estado.Contains("BORRADOR") || estado.Contains("ENVIADA"))
+            return "badge bg-warning text-dark";
+        if (estado.Contains("APROBADA") || estado.Contains("COMPLETADA"))
+            return "badge bg-success";
+        if (estado.Contains("RECHAZADA") || estado.Contains("CANCELADA"))
+            return "badge bg-danger";
+        if (estado.Contains("PAGADO") || estado.Contains("PROCESO"))
+            return "badge bg-info";
+        return "badge bg-secondary";
+    }
+}
+
+<div class="container-fluid aprobaciones-container">
+    <div class="aprobaciones-header border-definido">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="aprobaciones-title"><i class="fas fa-file-alt me-2"></i>Detalles de Solicitud</h1>
+                <p class="aprobaciones-subtitle">Revisión para aprobación - @Model?.CodigoSolicitud</p>
+            </div>
+            <div class="btn-group">
+                <a asp-action="Pendientes" class="btn-viamtek-outline">
+                    <i class="fas fa-arrow-left me-2"></i>Volver a Pendientes
+                </a>
+                <button class="btn-viamtek-gradient" id="btnImprimir">
+                    <i class="fas fa-print me-2"></i>Generar PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="recent-activity-card border-definido">
+                <div class="doc-header mb-4 border-bottom-definido">
+                    <div class="doc-empresa text-center mb-3">
+                        <h2 class="text-accent mb-1">CUVITEK Software S.C.</h2>
+                        <p class="text-light opacity-75">SOLICITUD DE VIÁTICOS</p>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-2">
+                            <strong class="text-accent">Código:</strong>
+                            <span class="text-white">@Model?.CodigoSolicitud</span>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <strong class="text-accent">Fecha:</strong>
+                            <span class="text-white">@DateTime.Now.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <strong class="text-accent">Estado:</strong>
+                            <span class="@GetBadgeClass(estadoCodigo) border-definido">@estadoCodigo</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN DE NOTIFICACIÓN DE CAMBIO DE TIPO DE VIÁTICO (SOLO PARA DIRECCIÓN) -->
+                @if (ViewBag.RolId == 5 && contieneCambioTipo && !string.IsNullOrEmpty(comentarioCambio))
+                {
+                    <div class="seccion mb-4 border-seccion border-info">
+                        <h3 class="seccion-titulo text-info mb-3 border-bottom-titulo">
+                            <i class="fas fa-exchange-alt me-2"></i>Cambio Realizado por Finanzas
+                        </h3>
+                        <div class="alert alert-info border-definido">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Finanzas modificó el tipo de viático:</strong>
+                            <div class="mt-2 p-2 bg-dark rounded">
+                                @comentarioCambio
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="seccion mb-4 border-seccion">
+                    <h3 class="seccion-titulo text-accent mb-3 border-bottom-titulo">
+                        <i class="fas fa-info-circle me-2"></i>Información General
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-light">Empleado</label>
+                            <div class="dato-valor text-white border-dato">@Model?.Empleado?.Nombre @Model?.Empleado?.Apellidos</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-light">Proyecto</label>
+                            <div class="dato-valor text-white border-dato">@Model?.NombreProyecto</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-light">Destino</label>
+                            <div class="dato-valor text-white border-dato">@Model?.Destino</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-light">Tipo de Viático</label>
+                            <div class="dato-valor text-white border-dato">@Model?.TipoViatico?.Nombre</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-light">Duración</label>
+                            <div class="dato-valor text-white border-dato">@duracionViaje días</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-light">Monto Anticipo</label>
+                            <div class="dato-valor text-success fw-bold border-dato">@(Model?.MontoAnticipo?.ToString("C") ?? "N/A")</div>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label text-light">Periodo</label>
+                            <div class="dato-valor text-white border-dato">
+                                @(Model?.FechaSalida != DateOnly.MinValue ? Model.FechaSalida.ToString("dd/MM/yyyy") : "-") al
+                                @(Model?.FechaRegreso != DateOnly.MinValue ? Model.FechaRegreso.ToString("dd/MM/yyyy") : "-")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="seccion mb-4 border-seccion">
+                    <h3 class="seccion-titulo text-accent mb-3 border-bottom-titulo">
+                        <i class="fas fa-route me-2"></i>Detalles del Viaje
+                    </h3>
+                    <div class="mb-3">
+                        <label class="form-label text-light">Motivo del Viaje</label>
+                        <div class="dato-valor text-white border-dato">@Model?.Motivo</div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model?.DireccionEmpresa))
+                    {
+                        <div class="mb-3">
+                            <label class="form-label text-light">Dirección Destino</label>
+                            <div class="dato-valor text-white border-dato">@Model.DireccionEmpresa</div>
+                        </div>
+                    }
+                </div>
+
+                <div class="seccion mb-4 border-seccion">
+                    <h3 class="seccion-titulo text-accent mb-3 border-bottom-titulo">
+                        <i class="fas fa-bus me-2"></i>Información de Transporte
+                    </h3>
+                    <div class="row">
+                        @if (!string.IsNullOrEmpty(Model?.MedioTrasladoPrincipal))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-light">Medio Traslado Principal</label>
+                                <div class="dato-valor text-white border-dato">@Model.MedioTrasladoPrincipal</div>
+                            </div>
+                        }
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-light">Requiere Taxi Domicilio</label>
+                            <div class="dato-valor text-white border-dato">@(Model?.RequiereTaxiDomicilio == true ? "Sí" : "No")</div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model?.DireccionTaxiOrigen))
+                        {
+                            <div class="col-12 mb-3">
+                                <label class="form-label text-light">Dirección Origen Taxi</label>
+                                <div class="dato-valor text-white border-dato">@Model.DireccionTaxiOrigen</div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model?.DireccionTaxiDestino))
+                        {
+                            <div class="col-12 mb-3">
+                                <label class="form-label text-light">Dirección Destino Taxi</label>
+                                <div class="dato-valor text-white border-dato">@Model.DireccionTaxiDestino</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="seccion mb-4 border-seccion">
+                    <h3 class="seccion-titulo text-accent mb-3 border-bottom-titulo">
+                        <i class="fas fa-hotel me-2"></i>Información de Hospedaje
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-light">Requiere Hospedaje</label>
+                            <div class="dato-valor text-white border-dato">@(Model?.RequiereHospedaje == true ? "Sí" : "No")</div>
+                        </div>
+                        @if (Model?.NochesHospedaje > 0)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-light">Noches Hospedaje</label>
+                                <div class="dato-valor text-white border-dato">@Model.NochesHospedaje</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="seccion mb-4 border-seccion">
+                    <h3 class="seccion-titulo text-accent mb-3 border-bottom-titulo">
+                        <i class="fas fa-list me-2"></i>Información Adicional
+                    </h3>
+                    <div class="row">
+                        @if (!string.IsNullOrEmpty(Model?.EmpresaVisitada))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-light">Empresa Visitada</label>
+                                <div class="dato-valor text-white border-dato">@Model.EmpresaVisitada</div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model?.LugarComisionDetallado))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-light">Lugar Comisión Detallado</label>
+                                <div class="dato-valor text-white border-dato">@Model.LugarComisionDetallado</div>
+                            </div>
+                        }
+                        @if (Model?.NumeroPersonas > 0)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-light">Número de Personas</label>
+                                <div class="dato-valor text-white border-dato">@Model.NumeroPersonas</div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model?.Colaboradores))
+                        {
+                            <div class="col-12 mb-3">
+                                <label class="form-label text-light">Colaboradores</label>
+                                <div class="dato-valor text-white border-dato">@Model.Colaboradores</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @if (Model?.Anticipos != null && Model.Anticipos.Any())
+                {
+                    <div class="seccion mb-4 border-seccion">
+                        <h3 class="seccion-titulo text-accent mb-3 border-bottom-titulo">
+                            <i class="fas fa-money-bill-wave me-2"></i>Anticipos Solicitados
+                        </h3>
+                        
+                        <div class="tabla-precios">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-dark mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th width="60" class="text-center">#</th>
+                                            <th>Monto Solicitado</th>
+                                            <th width="120" class="text-center">Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var (anticipo, index) in Model.Anticipos.Select((a, i) => (a, i)))
+                                        {
+                                            <tr class="fila-anticipo">
+                                                <td class="text-center align-middle">
+                                                    <span class="numero-fila">@(index + 1)</span>
+                                                </td>
+                                                <td class="align-middle">
+                                                    <div class="monto-anticipo text-success fw-bold">
+                                                        @anticipo.MontoSolicitado.ToString("C")
+                                                    </div>
+                                                </td>
+                                                <td class="text-center align-middle">
+                                                    <span class="badge estado-anticipo @GetBadgeClass(anticipo.Estado) border-definido">
+                                                        @anticipo.Estado
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="total-concepto">
+                                            <td colspan="3" class="text-end">
+                                                <strong>Total Anticipos: <span class="subtotal">@Model.Anticipos.Sum(a => a.MontoSolicitado).ToString("C")</span></strong>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- SECCIÓN DE CAMBIO DE TIPO DE VIÁTICO PARA FINANZAS - SOLO BOTÓN GUARDAR -->
+                @if (ViewBag.RolId == 4 && (Model.EstadoId == 6 || Model.EstadoId == 7))
+                {
+                    <div class="seccion mb-4 border-seccion border-warning">
+                        <h3 class="seccion-titulo text-warning mb-3 border-bottom-titulo">
+                            <i class="fas fa-exchange-alt me-2"></i>Gestión de Tipo de Viático
+                        </h3>
+                        
+                        <div class="alert alert-warning border-definido">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Finanzas puede modificar el tipo de viático:</strong> 
+                            Cambia el tipo si no es adecuado, luego envía a Dirección.
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label class="form-label fw-bold text-light">Tipo de Viático Actual:</label>
+                                    <div class="dato-valor text-white border-dato bg-dark p-3 rounded">
+                                        <strong id="tipoActualDisplay">@Model.TipoViatico?.Nombre</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="NuevoTipoViaticoId" class="form-label fw-bold text-light">
+                                        Seleccionar Nuevo Tipo:
+                                    </label>
+                                    <select class="form-control form-select-lg border-dato" 
+                                            id="NuevoTipoViaticoId" 
+                                            name="NuevoTipoViaticoId"
+                                            data-tipo-actual="@Model.TipoViaticoId">
+                                         <option value="">-- Mantener tipo actual --</option>
+                                            @foreach (var tipo in ViewBag.TiposViatico as List<SVV.Models.TiposViatico>)
+                                            {
+                                                <option value="@tipo.Id" selected="@(Model.TipoViaticoId == tipo.Id ? "selected" : null)">
+                                                    @tipo.Nombre
+                                                </option>
+                                            }
+                                        </select>
+                                    <small class="form-text text-muted">
+                                        Selecciona un nuevo tipo de viático y guarda los cambios.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PREVIEW DEL CAMBIO -->
+                        <div id="previewCambioTipo" class="alert alert-info d-none">
+                            <i class="fas fa-sync-alt me-2"></i>
+                            <strong>Cambio a realizar:</strong>
+                            <span id="tipoActualPreview">@Model.TipoViatico?.Nombre</span>
+                            <i class="fas fa-arrow-right mx-2"></i>
+                            <span id="tipoNuevoPreview" class="fw-bold"></span>
+                        </div>
+
+                        <!-- BOTÓN DE GUARDAR CAMBIO DE TIPO -->
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <!-- FORMULARIO 1: GUARDAR CAMBIO DE TIPO -->
+                                <form id="formCambiarTipo" 
+                                      asp-action="ActualizarTipoViatico" 
+                                      asp-route-id="@Model.Id" 
+                                      method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="NuevoTipoViaticoId" id="inputNuevoTipoViatico" value="" />
+                                    <button type="submit" id="btnGuardarTipo" class="btn btn-guardar-tipo w-100" disabled>
+                                        <i class="fas fa-save me-2"></i>Guardar Cambio
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- HISTORIAL DE CAMBIOS -->
+                        @{
+                            var cambiosTipo = Model.FlujoAprobaciones?
+                                .Where(f => f.Comentarios != null && f.Comentarios.Contains("Tipo de viático cambiado"))
+                                .OrderByDescending(f => f.CreatedAt)
+                                .ToList();
+                        }
+                        
+                        @if (cambiosTipo != null && cambiosTipo.Any())
+                        {
+                            <div class="mt-4 pt-3 border-top">
+                                <h5 class="text-light mb-3">
+                                    <i class="fas fa-history me-2"></i>Historial de Cambios
+                                </h5>
+                                <div class="list-group">
+                                    @foreach (var cambio in cambiosTipo)
+                                    {
+                                        <div class="list-group-item bg-dark text-light border-light">
+                                            <div class="d-flex justify-content-between">
+                                                <small class="text-info">
+                                                    <i class="fas fa-user me-1"></i>
+                                                    @cambio.EmpleadoAprobador?.Nombre @cambio.EmpleadoAprobador?.Apellidos
+                                                </small>
+                                                <small class="text-muted">
+                                                    @cambio.CreatedAt?.ToString("dd/MM/yyyy HH:mm")
+                                                </small>
+                                            </div>
+                                            <div class="mt-1">
+                                                @cambio.Comentarios
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <div class="seccion mb-4 border-seccion">
+                    <h3 class="seccion-titulo text-accent mb-3 border-bottom-titulo">
+                        <i class="fas fa-clipboard-list me-2"></i>Instrucciones y Observaciones
+                    </h3>
+                    <div class="alert alert-info border-definido">
+                        <p class="mb-2"><strong>Plazo para comprobación:</strong> 5 días hábiles posteriores al término de la comisión.</p>
+                        <p class="mb-2"><strong>Documentación requerida:</strong> Facturas, tickets, comprobantes en formato PDF o XLS.</p>
+                        <p class="mb-0">
+                            <strong>Periodo del viaje:</strong> @duracionViaje día(s) del
+                            @(Model?.FechaSalida != DateOnly.MinValue ? Model.FechaSalida.ToString("dd/MM/yyyy") : "-") al
+                            @(Model?.FechaRegreso != DateOnly.MinValue ? Model.FechaRegreso.ToString("dd/MM/yyyy") : "-").
+                        </p>
+                    </div>
+                </div>
+
+                <div class="seccion border-seccion">
+                    <h3 class="seccion-titulo text-accent mb-3 border-bottom-titulo">
+                        <i class="fas fa-signature me-2"></i>Autorizaciones
+                    </h3>
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-3">
+                            <div class="firma-item p-3 border-firma">
+                                <div class="firma-label text-light mb-2">Solicitante</div>
+                                <div class="firma-linea border-bottom mb-2" style="height: 2px;"></div>
+                                <div class="firma-nombre text-muted">Nombre y Firma</div>
+                                <div class="firma-cargo text-accent">SOLICITANTE</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="firma-item p-3 border-firma">
+                                <div class="firma-label text-light mb-2">Jefe Inmediato</div>
+                                <div class="firma-linea border-bottom mb-2" style="height: 2px;"></div>
+                                <div class="firma-nombre text-muted">Nombre y Firma</div>
+                                <div class="firma-cargo text-accent">JEFE INMEDIATO</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="firma-item p-3 border-firma">
+                                <div class="firma-label text-light mb-2">Finanzas</div>
+                                <div class="firma-linea border-bottom mb-2" style="height: 2px;"></div>
+                                <div class="firma-nombre text-muted">Nombre y Firma</div>
+                                <div class="firma-cargo text-accent">FINANZAS</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-footer mt-4 pt-3 border-top-definido">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                Documento generado el @DateTime.Now.ToString("dd/MM/yyyy a las HH:mm")
+                            </small>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <small class="text-muted">Página 1 de 1</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTONES DE APROBAR, RECHAZAR, COTIZACIÓN (para todos los roles) -->
+    @if (ViewBag.EsRH == null || !ViewBag.EsRH)
+    {
+        <div class="row detalles-botones">
+            <div class="col-12 text-center">
+                @if (ViewBag.RolId == 4 && (Model.EstadoId == 6 || Model.EstadoId == 7))
+                {
+                    <a asp-controller="Finanzas" asp-action="CrearCotizacion" 
+                       asp-route-solicitudId="@Model.Id"
+                       class="btn btn-cotizacion-especial me-3">
+                        <i class="fas fa-file-invoice-dollar me-2"></i>Generar Cotización
+                    </a>
+
+                    <!-- FORMULARIO 2: APROBAR Y ENVIAR A DIRECCIÓN -->
+                    <form id="formAprobarFinanzas" 
+                          asp-action="AprobarConTipoViatico" 
+                          asp-route-id="@Model.Id" 
+                          method="post" 
+                          style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" id="btnAprobarFinanzas" class="btn-aprobar me-3">
+                            <i class="fas fa-paper-plane me-2"></i>Enviar a Dirección
+                        </button>
+                    </form>
+
+                    <form asp-action="Rechazar" asp-route-id="@Model.Id" method="post" style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-rechazar">
+                            <i class="fas fa-times me-2"></i>Rechazar Solicitud
+                        </button>
+                    </form>
+                }
+                else if (ViewBag.RolId != 4) 
+                {
+                    <!-- Para otros roles (no Finanzas) -->
+                    <form asp-action="Aprobar" asp-route-id="@Model.Id" method="post" style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-aprobar me-3">
+                            <i class="fas fa-check me-2"></i>Aprobar Solicitud
+                        </button>
+                    </form>
+
+                    <form asp-action="Rechazar" asp-route-id="@Model.Id" method="post" style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-rechazar">
+                            <i class="fas fa-times me-2"></i>Rechazar Solicitud
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    }
+</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/aprobaciones.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. ELEMENTOS DEL DOM PARA LA SECCIÓN DE FINANZAS
+            const selectTipo = document.getElementById('NuevoTipoViaticoId');
+            const inputNuevoTipo = document.getElementById('inputNuevoTipoViatico');
+            const btnGuardarTipo = document.getElementById('btnGuardarTipo');
+            const formCambiarTipo = document.getElementById('formCambiarTipo');
+            const formAprobarFinanzas = document.getElementById('formAprobarFinanzas');
+            const previewCambioTipo = document.getElementById('previewCambioTipo');
+            const tipoActualPreview = document.getElementById('tipoActualPreview');
+            const tipoNuevoPreview = document.getElementById('tipoNuevoPreview');
+
+            const tipoActualNombre = '@Model.TipoViatico?.Nombre' || 'Actual';
+            const tipoActualId = parseInt('@Model.TipoViaticoId');
+
+            // 2. MANEJAR CAMBIOS EN EL SELECT (SOLO PARA FINANZAS)
+            if (selectTipo) {
+                selectTipo.addEventListener('change', function() {
+                    const nuevoValor = parseInt(this.value);
+                    const textoSeleccionado = this.options[this.selectedIndex]?.text || '';
+                    const esCambio = nuevoValor && nuevoValor !== tipoActualId;
+
+                    // Actualizar input hidden
+                    if (inputNuevoTipo) {
+                        inputNuevoTipo.value = nuevoValor;
+                    }
+
+                    // Habilitar/deshabilitar botón de guardar
+                    if (btnGuardarTipo) {
+                        btnGuardarTipo.disabled = !esCambio;
+                    }
+
+                    // Mostrar/ocultar preview
+                    if (previewCambioTipo && tipoNuevoPreview && tipoActualPreview) {
+                        if (esCambio) {
+                            tipoActualPreview.textContent = tipoActualNombre;
+                            tipoNuevoPreview.textContent = textoSeleccionado;
+                            previewCambioTipo.classList.remove('d-none');
+
+                            // Efecto visual
+                            selectTipo.classList.add('tipo-cambiado');
+                            selectTipo.style.borderColor = '#3b82f6';
+                            selectTipo.style.boxShadow = '0 0 0 0.2rem rgba(59, 130, 246, 0.25)';
+                        } else {
+                            previewCambioTipo.classList.add('d-none');
+                            selectTipo.classList.remove('tipo-cambiado');
+                            selectTipo.style.borderColor = '';
+                            selectTipo.style.boxShadow = '';
+                        }
+                    }
+                });
+
+                // Inicializar estado
+                selectTipo.dispatchEvent(new Event('change'));
+            }
+
+            // 3. FORMULARIO PARA GUARDAR CAMBIO DE TIPO
+            if (formCambiarTipo) {
+                formCambiarTipo.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    if (!selectTipo.value || parseInt(selectTipo.value) === tipoActualId) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Sin cambios',
+                            text: 'No hay cambios en el tipo de viático para guardar.',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        return;
+                    }
+
+                    const textoSeleccionado = selectTipo.options[selectTipo.selectedIndex]?.text || '';
+
+                    Swal.fire({
+                        title: 'Confirmar Cambio',
+                        html: `¿Estás seguro de cambiar el tipo de viático?<br><br>
+                              <strong>De:</strong> ${tipoActualNombre}<br>
+                              <strong>A:</strong> ${textoSeleccionado}`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3b82f6',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: 'Sí, guardar cambio',
+                        cancelButtonText: 'Cancelar',
+                        reverseButtons: true,
+                        background: 'var(--card-bg)',
+                        color: 'var(--primary-text)'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Mostrar carga
+                            Swal.fire({
+                                title: 'Guardando...',
+                                text: 'Actualizando tipo de viático en la base de datos',
+                                allowOutsideClick: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                }
+                            });
+
+                            // Enviar formulario
+                            formCambiarTipo.submit();
+                        }
+                    });
+                });
+            }
+
+            // 4. FORMULARIO PARA APROBAR Y ENVIAR A DIRECCIÓN (que ahora está en la parte inferior)
+            if (formAprobarFinanzas) {
+                formAprobarFinanzas.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    // Verificar si hubo cambios recientes
+                    const cambiosRecientes = document.querySelector('.cambio-realizado');
+                    const hayCambiosPendientes = selectTipo && selectTipo.value &&
+                                                 parseInt(selectTipo.value) !== tipoActualId &&
+                                                 !cambiosRecientes;
+
+                    if (hayCambiosPendientes) {
+                        Swal.fire({
+                            title: 'Cambios pendientes',
+                            html: `Has seleccionado un nuevo tipo de viático pero no has guardado los cambios.<br><br>
+                                  ¿Quieres guardar los cambios antes de enviar a Dirección?`,
+                            icon: 'warning',
+                            showDenyButton: true,
+                            showCancelButton: true,
+                            confirmButtonText: 'Guardar y Enviar',
+                            denyButtonText: 'Enviar sin guardar',
+                            cancelButtonText: 'Cancelar',
+                            confirmButtonColor: '#10b981',
+                            denyButtonColor: '#3b82f6',
+                            cancelButtonColor: '#ef4444',
+                            reverseButtons: true,
+                            background: 'var(--card-bg)',
+                            color: 'var(--primary-text)'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Primero guardar cambios, luego aprobar
+                                guardarYTEnviar();
+                            } else if (result.isDenied) {
+                                // Enviar sin guardar cambios
+                                enviarSinGuardar();
+                            }
+                        });
+                    } else {
+                        // Enviar directamente
+                        confirmarEnvioDireccion();
+                    }
+                });
+            }
+
+            // 5. FUNCIONES AUXILIARES PARA FINANZAS
+            function guardarYTEnviar() {
+                // Primero guardar el cambio de tipo
+                Swal.fire({
+                    title: 'Guardando cambios...',
+                    text: 'Actualizando tipo de viático',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Crear un formulario temporal para guardar
+                const formData = new FormData(formCambiarTipo);
+
+                fetch(formCambiarTipo.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Luego enviar a dirección
+                        Swal.fire({
+                            title: 'Enviando a Dirección...',
+                            text: 'Aprobando solicitud',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        // Enviar formulario de aprobación
+                        formAprobarFinanzas.submit();
+                    } else {
+                        throw new Error('Error al guardar cambios');
+                    }
+                })
+                .catch(error => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudieron guardar los cambios: ' + error.message
+                    });
+                });
+            }
+
+            function enviarSinGuardar() {
+                Swal.fire({
+                    title: 'Enviar sin guardar',
+                    text: 'Los cambios en el tipo de viático se perderán. ¿Continuar?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3b82f6',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Sí, enviar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Restaurar valor original en el select
+                        selectTipo.value = tipoActualId;
+                        selectTipo.dispatchEvent(new Event('change'));
+
+                        // Enviar formulario
+                        formAprobarFinanzas.submit();
+                    }
+                });
+            }
+
+            function confirmarEnvioDireccion() {
+                Swal.fire({
+                    title: '¿Enviar a Dirección?',
+                    html: `La solicitud será enviada a Dirección para su aprobación final.<br><br>
+                          <strong>Tipo de viático:</strong> ${tipoActualNombre}`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#10b981',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Sí, enviar',
+                    cancelButtonText: 'Cancelar',
+                    reverseButtons: true,
+                    background: 'var(--card-bg)',
+                    color: 'var(--primary-text)'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Enviando...',
+                            text: 'Procesando solicitud',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        formAprobarFinanzas.submit();
+                    }
+                });
+            }
+
+            // 6. EFECTO VISUAL AL CARGAR SI HAY CAMBIOS RECIENTES
+            setTimeout(() => {
+                const successMessage = '@TempData["Success"]';
+                if (successMessage && successMessage.includes("Tipo de viático actualizado")) {
+                    // Resaltar visualmente
+                    const seccionTipo = document.querySelector('.border-warning');
+                    if (seccionTipo) {
+                        seccionTipo.classList.add('cambio-realizado');
+
+                        // Actualizar el texto del tipo actual
+                        const datoValor = document.querySelector('.dato-valor strong');
+                        if (datoValor && successMessage.includes("→")) {
+                            const nuevoNombre = successMessage.split("→")[1].split("'")[1];
+                            datoValor.textContent = nuevoNombre;
+                        }
+                    }
+                }
+            }, 500);
+
+            // 7. BOTÓN DE IMPRIMIR (mantener funcionalidad existente)
+            const btnImprimir = document.getElementById('btnImprimir');
+            if (btnImprimir) {
+                btnImprimir.addEventListener('click', generarPDF);
+            }
+
+            // 8. FORMULARIO DE RECHAZAR (para todos los roles)
+            const formRechazar = document.querySelector('form[action*="Rechazar"]');
+            if (formRechazar) {
+                formRechazar.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: '¿Rechazar Solicitud?',
+                        text: 'Esta acción no se puede deshacer.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: 'Sí, rechazar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            this.submit();
+                        }
+                    });
+                });
+            }
+
+            // 9. FORMULARIO DE APROBAR (para otros roles, no Finanzas)
+            const formAprobar = document.querySelector('form[action*="Aprobar"]:not(#formAprobarFinanzas)');
+            if (formAprobar) {
+                formAprobar.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: '¿Aprobar Solicitud?',
+                        text: 'La solicitud será aprobada y avanzará a la siguiente etapa.',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#10b981',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: 'Sí, aprobar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            this.submit();
+                        }
+                    });
+                });
+            }
+
+            // 10. FUNCIÓN GENERAR PDF (mantener existente)
+            function generarPDF(e) {
+                if (e) e.preventDefault();
+
+                if (!btnImprimir) return;
+
+                const originalText = btnImprimir.innerHTML;
+                btnImprimir.disabled = true;
+                btnImprimir.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generando PDF...';
+
+                Swal.fire({
+                    title: 'Generando PDF',
+                    html: '<i class="fas fa-file-pdf fa-3x mb-2"></i><p>Preparando documento…</p>',
+                    icon: 'info',
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    timer: 1500
+                });
+
+                setTimeout(() => {
+                    document.body.classList.add('printing-pdf');
+
+                    const elementosCriticos = document.querySelectorAll(
+                        '.aprobaciones-container, .recent-activity-card, .doc-header, .seccion'
+                    );
+
+                    elementosCriticos.forEach(el => {
+                        el.style.setProperty('background', '#ffffff', 'important');
+                        el.style.setProperty('color', '#000000', 'important');
+                    });
+
+                    setTimeout(() => {
+                        window.print();
+
+                        setTimeout(() => {
+                            document.body.classList.remove('printing-pdf');
+                            elementosCriticos.forEach(el => {
+                                el.style.removeProperty('background');
+                                el.style.removeProperty('color');
+                            });
+
+                            btnImprimir.disabled = false;
+                            btnImprimir.innerHTML = originalText;
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'PDF listo',
+                                text: 'El documento se ha generado correctamente.',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                        }, 500);
+                    }, 300);
+                }, 1600);
+            }
+
+            // 11. Manejar impresión desde atajos de teclado
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                    e.preventDefault();
+                    generarPDF();
+                }
+            });
+        });
+    </script>
+}

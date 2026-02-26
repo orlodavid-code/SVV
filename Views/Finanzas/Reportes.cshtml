@@ -1,0 +1,625 @@
+﻿@using SVV.ViewModels
+@{
+    ViewData["Title"] = "Dashboard de Reportes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // VALIDACIÓN CRÍTICA - ASEGURAR QUE EL MODELO NO SEA NULO
+    var viewModel = Model ?? new DashboardReportesViewModel();
+    var resumen = viewModel.Resumen ?? new ResumenGeneralViewModel();
+    var filtros = viewModel.Filtros ?? new FiltrosReportesViewModel();
+    var departamentos = viewModel.Departamentos ?? new List<string>();
+
+    // Inicializar propiedades del resumen
+    resumen.TotalGastado = resumen.TotalGastado;
+    resumen.TotalAnticipos = resumen.TotalAnticipos;
+    resumen.TotalSolicitudes = resumen.TotalSolicitudes;
+    resumen.PromedioAnticipo = resumen.PromedioAnticipo;
+    resumen.TotalComprobaciones = resumen.TotalComprobaciones;
+    resumen.SolicitudesAprobadas = resumen.SolicitudesAprobadas;
+    resumen.SolicitudesPendientes = resumen.SolicitudesPendientes;
+
+    // Calcular eficiencia de forma segura
+    var eficienciacalculada = (resumen.TotalAnticipos > 0)
+        ? (resumen.TotalGastado / resumen.TotalAnticipos * 100)
+        : 0;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/reportes.css" />
+}
+
+<div class="reportes-page">
+    <!-- Header principal -->
+    <div class="reportes-header">
+        <h1 class="text-white mb-0">
+            <i class="fas fa-chart-bar me-2"></i>Dashboard de Reportes Financieros
+        </h1>
+        <div class="export-buttons">
+            <button id="exportarExcel" class="export-btn" title="Exportar todo el dashboard a Excel">
+                <i class="fas fa-file-excel"></i> Exportar Excel
+            </button>
+            <button id="actualizarDashboard" class="export-btn" title="Actualizar todos los datos">
+                <i class="fas fa-sync-alt"></i> Actualizar
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros-container">
+        <h6 class="reportes-title mb-3">
+            <i class="fas fa-filter me-2"></i>Filtros Avanzados
+        </h6>
+        <div class="filtros-grid">
+            <div class="form-group">
+                <label class="form-label">Fecha Inicio</label>
+                <input type="date" id="fechaInicio" class="form-control"
+                       value="@(Model?.Filtros?.FechaInicio?.ToString("yyyy-MM-dd") ?? DateTime.Now.AddMonths(-1).ToString("yyyy-MM-dd"))">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Fecha Fin</label>
+                <input type="date" id="fechaFin" class="form-control"
+                       value="@(Model?.Filtros?.FechaFin?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd"))">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Departamento</label>
+                <select id="departamento" class="form-select">
+                    <option value="">Todos los departamentos</option>
+                    @if (Model?.Departamentos != null && Model.Departamentos.Count > 0)
+                    {
+                        foreach (var depto in Model.Departamentos)
+                        {
+                            if (!string.IsNullOrEmpty(depto))
+                            {
+                                <option value="@depto">@depto</option>
+                            }
+                        }
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Escenario</label>
+                <select id="escenario" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="REPOSICION_EMPRESA">Reposición Empresa</option>
+                    <option value="REPOSICION_COLABORADOR">Reposición Colaborador</option>
+                    <option value="SALDADA">Saldada</option>
+                    <option value="PAGO_AUTORIZADO">Pago Autorizado</option>
+                    <option value="CON_CORRECCIONES_PENDIENTES">Con Correcciones</option>
+                    <option value="PARCIALMENTE_APROBADA">Parcialmente Aprobada</option>
+                    <option value="EN_REVISION_JP">En Revisión JP</option>
+                </select>
+            </div>
+            <div class="form-group d-flex align-items-end">
+                <button id="aplicarFiltros" class="reportes-btn w-100">
+                    <i class="fas fa-filter"></i> Aplicar Filtros
+                </button>
+            </div>
+        </div>
+
+        <!-- Filtros rápidos mejorados -->
+        <div class="filtros-rapidos mt-3">
+            <span class="text-white" style="font-size: 14px; opacity: 0.8;">Filtros rápidos:</span>
+            <div class="btn-group btn-group-sm" role="group">
+                <input type="radio" class="btn-check" name="filtro-rapido" id="filtroUltimoMes" autocomplete="off">
+                <label class="btn btn-outline-primary" for="filtroUltimoMes">
+                    <i class="fas fa-calendar-week me-1"></i> Último mes
+                </label>
+
+                <input type="radio" class="btn-check" name="filtro-rapido" id="filtroEsteAnio" autocomplete="off">
+                <label class="btn btn-outline-primary" for="filtroEsteAnio">
+                    <i class="fas fa-calendar-alt me-1"></i> Este año
+                </label>
+
+                <input type="radio" class="btn-check" name="filtro-rapido" id="filtroRangoCompleto" autocomplete="off" checked>
+                <label class="btn btn-outline-primary" for="filtroRangoCompleto">
+                    <i class="fas fa-infinity me-1"></i> Todo el rango
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI Cards simplificadas -->
+    <div class="fade-in mt-4">
+        <div class="reportes-header mb-3">
+            <div class="reportes-title">
+                <i class="fas fa-chart-line"></i> Indicadores Principales
+            </div>
+        </div>
+        <div class="kpi-container">
+            <div class="kpi-card">
+                <div class="kpi-icon">
+                    <i class="fas fa-money-bill-wave text-primary"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-value kpi-primary" id="totalGastado">@Model?.Resumen?.TotalGastado.ToString("C")</div>
+                    <div class="kpi-label">Total Gastado</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">
+                    <i class="fas fa-hand-holding-usd text-success"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-value kpi-success" id="totalAnticipos">@Model?.Resumen?.TotalAnticipos.ToString("C")</div>
+                    <div class="kpi-label">Total Anticipos</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">
+                    <i class="fas fa-file-alt text-warning"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-value kpi-warning" id="totalSolicitudes">@Model?.Resumen?.TotalSolicitudes</div>
+                    <div class="kpi-label">Solicitudes</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">
+                    <i class="fas fa-calculator text-info"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-value kpi-info" id="promedioAnticipo">@Model?.Resumen?.PromedioAnticipo.ToString("C")</div>
+                    <div class="kpi-label">Promedio Anticipo</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">
+                    <i class="fas fa-receipt text-danger"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-value kpi-danger" id="totalComprobaciones">@Model?.Resumen?.TotalComprobaciones</div>
+                    <div class="kpi-label">Comprobaciones</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">
+                    <i class="fas fa-chart-line text-primary"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-value kpi-primary" id="eficiencia">
+                        @eficienciacalculada.ToString("N1")%
+                    </div>
+                    <div class="kpi-label">Eficiencia</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos Principales -->
+    <div class="reportes-grid mt-4">
+        <!-- Gráfico 1: Gastos por Departamento -->
+        <div class="reporte-chart-wrapper" data-chart="gastosdepartamento">
+            <div class="reporte-chart-header">
+                <div class="reporte-chart-title">
+                    <i class="fas fa-building"></i> Gastos por Departamento
+                </div>
+                <div class="chart-actions">
+                    <button class="chart-type-btn active" data-type="bar" title="Barras verticales" >
+                        <i class="fas fa-chart-bar"></i>
+                    </button>
+                    <button class="chart-type-btn" data-type="pie" title="Gráfico circular">
+                        <i class="fas fa-chart-pie"></i>
+                    </button>
+                    <button class="export-chart-btn" title="Exportar gráfico">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="chartGastosDepartamento"></canvas>
+            </div>
+        </div>
+
+        <!-- Gráfico 2: Top Anticipos -->
+        <div class="reporte-chart-wrapper" data-chart="anticiposmayores">
+            <div class="reporte-chart-header">
+                <div class="reporte-chart-title">
+                    <i class="fas fa-trophy"></i> Top 10 Anticipos Mayores
+                </div>
+                <div class="chart-actions">
+                    <button class="chart-type-btn active" data-type="bar" title="Barras verticales">
+                        <i class="fas fa-chart-bar"></i>
+                    </button>
+                    <button class="export-chart-btn" title="Exportar gráfico">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="chartAnticiposMayores"></canvas>
+            </div>
+        </div>
+
+        <!-- Gráfico 3: Escenarios de Liquidación -->
+        <div class="reporte-chart-wrapper" data-chart="escenarios">
+            <div class="reporte-chart-header">
+                <div class="reporte-chart-title">
+                    <i class="fas fa-money-bill-transfer"></i> Escenarios de Liquidación
+                </div>
+                <div class="chart-actions">
+                    <button class="chart-type-btn active" data-type="pie" title="Gráfico circular">
+                        <i class="fas fa-chart-pie"></i>
+                    </button>
+                    <button class="chart-type-btn" data-type="doughnut" title="Gráfico de dona">
+                        <i class="fas fa-circle-notch"></i>
+                    </button>
+                    <button class="export-chart-btn" title="Exportar gráfico">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="chartEscenarios"></canvas>
+            </div>
+        </div>
+
+        <!-- Gráfico 4: Estados de Comprobación -->
+        <div class="reporte-chart-wrapper" data-chart="estadoscomprobacion">
+            <div class="reporte-chart-header">
+                <div class="reporte-chart-title">
+                    <i class="fas fa-clipboard-check"></i> Estados de Comprobación
+                </div>
+                <div class="chart-actions">
+                    <button class="chart-type-btn active" data-type="pie" title="Gráfico circular">
+                        <i class="fas fa-chart-pie"></i>
+                    </button>
+                    <button class="chart-type-btn" data-type="doughnut" title="Gráfico de dona">
+                        <i class="fas fa-circle-notch"></i>
+                    </button>
+                    <button class="export-chart-btn" title="Exportar gráfico">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="chartEstadosComprobacion"></canvas>
+            </div>
+        </div>
+
+        <!-- Gráfico 5: Evolución Mensual -->
+        <div class="reporte-chart-wrapper full-width" data-chart="evolucionmensual">
+            <div class="reporte-chart-header">
+                <div class="reporte-chart-title">
+                    <i class="fas fa-calendar-alt"></i> Evolución Mensual de Gastos
+                </div>
+                <div class="chart-actions">
+                    <button class="chart-type-btn active" data-type="line" title="Gráfico de líneas">
+                        <i class="fas fa-chart-line"></i>
+                    </button>
+                    <button class="chart-type-btn" data-type="bar" title="Barras verticales">
+                        <i class="fas fa-chart-bar"></i>
+                    </button>
+                    <button class="export-chart-btn" title="Exportar gráfico">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="chartEvolucionMensual"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Detalle de Gastos -->
+    <div class="table-container mt-4">
+        <div class="reportes-header">
+            <div class="reportes-title">
+                <i class="fas fa-table"></i> Detalle de Gastos
+            </div>
+            <div class="export-buttons">
+                <!-- Solo el botón de exportar -->
+                <button id="exportarTabla" class="export-btn" title="Exportar tabla a Excel">
+                    <i class="fas fa-download"></i> Exportar
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive mt-3">
+            <table class="table table-reportes" id="tablaDetalleGastos" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Empleado</th>
+                        <th>Departamento</th>
+                        <th>Proyecto</th>
+                        <th class="text-end">Anticipo</th>
+                        <th class="text-end">Gastado</th>
+                        <th class="text-end">Diferencia</th>
+                        <th>Escenario</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th> 
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los datos se cargan dinámicamente -->
+                </tbody>
+                <tfoot class="table-totals">
+                    <tr>
+                        <td colspan="3" class="text-end"><strong>Totales:</strong></td>
+                        <td class="text-end" id="totalAnticipoTabla">$0.00</td>
+                        <td class="text-end" id="totalGastadoTabla">$0.00</td>
+                        <td class="text-end" id="totalDiferenciaTabla">$0.00</td>
+                        <td colspan="2"></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"
+            integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"></script>
+
+    <!-- DataTables -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+             window.dashboardData = {
+            TotalGastado: @(Model?.Resumen?.TotalGastado ?? 0),
+            TotalAnticipos: @(Model?.Resumen?.TotalAnticipos ?? 0),
+            TotalSolicitudes: @(Model?.Resumen?.TotalSolicitudes ?? 0),
+            PromedioAnticipo: @(Model?.Resumen?.PromedioAnticipo ?? 0),
+            TotalComprobaciones: @(Model?.Resumen?.TotalComprobaciones ?? 0),
+            SolicitudesAprobadas: @(Model?.Resumen?.SolicitudesAprobadas ?? 0),
+            SolicitudesPendientes: @(Model?.Resumen?.SolicitudesPendientes ?? 0)
+        };
+
+        window.sistemaReportes = null;
+    </script>
+    <script src="~/js/reportes.js"></script>
+
+    <script>
+        setTimeout(function() {
+            console.clear();
+            console.log("%c🔍 DIAGNÓSTICO COMPLETO DEL DASHBOARD 🔍", "font-size: 20px; color: #00ff00; font-weight: bold;");
+            console.log("=".repeat(80));
+
+            const diagnostico = {
+                errores: [],
+                advertencias: [],
+                info: []
+            };
+
+            // 1. VERIFICAR DEPENDENCIAS
+            console.log("\n%c1️⃣ VERIFICANDO DEPENDENCIAS", "font-size: 16px; color: #ffcc00; font-weight: bold;");
+
+            const dependencias = {
+                'jQuery': typeof $ !== 'undefined',
+                'Chart.js': typeof Chart !== 'undefined',
+                'DataTables': typeof $.fn.DataTable !== 'undefined',
+                'Bootstrap': typeof bootstrap !== 'undefined'
+            };
+
+            Object.entries(dependencias).forEach(([nombre, cargado]) => {
+                if (cargado) {
+                    console.log(`✅ ${nombre}: CARGADO`);
+                    diagnostico.info.push(`${nombre} cargado correctamente`);
+                } else {
+                    console.error(`❌ ${nombre}: NO CARGADO`);
+                    diagnostico.errores.push(`${nombre} no está cargado`);
+                }
+            });
+
+            // 2. VERIFICAR SISTEMA DE REPORTES
+            console.log("\n%c2️⃣ VERIFICANDO SISTEMA DE REPORTES", "font-size: 16px; color: #ffcc00; font-weight: bold;");
+
+            if (typeof window.sistemaReportes !== 'undefined' && window.sistemaReportes !== null) {
+                console.log("✅ SistemaReportes: INSTANCIADO");
+                console.log("   • initialLoadDone:", window.sistemaReportes.initialLoadDone);
+                console.log("   • isLoading:", window.sistemaReportes.isLoading);
+                console.log("   • Gráficos en memoria:", Object.keys(window.sistemaReportes.charts || {}).length);
+
+                if (!window.sistemaReportes.initialLoadDone) {
+                    diagnostico.advertencias.push("Sistema de reportes NO inicializado completamente");
+                }
+            } else {
+                console.error("❌ SistemaReportes: NO INSTANCIADO");
+                diagnostico.errores.push("SistemaReportes no está instanciado");
+            }
+
+            // 3. VERIFICAR CANVASES
+            // ==========================================
+            console.log("\n%c3️⃣ VERIFICANDO ELEMENTOS CANVAS", "font-size: 16px; color: #ffcc00; font-weight: bold;");
+
+            const canvasIds = [
+                'chartGastosDepartamento',
+                'chartAnticiposMayores',
+                'chartEvolucionMensual',
+                'chartEscenarios',
+                'chartEstadosComprobacion'
+            ];
+
+            canvasIds.forEach(id => {
+                const canvas = document.getElementById(id);
+                if (canvas) {
+                    const ctx = canvas.getContext('2d');
+                    const chart = Chart.getChart(canvas);
+
+                    console.log(`✅ ${id}:`);
+                    console.log(`   • Elemento: EXISTE`);
+                    console.log(`   • Contexto: ${ctx ? 'OK' : 'ERROR'}`);
+                    console.log(`   • Dimensiones: ${canvas.width}x${canvas.height}`);
+                    console.log(`   • Gráfico: ${chart ? 'CARGADO (' + chart.config.type + ')' : 'NO CARGADO'}`);
+
+                    if (!chart) {
+                        diagnostico.errores.push(`Gráfico ${id} no está renderizado`);
+                    }
+                } else {
+                    console.error(`❌ ${id}: NO EXISTE EN EL DOM`);
+                    diagnostico.errores.push(`Canvas ${id} no existe en el DOM`);
+                }
+            });
+
+            // ==========================================
+            // 4. VERIFICAR CONTENEDORES
+            // ==========================================
+            console.log("\n%c4️⃣ VERIFICANDO CONTENEDORES DE GRÁFICOS", "font-size: 16px; color: #ffcc00; font-weight: bold;");
+
+            const chartWrappers = [
+                'gastosdepartamento',
+                'anticiposmayores',
+                'evolucionmensual',
+                'escenarios',
+                'estadoscomprobacion'
+            ];
+
+            chartWrappers.forEach(wrapper => {
+                const element = document.querySelector(`[data-chart="${wrapper}"]`);
+                if (element) {
+                    const container = element.querySelector('.chart-container');
+                    const errorMsg = element.querySelector('.chart-error-message');
+
+                    console.log(`✅ Contenedor [data-chart="${wrapper}"]:`);
+                    console.log(`   • Contenedor existe: SÍ`);
+                    console.log(`   • .chart-container: ${container ? 'SÍ' : 'NO'}`);
+                    console.log(`   • Mensaje de error: ${errorMsg ? 'SÍ (HAY ERROR)' : 'NO'}`);
+
+                    if (errorMsg) {
+                        diagnostico.errores.push(`Contenedor ${wrapper} muestra mensaje de error`);
+                    }
+                } else {
+                    console.error(`❌ Contenedor [data-chart="${wrapper}"]: NO EXISTE`);
+                    diagnostico.errores.push(`Contenedor ${wrapper} no existe`);
+                }
+            });
+
+            // ==========================================
+            // 5. VERIFICAR FILTROS
+            // ==========================================
+            console.log("\n%c5️⃣ VERIFICANDO FILTROS", "font-size: 16px; color: #ffcc00; font-weight: bold;");
+
+            const fechaInicio = $('#fechaInicio').val();
+            const fechaFin = $('#fechaFin').val();
+            const departamento = $('#departamento').val();
+            const escenario = $('#escenario').val();
+
+            console.log("📅 Fecha Inicio:", fechaInicio || '(vacío)');
+            console.log("📅 Fecha Fin:", fechaFin || '(vacío)');
+            console.log("🏢 Departamento:", departamento || '(todos)');
+            console.log("🔄 Escenario:", escenario || '(todos)');
+
+            if (!fechaInicio && !fechaFin) {
+                diagnostico.info.push("Filtros de fecha vacíos (mostrando todo el rango)");
+            }
+
+            // ==========================================
+            // 6. PROBAR APIs
+            // ==========================================
+            console.log("\n%c6️⃣ PROBANDO APIs", "font-size: 16px; color: #ffcc00; font-weight: bold;");
+
+            const params = new URLSearchParams();
+            if (fechaInicio) params.append('fechaInicio', fechaInicio);
+            if (fechaFin) params.append('fechaFin', fechaFin);
+            const queryString = params.toString();
+
+            const apis = [
+                { name: 'Resumen General', url: `/Reportes/api/GetResumenGeneral?${queryString}` },
+                { name: 'Gastos Departamento', url: `/Reportes/api/GetGastosPorDepartamento?${queryString}` },
+                { name: 'Anticipos Mayores', url: `/Reportes/api/GetAnticiposMayores?${queryString}&top=5` },
+                { name: 'Escenarios', url: `/Reportes/api/GetEstadisticasPorEscenario?${queryString}` },
+                { name: 'Estados Comprobación', url: `/Reportes/api/GetComprobacionesPorEstado?${queryString}` }
+            ];
+
+            Promise.all(apis.map(api =>
+                fetch(api.url)
+                    .then(response => {
+                        if (!response.ok) {
+                            return { ...api, status: response.status, success: false, error: `HTTP ${response.status}` };
+                        }
+                        return response.json().then(data => ({
+                            ...api,
+                            status: response.status,
+                            success: true,
+                            dataLength: Array.isArray(data) ? data.length : (data.GastosMensuales ? data.GastosMensuales.length : 'N/A')
+                        }));
+                    })
+                    .catch(err => ({ ...api, success: false, error: err.message }))
+            )).then(results => {
+                results.forEach(result => {
+                    if (result.success) {
+                        console.log(`✅ ${result.name}: Status ${result.status}, Datos: ${result.dataLength}`);
+                    } else {
+                        console.error(`❌ ${result.name}: ${result.error}`);
+                        diagnostico.errores.push(`API ${result.name} falló: ${result.error}`);
+                    }
+                });
+
+                // ==========================================
+                // 7. RESUMEN FINAL
+                // ==========================================
+                console.log("\n%c" + "=".repeat(80), "color: #00ff00;");
+                console.log("%c📊 RESUMEN DEL DIAGNÓSTICO", "font-size: 18px; color: #00ff00; font-weight: bold;");
+                console.log("%c" + "=".repeat(80), "color: #00ff00;");
+
+                if (diagnostico.errores.length === 0) {
+                    console.log("%c✅ NO SE ENCONTRARON ERRORES CRÍTICOS", "font-size: 14px; color: #00ff00; font-weight: bold;");
+                } else {
+                    console.log("%c❌ ERRORES ENCONTRADOS:", "font-size: 14px; color: #ff0000; font-weight: bold;");
+                    diagnostico.errores.forEach((error, i) => {
+                        console.log(`   ${i + 1}. ${error}`);
+                    });
+                }
+
+                if (diagnostico.advertencias.length > 0) {
+                    console.log("\n%c⚠️ ADVERTENCIAS:", "font-size: 14px; color: #ffcc00; font-weight: bold;");
+                    diagnostico.advertencias.forEach((warn, i) => {
+                        console.log(`   ${i + 1}. ${warn}`);
+                    });
+                }
+
+                console.log("\n%c💡 INFORMACIÓN:", "font-size: 14px; color: #00ccff;");
+                diagnostico.info.forEach((info, i) => {
+                    console.log(`   ${i + 1}. ${info}`);
+                });
+
+                // ==========================================
+                // 8. SOLUCIONES SUGERIDAS
+                // ==========================================
+                if (diagnostico.errores.length > 0) {
+                    console.log("\n%c🔧 SOLUCIONES SUGERIDAS:", "font-size: 14px; color: #ff00ff; font-weight: bold;");
+
+                    if (diagnostico.errores.some(e => e.includes('no está cargado'))) {
+                        console.log("   1. Verifica que todas las bibliotecas estén cargadas en el orden correcto");
+                        console.log("      - jQuery debe cargar primero");
+                        console.log("      - Luego Chart.js");
+                        console.log("      - Luego DataTables");
+                    }
+
+                    if (diagnostico.errores.some(e => e.includes('no está renderizado'))) {
+                        console.log("   2. Los gráficos no se están renderizando:");
+                        console.log("      - Ejecuta en consola: window.sistemaReportes.cargarTodosLosGraficos()");
+                        console.log("      - O recarga la página con Ctrl+F5");
+                    }
+
+                    if (diagnostico.errores.some(e => e.includes('API') && e.includes('falló'))) {
+                        console.log("   3. Hay errores en las APIs:");
+                        console.log("      - Verifica que el controlador esté funcionando");
+                        console.log("      - Revisa los logs del servidor");
+                        console.log("      - Verifica la conexión a la base de datos");
+                    }
+
+                    if (diagnostico.errores.some(e => e.includes('no existe'))) {
+                        console.log("   4. Faltan elementos en el DOM:");
+                        console.log("      - Verifica que la vista Reportes.cshtml esté completa");
+                        console.log("      - Asegúrate que no haya errores de sintaxis en el Razor");
+                    }
+                }
+
+                console.log("\n%c" + "=".repeat(80), "color: #00ff00;");
+                console.log("%c🚀 COMANDOS ÚTILES:", "font-size: 14px; color: #00ccff; font-weight: bold;");
+                console.log("   • debugDashboard()           - Ver estado completo del sistema");
+                console.log("   • testAPIs()                 - Probar todas las APIs");
+                console.log("   • window.sistemaReportes.cargarTodosLosGraficos() - Recargar gráficos");
+                console.log("   • window.sistemaReportes.aplicarFiltros() - Aplicar filtros actuales");
+                console.log("%c" + "=".repeat(80), "color: #00ff00;");
+            });
+
+        }, 3000); // Esperar 3 segundos
+    </script>
+} 

@@ -1,0 +1,256 @@
+﻿@model dynamic
+@{
+    // Extraer propiedades del modelo dinámico
+    var solicitud = Model.Solicitud as SVV.Models.SolicitudesViaje;
+    var url = Model.Url as string;
+    var esBorrador = Model.EsBorrador ?? false;
+    var esEnvioAprobacion = Model.EsEnvioAprobacion ?? false;
+    var esParaRH = Model.EsParaRH ?? false;
+    var esParaJP = Model.EsParaJP ?? false;
+    var esParaFinanzas = Model.EsParaFinanzas ?? false;
+    var esSinJefe = Model.EsSinJefe ?? false;
+    var esNotificacionMultiple = Model.EsNotificacionMultiple ?? false;
+    var empleadoSolicitante = Model.EmpleadoSolicitante as string ?? "N/A";
+    var jefeDestinatario = Model.JefeDestinatario as string ?? "N/A";
+    var mensaje = Model.Mensaje as string ?? "";
+
+    // Determinar título
+    string tituloCorreo = "Notificación de Solicitud de Viáticos";
+    if (esBorrador) tituloCorreo = "Nuevo Borrador de Solicitud de Viáticos";
+    else if (esEnvioAprobacion)
+    {
+        if (esParaJP) tituloCorreo = "Solicitud de Viáticos para Aprobación (Jefe Directo)";
+        else if (esParaFinanzas) tituloCorreo = "Solicitud de Viáticos para Aprobación (Finanzas)";
+        else tituloCorreo = "Nueva Solicitud de Viáticos Enviada";
+    }
+
+    // Determinar estado
+    string colorEstado = "#6c757d";
+    string textoEstado = "Desconocido";
+    string iconoEstado = "❓";
+    if (solicitud != null)
+    {
+        switch (solicitud.EstadoId)
+        {
+            case 1: colorEstado = "#6c757d"; textoEstado = "📝 BORRADOR"; iconoEstado = "📝"; break;
+            case 2: colorEstado = "#ffc107"; textoEstado = "⏳ PENDIENTE DE JEFE"; iconoEstado = "⏳"; break;
+            case 6: colorEstado = "#17a2b8"; textoEstado = "💰 PENDIENTE DE FINANZAS"; iconoEstado = "💰"; break;
+            case 7: colorEstado = "#fd7e14"; textoEstado = "🔍 EN REVISIÓN (FINANZAS)"; iconoEstado = "🔍"; break;
+            case 8: colorEstado = "#007bff"; textoEstado = "👨‍💼 PENDIENTE DE DIRECCIÓN"; iconoEstado = "👨‍💼"; break;
+            case 9: colorEstado = "#28a745"; textoEstado = "✅ APROBADA"; iconoEstado = "✅"; break;
+            case 10: colorEstado = "#dc3545"; textoEstado = "❌ RECHAZADA"; iconoEstado = "❌"; break;
+            default: textoEstado = solicitud.Estado?.Codigo ?? "PENDIENTE"; break;
+        }
+    }
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        .button {
+            background: #007bff;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 15px 0;
+        }
+
+        .details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #007bff;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 10px 15px;
+            margin: 15px 0;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px 15px;
+            margin: 15px 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 Sistema de Viáticos Viamtek</h1>
+            <p>@tituloCorreo</p>
+            @if (esNotificacionMultiple)
+            {
+                <p style="font-size: 14px; opacity: 0.8;">📧 Notificación enviada a múltiples destinatarios</p>
+            }
+        </div>
+
+        <div class="content">
+            <!-- Destinatario -->
+            @if (esParaJP || esParaFinanzas || esParaRH)
+            {
+                <div style="background: #f1f1f1; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
+                    <strong>📬 Destinatario:</strong>
+                    @if (esParaRH)
+                    {
+                        <span>Recursos Humanos</span>
+                    }
+                    else if (esParaJP)
+                    {
+
+                        <span>Autorizador/Jefe Directo (@jefeDestinatario)</span>
+                    }
+                    else if (esParaFinanzas)
+                    {
+
+                        <span>Departamento de Finanzas</span>
+                    }
+                </div>
+            }
+
+            <!-- Mensaje principal -->
+            @if (!string.IsNullOrEmpty(mensaje))
+            {
+                <div class="info-box">
+                    <p style="margin:0;">@Html.Raw(mensaje)</p>
+                </div>
+            }
+
+            <!-- Sin jefe -->
+            @if (esSinJefe)
+            {
+                <div class="warning-box">
+                    <strong>⚠️ FLUJO ESPECIAL:</strong> Esta solicitud se envía directamente a Finanzas porque el empleado no tiene jefe directo asignado.
+                </div>
+            }
+
+            <!-- Estado -->
+            <div style="text-align:center; margin:20px 0;">
+                <span class="status-badge" style="background:@colorEstado; color:white;">@iconoEstado @textoEstado</span>
+            </div>
+
+            <!-- Detalles de la solicitud -->
+            <h3>📋 Detalles de la Solicitud</h3>
+            <div class="details">
+                <p><span class="label">Código:</span> @(solicitud?.CodigoSolicitud ?? "")</p>
+                <p><span class="label">Empleado:</span> @empleadoSolicitante</p>
+                <p><span class="label">Proyecto:</span> @(solicitud?.NombreProyecto ?? "")</p>
+                <p><span class="label">Destino:</span> @(solicitud?.Destino ?? "")</p>
+                <p>
+                    <span class="label">Fecha Salida:</span>
+                    @(solicitud != null ? solicitud.FechaSalida.ToString("dd/MM/yyyy") : "")
+                </p>
+                <p>
+                    <span class="label">Fecha Regreso:</span>
+                    @(solicitud != null ? solicitud.FechaRegreso.ToString("dd/MM/yyyy") : "")
+                </p>
+                <p><span class="label">Motivo:</span> @(solicitud?.Motivo ?? "")</p>
+                @if (solicitud?.RequiereAnticipo == true)
+                {
+                    <p>
+                        <span class="label">Anticipo:</span>
+                        @if (solicitud.MontoAnticipo.HasValue)
+                        {
+                            <span>$@(solicitud.MontoAnticipo.Value.ToString("N2"))</span>
+                        }
+                        else
+                        {
+
+                            <span>Monto por determinar</span>
+                        }
+                    </p>
+                }
+            </div>
+
+            <!-- Botón -->
+            <div style="text-align:center; margin:30px 0;">
+                <a href="@url" class="button">
+                    @if (esParaJP || esParaFinanzas)
+                    {
+                        <span>📋 REVISAR SOLICITUD</span>
+                    }
+                    else if (esBorrador)
+                    {
+
+                        <span>👁️ VER BORRADOR</span>
+                    }
+                    else
+                    {
+
+                        <span>🔍 VER DETALLES COMPLETOS</span>
+                    }
+                </a>
+            </div>
+
+            <!-- Seguridad -->
+            <div style="background:#f1f1f1; padding:15px; border-radius:5px; font-size:12px; color:#666;">
+                <strong>🔒 Información de Seguridad:</strong><br>
+                Este es un mensaje automático generado por el Sistema de Viáticos de Viamtek.
+                Si recibiste este correo por error, por favor ignóralo.
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>📧 Este es un mensaje automático. Por favor, no respondas a este correo.</p>
+            <p>&copy; @DateTime.Now.Year - Sistema de Viáticos Viamtek</p>
+        </div>
+    </div>
+</body>
+</html>

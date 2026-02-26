@@ -1,0 +1,349 @@
+﻿@model IEnumerable<SVV.Models.SolicitudesViaje>
+
+@{
+    ViewData["Title"] = "Solicitudes Pendientes de Aprobación";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid aprobaciones-container">
+    <div class="aprobaciones-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="aprobaciones-title"><i class="fas fa-tasks me-2"></i>Solicitudes Pendientes de Aprobación</h1>
+                <p class="aprobaciones-subtitle">Solicitudes que requieren tu revisión como @ViewBag.RolNombre</p>
+            </div>
+            <a asp-controller="Home" asp-action="Index" class="btn-viamtek-outline btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="recent-activity-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0 text-white"><i class="fas fa-list-alt me-2"></i>Panel de Aprobaciones</h4>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-light btn-sm" id="btnExportarExcel">
+                            <i class="fas fa-download me-2"></i>Exportar a excel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover table-dark align-middle" id="tablaPendientes">
+                        <thead class="table-header-custom">
+                            <tr>
+                                <th class="border-0">Código</th>
+                                <th class="border-0">Empleado</th>
+                                <th class="border-0">Proyecto</th>
+                                <th class="border-0">Destino</th>
+                                <th class="border-0">Fechas</th>
+                                <th class="border-0">Total Anticipos</th>
+                                <th class="border-0">Estado</th>
+                                <th class="border-0 text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Any())
+                            {
+                                @foreach (var solicitud in Model)
+                                {
+                                    var totalSolicitado = solicitud.RequiereAnticipo == true ? solicitud.MontoAnticipo ?? 0 : 0;
+                                    <tr class="table-row-custom" data-id="@solicitud.Id">
+                                        <td>
+                                            <strong class="text-accent">@solicitud.CodigoSolicitud</strong>
+                                        </td>
+                                        <td class="text-white">@solicitud.Empleado?.Nombre @solicitud.Empleado?.Apellidos</td>
+                                        <td class="text-white">@solicitud.NombreProyecto</td>
+                                        <td class="text-white">@solicitud.Destino</td>
+                                        <td>
+                                            <small class="text-light">@solicitud.FechaSalida.ToString("dd/MM/yyyy") - @solicitud.FechaRegreso.ToString("dd/MM/yyyy")</small>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold text-success">@totalSolicitado.ToString("C")</span>
+                                        </td>
+                                        <td>
+                                            @{
+                                                var estadoClass = "badge bg-info";
+                                                var estadoTexto = solicitud.Estado?.Codigo;
+
+                                                switch (solicitud.Estado?.Codigo)
+                                                {
+                                                    case "BORRADOR":
+                                                        estadoClass = "badge bg-secondary";
+                                                        break;
+                                                    case "ENVIADA_JP":
+                                                    case "ENVIADA_RH":
+                                                    case "ENVIADA_FINANZAS":
+                                                    case "ENVIADA_DIRECCION":
+                                                        estadoClass = "badge bg-warning text-dark";
+                                                        break;
+                                                    case "APROBADA_JP":
+                                                    case "APROBADA_RH":
+                                                    case "APROBADA_DIRECCION":
+                                                        estadoClass = "badge bg-success";
+                                                        break;
+                                                    case "RECHAZADA":
+                                                        estadoClass = "badge bg-danger";
+                                                        break;
+                                                }
+                                            }
+                                            <span class="@estadoClass">@estadoTexto</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a asp-action="Detalles" asp-route-id="@solicitud.Id"
+                                                   class="btn btn-outline-info btn-action" title="Ver detalles">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+
+                                                @if (ViewBag.RolId == 4)
+                                                {
+                                                    <a asp-controller="Finanzas" asp-action="CrearCotizacion" asp-route-solicitudId="@solicitud.Id"
+                                                       class="btn btn-outline-warning btn-action" title="Generar Cotización">
+                                                        <i class="fas fa-file-invoice-dollar"></i>
+                                                    </a>
+                                                }
+
+                                                @if (ViewBag.RolId != 3)
+                                                {
+                                                    <form asp-action="Aprobar" asp-route-id="@solicitud.Id" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-outline-success btn-action btn-aprobar"
+                                                                title="Aprobar" data-codigo="@solicitud.CodigoSolicitud">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    </form>
+                                                    <form asp-action="Rechazar" asp-route-id="@solicitud.Id" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-outline-danger btn-action btn-rechazar"
+                                                                title="Rechazar" data-codigo="@solicitud.CodigoSolicitud">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </form>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="8" class="text-center py-5">
+                                        <div class="text-light">
+                                            <i class="fas fa-check-circle fa-4x text-muted mb-3"></i>
+                                            <h5 class="text-muted">No hay solicitudes pendientes</h5>
+                                            <p class="text-muted mb-4">No tienes solicitudes que requieran tu aprobación en este momento.</p>
+                                            <a asp-controller="Home" asp-action="Index" class="btn-viamtek-gradient">
+                                                <i class="fas fa-home me-2"></i>Volver al Dashboard
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/aprobaciones.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Efectos hover para filas
+            const tableRows = document.querySelectorAll('.table-row-custom');
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 4px 15px rgba(92, 200, 123, 0.2)';
+                });
+
+                row.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 'none';
+                });
+            });
+
+            // Eventos para botones de aprobar
+            document.querySelectorAll('.btn-aprobar').forEach(boton => {
+                boton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const codigo = this.getAttribute('data-codigo');
+                    const form = this.closest('form');
+                    mostrarConfirmacion('aprobar', codigo, form);
+                });
+            });
+
+            // Eventos para botones de rechazar
+            document.querySelectorAll('.btn-rechazar').forEach(boton => {
+                boton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const codigo = this.getAttribute('data-codigo');
+                    const form = this.closest('form');
+                    mostrarConfirmacion('rechazar', codigo, form);
+                });
+            });
+
+            // Evento para exportar a Excel
+            document.getElementById('btnExportarExcel')?.addEventListener('click', function(e) {
+                e.preventDefault();
+                exportarExcel();
+            });
+
+                  if (@Model.Count() > 0) {
+            $('#tablaPendientes').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-MX.json'
+                },
+                pageLength: 10,
+                order: [[0, 'desc']],
+                scrollX: true,                     // Habilita scroll horizontal
+                autoWidth: false,                   // Evita que DataTables calcule anchos automáticamente
+                columnDefs: [
+                    { width: '120px', targets: 0 }, // Código
+                    { width: '180px', targets: 1 }, // Empleado
+                    { width: '150px', targets: 2 }, // Proyecto
+                    { width: '150px', targets: 3 }, // Destino
+                    { width: '140px', targets: 4 }, // Fechas
+                    { width: '120px', targets: 5 }, // Total Anticipos
+                    { width: '120px', targets: 6 }, // Estado
+                    { width: '180px', targets: 7 }  // Acciones
+                ]
+            });
+        }
+        });
+
+        function mostrarConfirmacion(accion, codigo, form) {
+            const config = {
+                aprobar: {
+                    icono: 'fa-check-circle',
+                    color: 'var(--viamtek-green)',
+                    titulo: '¿Aprobar Solicitud?',
+                    texto: 'APROBAR',
+                    textoBoton: 'Sí, aprobar',
+                    textoProceso: 'Aprobando Solicitud...'
+                },
+                rechazar: {
+                    icono: 'fa-times-circle',
+                    color: '#e74c3c',
+                    titulo: '¿Rechazar Solicitud?',
+                    texto: 'RECHAZAR',
+                    textoBoton: 'Sí, rechazar',
+                    textoProceso: 'Rechazando Solicitud...'
+                }
+            }[accion];
+
+            Swal.fire({
+                title: config.titulo,
+                html: `
+                    <div class="text-center">
+                        <div class="mb-3">
+                            <i class="fas ${config.icono} fa-3x" style="color: ${config.color};"></i>
+                        </div>
+                        <p>¿Estás seguro de ${accion} la siguiente solicitud?</p>
+                        <div class="alert-comprobacion-info" style="text-align: left; padding: 1rem; margin: 1rem 0;">
+                            <strong>Código:</strong> <span class="text-${accion === 'aprobar' ? 'success' : 'danger'}">${codigo}</span><br>
+                            <strong>Acción:</strong> <span class="text-${accion === 'aprobar' ? 'success' : 'danger'}">${config.texto}</span>
+                        </div>
+                        <small class="text-warning">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            <strong>Importante:</strong> Esta acción no se puede deshacer
+                        </small>
+                    </div>
+                `,
+                icon: accion === 'aprobar' ? 'question' : 'warning',
+                showCancelButton: true,
+                confirmButtonColor: config.color,
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: `<i class="fas ${accion === 'aprobar' ? 'fa-check' : 'fa-times'} me-2"></i>${config.textoBoton}`,
+                cancelButtonText: '<i class="fas fa-times me-2"></i>Cancelar',
+                background: 'var(--card-bg)',
+                color: 'var(--primary-text)',
+                customClass: {
+                    popup: 'sweetalert-dark',
+                    confirmButton: 'btn-sweet-' + (accion === 'aprobar' ? 'confirm' : 'danger'),
+                    cancelButton: 'btn-sweet-cancel'
+                },
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    mostrarProcesando(config.textoProceso, config.color);
+                    setTimeout(() => form.submit(), 1000);
+                }
+            });
+        }
+
+        function mostrarProcesando(texto, color) {
+            Swal.fire({
+                title: texto,
+                html: `
+                    <div class="text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-spinner fa-spin fa-2x" style="color: ${color};"></i>
+                        </div>
+                        <p>Procesando tu solicitud</p>
+                        <div class="progress" style="height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                 style="width: 100%; background: ${color === 'var(--viamtek-green)' ? 'var(--button-gradient)' : 'linear-gradient(45deg, #e74c3c, #c0392b)'};"></div>
+                        </div>
+                    </div>
+                `,
+                allowEscapeKey: false,
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                background: 'var(--card-bg)',
+                color: 'var(--primary-text)',
+                customClass: { popup: 'sweetalert-dark' }
+            });
+        }
+
+        function exportarExcel() {
+            const totalSolicitudes = @Model.Count();
+            Swal.fire({
+                title: '¿Exportar Solicitudes a Excel?',
+                html: `
+                    <div class="text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-file-excel fa-3x" style="color: var(--viamtek-green);"></i>
+                        </div>
+                        <p>¿Estás seguro de que deseas descargar el listado de solicitudes pendientes en formato Excel?</p>
+                        <div class="alert-comprobacion-info" style="text-align: left; padding: 1rem; margin: 1rem 0;">
+                            <strong>Total de solicitudes:</strong> <span class="text-success">${totalSolicitudes}</span><br>
+                            <strong>Formato:</strong> <span class="text-info">Archivo .xlsx</span>
+                        </div>
+                        <small class="text-info">
+                            <i class="fas fa-info-circle me-1"></i>
+                            El archivo incluirá todas las columnas visibles en la tabla
+                        </small>
+                    </div>
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: 'var(--viamtek-green)',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fas fa-download me-2"></i>Sí, descargar Excel',
+                cancelButtonText: '<i class="fas fa-times me-2"></i>Cancelar',
+                background: 'var(--card-bg)',
+                color: 'var(--primary-text)',
+                customClass: {
+                    popup: 'sweetalert-dark',
+                    confirmButton: 'btn-sweet-confirm',
+                    cancelButton: 'btn-sweet-cancel'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '@Url.Action("ExportarSolicitudesPendientesExcel", "Aprobaciones")';
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,1076 @@
+﻿@model SVV.Models.SolicitudesViaje
+
+@{
+    ViewData["Title"] = "Detalles de Mi Solicitud";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var fechaVacia = DateOnly.MinValue;
+    var duracionViaje = 0;
+
+    if (Model?.FechaSalida != null && Model?.FechaRegreso != null && Model.FechaSalida != fechaVacia && Model.FechaRegreso != fechaVacia)
+    {
+        var salida = Model.FechaSalida.ToDateTime(TimeOnly.MinValue);
+        var regreso = Model.FechaRegreso.ToDateTime(TimeOnly.MinValue);
+        duracionViaje = (regreso - salida).Days + 1;
+    }
+
+    var estadoCodigo = Model?.Estado?.Codigo ?? "PENDIENTE";
+    var totalSolicitado = Model?.RequiereAnticipo == true ? Model.MontoAnticipo ?? 0 : 0;
+}
+
+@functions {
+    string GetBadgeClass(string estado)
+    {
+        if (string.IsNullOrEmpty(estado)) return "badge bg-secondary";
+        estado = estado.ToUpper();
+        if (estado.Contains("PENDIENTE") || estado.Contains("BORRADOR") || estado.Contains("ENVIADA"))
+            return "badge bg-warning text-dark";
+        if (estado.Contains("APROBADA") || estado.Contains("COMPLETADA"))
+            return "badge bg-success";
+        if (estado.Contains("RECHAZADA") || estado.Contains("CANCELADA"))
+            return "badge bg-danger";
+        if (estado.Contains("PAGADO") || estado.Contains("PROCESO"))
+            return "badge bg-info";
+        return "badge bg-secondary";
+    }
+}
+
+<div class="container-fluid solicitudes-container">
+    <div class="solicitudes-header border-definido">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="solicitudes-title"><i class="fas fa-file-alt me-2"></i>Detalles de Mi Solicitud</h1>
+                <p class="solicitudes-subtitle">Revisa el estado y detalles de tu solicitud - @Model?.CodigoSolicitud</p>
+            </div>
+            <div class="btn-group">
+                <a asp-action="Index" class="btn-viamtek-outline">
+                    <i class="fas fa-arrow-left me-2"></i>Volver a Mis Solicitudes
+                </a>
+                <button class="btn-viamtek-gradient" id="btnImprimir">
+                    <i class="fas fa-print me-2"></i>Generar PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="recent-activity-card border-definido">
+                <div class="doc-header mb-4 border-bottom-definido">
+                    <div class="doc-empresa text-center mb-3">
+                        <h2 class="text-accent mb-1">CUVITEK Software S.C.</h2>
+                        <p class="text-light opacity-75">SOLICITUD DE VIÁTICOS</p>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-2">
+                            <strong class="text-accent">Código:</strong>
+                            <span class="text-white">@Model?.CodigoSolicitud</span>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <strong class="text-accent">Fecha:</strong>
+                            <span class="text-white">@DateTime.Now.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <strong class="text-accent">Estado:</strong>
+                            <span class="@GetBadgeClass(estadoCodigo) border-definido">@estadoCodigo</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="seccion mb-4 border-seccion">
+                    <h3 class="seccion-titulo text-accent mb-3 border-bottom-titulo">
+                        <i class="fas fa-info-circle me-2"></i>Información General
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-light">Empleado</label>
+                            <div class="dato-valor text-white border-dato">@Model?.Empleado?.Nombre @Model?.Empleado?.Apellidos</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-light">Proyecto</label>
+                            <div class="dato-valor text-white border-dato">@Model?.NombreProyecto</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-light">Destino</label>
+                            <div class="dato-valor text-white border-dato">@Model?.Destino</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-light">Tipo de Viático</label>
+                            <div class="dato-valor text-white border-dato">@Model?.TipoViatico?.Nombre</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-light">Duración</label>
+                            <div class="dato-valor text-white border-dato">@duracionViaje días</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-light">Monto Anticipo</label>
+                            <div class="dato-valor text-success fw-bold border-dato">@(Model?.MontoAnticipo?.ToString("C") ?? "N/A")</div>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label text-light">Periodo</label>
+                            <div class="dato-valor text-white border-dato">
+                                @(Model?.FechaSalida != DateOnly.MinValue ? Model.FechaSalida.ToString("dd/MM/yyyy") : "-") al
+                                @(Model?.FechaRegreso != DateOnly.MinValue ? Model.FechaRegreso.ToString("dd/MM/yyyy") : "-")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="seccion mb-4 border-seccion">
+                    <h3 class="seccion-titulo text-accent mb-3 border-bottom-titulo">
+                        <i class="fas fa-route me-2"></i>Detalles del Viaje
+                    </h3>
+                    <div class="mb-3">
+                        <label class="form-label text-light">Motivo del Viaje</label>
+                        <div class="dato-valor text-white border-dato">@Model?.Motivo</div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model?.DireccionEmpresa))
+                    {
+                        <div class="mb-3">
+                            <label class="form-label text-light">Dirección Destino</label>
+                            <div class="dato-valor text-white border-dato">@Model.DireccionEmpresa</div>
+                        </div>
+                    }
+                </div>
+
+                <div class="seccion mb-4 border-seccion">
+                    <h3 class="seccion-titulo text-accent mb-3 border-bottom-titulo">
+                        <i class="fas fa-bus me-2"></i>Información de Transporte
+                    </h3>
+                    <div class="row">
+                        @if (!string.IsNullOrEmpty(Model?.MedioTrasladoPrincipal))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-light">Medio Traslado Principal</label>
+                                <div class="dato-valor text-white border-dato">@Model.MedioTrasladoPrincipal</div>
+                            </div>
+                        }
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-light">Requiere Taxi Domicilio</label>
+                            <div class="dato-valor text-white border-dato">@(Model?.RequiereTaxiDomicilio == true ? "Sí" : "No")</div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model?.DireccionTaxiOrigen))
+                        {
+                            <div class="col-12 mb-3">
+                                <label class="form-label text-light">Dirección Origen Taxi</label>
+                                <div class="dato-valor text-white border-dato">@Model.DireccionTaxiOrigen</div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model?.DireccionTaxiDestino))
+                        {
+                            <div class="col-12 mb-3">
+                                <label class="form-label text-light">Dirección Destino Taxi</label>
+                                <div class="dato-valor text-white border-dato">@Model.DireccionTaxiDestino</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="seccion mb-4 border-seccion">
+                    <h3 class="seccion-titulo text-accent mb-3 border-bottom-titulo">
+                        <i class="fas fa-hotel me-2"></i>Información de Hospedaje
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-light">Requiere Hospedaje</label>
+                            <div class="dato-valor text-white border-dato">@(Model?.RequiereHospedaje == true ? "Sí" : "No")</div>
+                        </div>
+                        @if (Model?.NochesHospedaje > 0)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-light">Noches Hospedaje</label>
+                                <div class="dato-valor text-white border-dato">@Model.NochesHospedaje</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="seccion mb-4 border-seccion">
+                    <h3 class="seccion-titulo text-accent mb-3 border-bottom-titulo">
+                        <i class="fas fa-list me-2"></i>Información Adicional
+                    </h3>
+                    <div class="row">
+                        @if (!string.IsNullOrEmpty(Model?.EmpresaVisitada))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-light">Empresa Visitada</label>
+                                <div class="dato-valor text-white border-dato">@Model.EmpresaVisitada</div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model?.LugarComisionDetallado))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-light">Lugar Comisión Detallado</label>
+                                <div class="dato-valor text-white border-dato">@Model.LugarComisionDetallado</div>
+                            </div>
+                        }
+                        @if (Model?.NumeroPersonas > 0)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-light">Número de Personas</label>
+                                <div class="dato-valor text-white border-dato">@Model.NumeroPersonas</div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model?.Colaboradores))
+                        {
+                            <div class="col-12 mb-3">
+                                <label class="form-label text-light">Colaboradores</label>
+                                <div class="dato-valor text-white border-dato">@Model.Colaboradores</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @if (Model?.Anticipos != null && Model.Anticipos.Any())
+                {
+                    <div class="seccion mb-4 border-seccion">
+                        <h3 class="seccion-titulo text-accent mb-3 border-bottom-titulo">
+                            <i class="fas fa-money-bill-wave me-2"></i>Anticipos Solicitados
+                        </h3>
+                        
+                        <div class="tabla-precios">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-dark mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th width="60" class="text-center">#</th>
+                                            <th>Monto Solicitado</th>
+                                            <th width="120" class="text-center">Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var (anticipo, index) in Model.Anticipos.Select((a, i) => (a, i)))
+                                        {
+                                            <tr class="fila-anticipo">
+                                                <td class="text-center align-middle">
+                                                    <span class="numero-fila">@(index + 1)</span>
+                                                </td>
+                                                <td class="align-middle">
+                                                    <div class="monto-anticipo text-success fw-bold">
+                                                        @anticipo.MontoSolicitado.ToString("C")
+                                                    </div>
+                                                </td>
+                                                <td class="text-center align-middle">
+                                                    <span class="badge estado-anticipo @GetBadgeClass(anticipo.Estado) border-definido">
+                                                        @anticipo.Estado
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="total-concepto">
+                                            <td colspan="3" class="text-end">
+                                                <strong>Total Anticipos: <span class="subtotal">@Model.Anticipos.Sum(a => a.MontoSolicitado).ToString("C")</span></strong>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="seccion mb-4 border-seccion">
+                    <h3 class="seccion-titulo text-accent mb-3 border-bottom-titulo">
+                        <i class="fas fa-clipboard-list me-2"></i>Instrucciones y Observaciones
+                    </h3>
+                    <div class="alert alert-info border-definido">
+                        <p class="mb-2"><strong>Plazo para comprobación:</strong> 5 días hábiles posteriores al término de la comisión.</p>
+                        <p class="mb-2"><strong>Documentación requerida:</strong> Facturas, tickets, comprobantes en formato PDF o XLS.</p>
+                        <p class="mb-0">
+                            <strong>Periodo del viaje:</strong> @duracionViaje día(s) del
+                            @(Model?.FechaSalida != DateOnly.MinValue ? Model.FechaSalida.ToString("dd/MM/yyyy") : "-") al
+                            @(Model?.FechaRegreso != DateOnly.MinValue ? Model.FechaRegreso.ToString("dd/MM/yyyy") : "-").
+                        </p>
+                    </div>
+                </div>
+
+                <div class="seccion border-seccion">
+                    <h3 class="seccion-titulo text-accent mb-3 border-bottom-titulo">
+                        <i class="fas fa-signature me-2"></i>Autorizaciones
+                    </h3>
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-3">
+                            <div class="firma-item p-3 border-firma">
+                                <div class="firma-label text-light mb-2">Solicitante</div>
+                                <div class="firma-linea border-bottom mb-2" style="height: 2px;"></div>
+                                <div class="firma-nombre text-muted">Nombre y Firma</div>
+                                <div class="firma-cargo text-accent">SOLICITANTE</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="firma-item p-3 border-firma">
+                                <div class="firma-label text-light mb-2">Jefe Inmediato</div>
+                                <div class="firma-linea border-bottom mb-2" style="height: 2px;"></div>
+                                <div class="firma-nombre text-muted">Nombre y Firma</div>
+                                <div class="firma-cargo text-accent">JEFE INMEDIATO</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="firma-item p-3 border-firma">
+                                <div class="firma-label text-light mb-2">Finanzas</div>
+                                <div class="firma-linea border-bottom mb-2" style="height: 2px;"></div>
+                                <div class="firma-nombre text-muted">Nombre y Firma</div>
+                                <div class="firma-cargo text-accent">FINANZAS</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-footer mt-4 pt-3 border-top-definido">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                Documento generado el @DateTime.Now.ToString("dd/MM/yyyy a las HH:mm")
+                            </small>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <small class="text-muted">Página 1 de 1</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row detalles-botones">
+        <div class="col-12 text-center">
+            @if (Model?.EstadoId == 1) // BORRADOR
+            {
+                <a asp-action="Editar" asp-route-id="@Model.Id" class="btn btn-editar-solicitud me-3">
+                    <i class="fas fa-edit me-2"></i>Editar Solicitud
+                </a>
+                
+                <form asp-action="EnviarAprobacion" asp-route-id="@Model.Id" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-enviar-aprobacion me-3">
+                        <i class="fas fa-paper-plane me-2"></i>Enviar a Aprobación
+                    </button>
+                </form>
+                
+                <form asp-action="Eliminar" asp-route-id="@Model.Id" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-eliminar-solicitud" onclick="return confirmDelete()">
+                        <i class="fas fa-trash me-2"></i>Eliminar
+                    </button>
+                </form>
+            }
+            else
+            {
+                <a asp-action="Index" class="btn btn-volver-solicitud me-3">
+                    <i class="fas fa-arrow-left me-2"></i>Volver a Mis Solicitudes
+                </a>
+                
+                @if (Model?.EstadoId == 9) // APROBADA_DIRECCION
+                {
+                    <a asp-controller="Comprobaciones" asp-action="Comprobar" asp-route-solicitudId="@Model.Id" 
+                       class="btn btn-comprobar-gastos">
+                        <i class="fas fa-receipt me-2"></i>Comprobar Gastos
+                    </a>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/solicitudes.css" asp-append-version="true" />
+    <style>
+        .border-definido { border: 2px solid var(--border-light) !important; border-radius: var(--border-radius-md) !important; }
+        .border-seccion { border: 1.5px solid rgba(92, 200, 123, 0.2) !important; border-radius: var(--border-radius-md) !important; padding: 1.5rem !important; background: rgba(25, 35, 45, 0.7) !important; backdrop-filter: blur(10px) !important; }
+        .border-bottom-titulo { border-bottom: 2px solid var(--viamtek-green) !important; padding-bottom: 0.75rem !important; }
+        .border-bottom-definido { border-bottom: 3px solid var(--border-light) !important; padding-bottom: 1.5rem !important; }
+        .border-top-definido { border-top: 2px solid var(--border-light) !important; }
+        .border-dato { border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: var(--border-radius-sm) !important; padding: 0.75rem 1rem !important; background: rgba(255, 255, 255, 0.05) !important; min-height: 48px !important; display: flex !important; align-items: center !important; }
+        .border-firma { border: 2px solid var(--border-light) !important; border-radius: var(--border-radius-md) !important; background: rgba(30, 40, 50, 0.8) !important; transition: all var(--transition-normal) !important; }
+        .border-firma:hover { border-color: var(--viamtek-green) !important; transform: translateY(-2px) !important; box-shadow: 0 4px 15px rgba(92, 200, 123, 0.2) !important; }
+        .badge.border-definido { border: 1px solid rgba(255, 255, 255, 0.3) !important; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important; }
+        
+        .seccion { transition: all var(--transition-normal) !important; }
+        .seccion:hover { border-color: rgba(92, 200, 123, 0.4) !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important; }
+        
+        .dato-valor { font-weight: 500 !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important; }
+        
+        .tabla-precios { background: rgba(255, 255, 255, 0.02) !important; border-radius: 8px !important; padding: 1rem !important; margin-top: 0 !important; }
+        .tabla-precios .table { width: 100% !important; border-collapse: separate !important; border-spacing: 0 !important; margin-bottom: 0 !important; }
+        .tabla-precios .table-dark thead th { border: none !important; color: var(--text-secondary) !important; font-weight: 600 !important; font-size: 0.8rem !important; padding: 10px 8px !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; background: rgba(255, 255, 255, 0.05) !important; white-space: nowrap !important; }
+        .tabla-precios .table-dark tbody td { border: none !important; padding: 12px 8px !important; vertical-align: middle !important; background: transparent !important; }
+        .tabla-precios .fila-anticipo { transition: background-color 0.2s ease; background: rgba(35, 45, 55, 0.6) !important; }
+        .tabla-precios .fila-anticipo:hover { background-color: rgba(92, 200, 123, 0.05) !important; }
+        .tabla-precios .fila-anticipo td:first-child { width: 60px !important; text-align: center !important; padding: 12px 4px !important; }
+        .tabla-precios .numero-fila { color: var(--text-secondary); font-weight: 700; font-size: 0.9rem; display: inline-block; }
+        .tabla-precios .monto-anticipo { font-size: 1rem !important; font-weight: 700 !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important; }
+        .tabla-precios .fila-anticipo td:last-child { width: 120px !important; text-align: center !important; padding: 12px 4px !important; }
+        .tabla-precios .estado-anticipo { font-size: 0.75rem !important; padding: 0.4rem 0.6rem !important; border-radius: 20px !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; }
+        .tabla-precios .total-concepto { border-top: 2px solid var(--viamtek-green) !important; background: rgba(92, 200, 123, 0.1) !important; }
+        .tabla-precios .total-concepto td { padding: 1rem 0.5rem !important; font-size: 1rem !important; }
+        .tabla-precios .subtotal { color: var(--viamtek-green) !important; font-weight: 700 !important; font-size: 1.1rem !important; margin-left: 5px !important; }
+        
+        .btn-editar-solicitud,
+        .btn-enviar-aprobacion,
+        .btn-eliminar-solicitud,
+        .btn-volver-solicitud,
+        .btn-comprobar-gastos {
+            border: 2px solid transparent !important;
+            border-radius: var(--border-radius-sm) !important;
+            padding: 0.875rem 1.75rem !important;
+            font-weight: 700 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: all var(--transition-normal) !important;
+            font-size: 0.95rem !important;
+            min-height: 52px !important;
+            position: relative !important;
+            overflow: hidden !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+            margin: 0 5px !important;
+        }
+        
+        .btn-editar-solicitud::before,
+        .btn-enviar-aprobacion::before,
+        .btn-eliminar-solicitud::before,
+        .btn-volver-solicitud::before,
+        .btn-comprobar-gastos::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+        
+        .btn-editar-solicitud:hover::before,
+        .btn-enviar-aprobacion:hover::before,
+        .btn-eliminar-solicitud:hover::before,
+        .btn-volver-solicitud:hover::before,
+        .btn-comprobar-gastos:hover::before { left: 100%; }
+        
+        .btn-volver-solicitud { background: transparent !important; border-color: var(--viamtek-green) !important; color: var(--viamtek-green) !important; }
+        .btn-volver-solicitud:hover { background: var(--viamtek-green) !important; color: var(--color-white) !important; transform: translateY(-3px) !important; box-shadow: 0 6px 20px rgba(92, 200, 123, 0.4) !important; }
+        
+        .btn-editar-solicitud { background: rgba(99, 179, 237, 0.15) !important; border-color: #63b3ed !important; color: #63b3ed !important; }
+        .btn-editar-solicitud:hover { background: #63b3ed !important; color: #1a202c !important; transform: translateY(-3px) !important; box-shadow: 0 6px 20px rgba(99, 179, 237, 0.4) !important; }
+        
+        .btn-enviar-aprobacion { background: rgba(92, 200, 123, 0.15) !important; border-color: var(--viamtek-green) !important; color: var(--viamtek-green) !important; }
+        .btn-enviar-aprobacion:hover { background: var(--viamtek-green) !important; color: var(--color-white) !important; transform: translateY(-3px) !important; box-shadow: 0 6px 20px rgba(92, 200, 123, 0.4) !important; }
+        
+        .btn-eliminar-solicitud { background: rgba(252, 129, 129, 0.15) !important; border-color: #fc8181 !important; color: #fc8181 !important; }
+        .btn-eliminar-solicitud:hover { background: #fc8181 !important; color: #1a202c !important; transform: translateY(-3px) !important; box-shadow: 0 6px 20px rgba(252, 129, 129, 0.4) !important; }
+        
+        .btn-comprobar-gastos { background: rgba(246, 173, 85, 0.15) !important; border-color: #f6ad55 !important; color: #f6ad55 !important; }
+        .btn-comprobar-gastos:hover { background: #f6ad55 !important; color: #1a202c !important; transform: translateY(-3px) !important; box-shadow: 0 6px 20px rgba(246, 173, 85, 0.4) !important; }
+        
+        .detalles-botones { margin-top: 2.5rem !important; padding-top: 2rem !important; border-top: 2px solid var(--border-light) !important; }
+        
+           /* ESTILOS DE IMPRESIÓN - VERSIÓN FINAL CORREGIDA */
+    @@media print {
+        @@page {
+            size: A4 portrait !important;
+            margin: 14mm 16mm !important;
+            background: #ffffff !important;
+        }
+
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            font-family: Arial, Helvetica, sans-serif !important;
+            font-size: 9pt !important;
+            line-height: 1.3 !important;
+            color: #000000 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            width: 100% !important;
+            height: auto !important;
+            min-height: 100vh !important;
+            box-sizing: border-box !important;
+        }
+
+        /* ESTO ES LO MÁS IMPORTANTE: Forzar TODO a blanco y negro */
+        *,
+        *::before,
+        *::after {
+            background: #ffffff !important;
+            background-image: none !important;
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            opacity: 1 !important;
+            filter: none !important;
+            text-shadow: none !important;
+            box-shadow: none !important;
+            border-color: #000000 !important;
+        }
+
+        /* EXCEPCIÓN ESPECÍFICA PARA EL HEADER - VERDE PARA EL TÍTULO */
+        .doc-header h2,
+        .doc-header .text-accent,
+        .doc-header strong.text-accent {
+            color: #2e7d32 !important;
+            background: transparent !important;
+        }
+
+        /* EXCEPCIÓN PARA EL COLOR VERDE EN SECCIONES */
+        .seccion-titulo,
+        .firma-cargo {
+            color: #2e7d32 !important;
+            background: #f5f5f5 !important;
+        }
+
+        /* EXCEPCIÓN PARA FONDO GRIS CLARO EN TABLAS */
+        thead th,
+        .seccion-titulo {
+            background: #f5f5f5 !important;
+        }
+
+        /* Ocultar elementos innecesarios */
+        .navbar, 
+        .footer, 
+        .detalles-botones, 
+        .btn, 
+        .alert, 
+        .solicitudes-header, 
+        .swal2-container,
+        .btn-group,
+        .solicitudes-title,
+        .solicitudes-subtitle,
+        .fa,
+        .fas,
+        .fab,
+        .far,
+        .bi {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
+        /* CONTENEDOR PRINCIPAL */
+        .solicitudes-container,
+        .container-fluid {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* TARJETA PRINCIPAL */
+        .recent-activity-card {
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: #ffffff !important;
+            width: 100% !important;
+            min-height: auto !important;
+        }
+
+        /* ========== HEADER ========== */
+        .doc-header {
+            display: block !important;
+            visibility: visible !important;
+            background: #ffffff !important;
+            border-bottom: 2px solid #2e7d32 !important;
+            padding: 0 0 12px 0 !important;
+            margin: 0 0 15px 0 !important;
+            text-align: center !important;
+            page-break-before: avoid !important;
+            page-break-inside: avoid !important;
+            page-break-after: avoid !important;
+            width: 100% !important;
+        }
+
+        .doc-empresa {
+            display: block !important;
+            margin: 0 0 10px 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            background: transparent !important;
+        }
+
+        .doc-empresa h2 {
+            color: #2e7d32 !important;
+            font-size: 20pt !important;
+            font-weight: bold !important;
+            margin: 0 0 5px 0 !important;
+            padding: 0 !important;
+            text-align: center !important;
+            background: transparent !important;
+        }
+
+        .doc-empresa p {
+            color: #000000 !important;
+            font-weight: bold !important;
+            font-size: 14pt !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            text-align: center !important;
+            background: transparent !important;
+        }
+
+        .doc-header .row {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            margin: 10px auto 0 auto !important;
+            padding: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            background: transparent !important;
+        }
+
+        .doc-header .col-md-4 {
+            flex: 1 !important;
+            text-align: center !important;
+            padding: 0 5px !important;
+            margin: 0 !important;
+            background: transparent !important;
+        }
+
+        .doc-header strong {
+            color: #2e7d32 !important;
+            font-weight: bold !important;
+            font-size: 10pt !important;
+            background: transparent !important;
+        }
+
+        .doc-header span:not(.badge) {
+            color: #000000 !important;
+            font-weight: normal !important;
+            font-size: 10pt !important;
+            background: transparent !important;
+            margin-left: 5px !important;
+        }
+
+        .doc-header .badge {
+            color: #000000 !important;
+            background: #f8f9fa !important;
+            border: 1px solid #000000 !important;
+            padding: 3px 8px !important;
+            border-radius: 4px !important;
+            font-size: 9pt !important;
+            font-weight: bold !important;
+            display: inline-block !important;
+            margin-left: 8px !important;
+        }
+
+        /* ========== CONTENIDO ========== */
+        .seccion {
+            border: 1px solid #b5b5b5 !important;
+            background: #ffffff !important;
+            padding: 10px 12px !important;
+            margin: 0 0 12px 0 !important;
+            page-break-inside: avoid !important;
+            page-break-after: auto !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+
+        .seccion-titulo {
+            font-size: 12pt !important;
+            font-weight: bold !important;
+            color: #2e7d32 !important;
+            border-bottom: 1px solid #b5b5b5 !important;
+            padding: 6px 8px !important;
+            margin: -10px -12px 10px -12px !important;
+            background: #f5f5f5 !important;
+        }
+
+        .form-label {
+            font-size: 9pt !important;
+            font-weight: bold !important;
+            margin: 0 0 3px 0 !important;
+            padding: 0 !important;
+            color: #000000 !important;
+            background: transparent !important;
+        }
+
+        .dato-valor,
+        .border-dato {
+            font-size: 10pt !important;
+            padding: 6px 8px !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+            border: 1px solid #b5b5b5 !important;
+            display: block !important;
+            margin: 0 0 8px 0 !important;
+            min-height: auto !important;
+            border-radius: 0 !important;
+        }
+
+        /* TABLAS */
+        table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            font-size: 9pt !important;
+            margin: 8px 0 0 0 !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+            border: 1px solid #b5b5b5 !important;
+        }
+
+        thead {
+            background: #f5f5f5 !important;
+            display: table-header-group !important;
+        }
+
+        th {
+            border: 1px solid #b5b5b5 !important;
+            background: #f5f5f5 !important;
+            color: #000000 !important;
+            padding: 6px 4px !important;
+            font-weight: bold !important;
+            text-align: center !important;
+            font-size: 8.5pt !important;
+        }
+
+        td {
+            border: 1px solid #b5b5b5 !important;
+            padding: 6px 4px !important;
+            text-align: center !important;
+            font-size: 9pt !important;
+            color: #000000 !important;
+            background: #ffffff !important;
+        }
+
+        /* FIRMAS */
+        .firmas-seccion {
+            margin: 20mm 0 0 0 !important;
+            padding: 0 !important;
+            page-break-inside: avoid !important;
+        }
+
+        .firma-item {
+            border: 1px solid #000000 !important;
+            height: 35mm !important;
+            padding: 8px !important;
+            text-align: center !important;
+            margin: 0 0 10mm 0 !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+            page-break-inside: avoid !important;
+        }
+
+        .firma-label {
+            font-size: 9pt !important;
+            font-weight: bold !important;
+            margin: 0 0 20mm 0 !important;
+            display: block !important;
+            color: #000000 !important;
+            background: transparent !important;
+        }
+
+        .firma-cargo {
+            color: #2e7d32 !important;
+            font-weight: bold !important;
+            font-size: 9pt !important;
+            margin: 5mm 0 0 0 !important;
+            display: block !important;
+            background: transparent !important;
+        }
+
+        .firma-linea {
+            border-top: 1px solid #000000 !important;
+            margin: 3mm 0 0 0 !important;
+            padding: 0 !important;
+            display: block !important;
+            width: 100% !important;
+        }
+
+        /* FOOTER */
+        .doc-footer {
+            font-size: 8pt !important;
+            text-align: center !important;
+            border-top: 1px solid #b5b5b5 !important;
+            padding: 8px 0 0 0 !important;
+            margin: 15px 0 0 0 !important;
+            page-break-inside: avoid !important;
+            color: #000000 !important;
+            background: #ffffff !important;
+            width: 100% !important;
+        }
+
+        /* LAYOUT EN IMPRESIÓN */
+        .row:not(.doc-header .row) {
+            display: block !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: transparent !important;
+        }
+
+        .col-md-6,
+        .col-md-4,
+        .col-12 {
+            width: 50% !important;
+            float: left !important;
+            box-sizing: border-box !important;
+            padding: 0 8px !important;
+            margin: 0 0 8px 0 !important;
+            background: transparent !important;
+        }
+
+        .col-12 {
+            width: 100% !important;
+            clear: both !important;
+            float: none !important;
+        }
+
+        .col-md-4:not(.doc-header .col-md-4) {
+            width: 33.333% !important;
+        }
+
+        .mb-3, .mb-4 {
+            margin-bottom: 12px !important;
+        }
+
+        .mt-4 {
+            margin-top: 16px !important;
+        }
+
+        .pt-3 {
+            padding-top: 12px !important;
+        }
+
+        /* ELIMINAR TODOS LOS EFECTOS VISUALES */
+        .border-definido,
+        .border-seccion,
+        .border-bottom-titulo,
+        .border-bottom-definido,
+        .border-top-definido,
+        .border-dato,
+        .border-firma {
+            border-color: #b5b5b5 !important;
+            border-style: solid !important;
+            border-width: 1px !important;
+            box-shadow: none !important;
+            text-shadow: none !important;
+            background: #ffffff !important;
+        }
+
+        .border-definido.badge {
+            border: 1px solid #000000 !important;
+            background: #f8f9fa !important;
+        }
+
+        /* ASEGURAR QUE NO HAYAN FONDOS OSCUROS */
+        .tabla-precios,
+        .table-dark,
+        .alert,
+        .alert-info {
+            background: #ffffff !important;
+            color: #000000 !important;
+            border: 1px solid #b5b5b5 !important;
+        }
+
+        .table-dark thead th {
+            background: #f5f5f5 !important;
+            color: #000000 !important;
+        }
+
+        .table-dark tbody td {
+            background: #ffffff !important;
+            color: #000000 !important;
+        }
+
+        /* CONTROL DE PÁGINAS */
+        .control-pagina {
+            page-break-before: always !important;
+        }
+
+        /* EVITAR QUE LAS SECCIONES SE ROMPAN */
+        .seccion,
+        .firmas-seccion .row,
+        .doc-header {
+            page-break-inside: avoid !important;
+        }
+
+        /* ASEGURAR QUE EL CONTENIDO NO SE SALGA */
+        .container-fluid,
+        .solicitudes-container,
+        .recent-activity-card {
+            max-width: 100% !important;
+            overflow: visible !important;
+        }
+
+        /* LIMPIAR FLOATS */
+        .row::after {
+            content: "" !important;
+            display: table !important;
+            clear: both !important;
+        }
+
+        /* OCULTAR ENLACES DE URL EN EL PDF */
+        a[href]:after {
+            content: "" !important;
+        }
+
+        /* REMOVER TODAS LAS TRANSICIONES Y ANIMACIONES */
+        * {
+            transition: none !important;
+            animation: none !important;
+        }
+    }       
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar el botón de imprimir PDF
+            const btnImprimir = document.getElementById('btnImprimir');
+            if (btnImprimir) {
+                btnImprimir.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    generarPDF();
+                });
+            }
+
+            function generarPDF() {
+                if (!btnImprimir) return;
+                
+                // Guardar el texto original del botón
+                const originalText = btnImprimir.innerHTML;
+                
+                btnImprimir.disabled = true;
+                btnImprimir.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generando PDF...';
+
+                // Mostrar alerta de preparación
+                Swal.fire({
+                    title: 'Preparando PDF',
+                    html: '<i class="fas fa-file-pdf fa-3x mb-3 text-primary"></i><p class="mb-0">Generando documento para impresión...</p>',
+                    icon: 'info',
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    timer: 1500,
+                    background: 'var(--card-bg)',
+                    color: 'var(--primary-text)'
+                });
+
+                // Pequeño retraso para asegurar que Swal se muestre
+                setTimeout(() => {
+                    // IMPORTANTE: Agregar clase al body ANTES de imprimir
+                    document.body.classList.add('modo-impresion');
+                    
+                    // También agregar clase al contenedor principal
+                    const container = document.querySelector('.solicitudes-container');
+                    if (container) {
+                        container.classList.add('modo-impresion');
+                    }
+                    
+                    // Asegurar que todos los elementos necesarios sean visibles
+                    const docHeader = document.querySelector('.doc-header');
+                    if (docHeader) {
+                        docHeader.style.display = 'block';
+                        docHeader.style.visibility = 'visible';
+                        docHeader.style.opacity = '1';
+                        docHeader.style.position = 'relative';
+                        docHeader.style.zIndex = '10000';
+                    }
+                    
+                    // Pequeño retraso para que los estilos se apliquen
+                    setTimeout(() => {
+                        // Forzar reflow para asegurar que los estilos se apliquen
+                        document.body.offsetHeight;
+                        
+                        // Disparar la impresión
+                        window.print();
+                        
+                        // Retraso después de imprimir
+                        setTimeout(() => {
+                            // Remover clases y restaurar estilos
+                            document.body.classList.remove('modo-impresion');
+                            
+                            if (container) {
+                                container.classList.remove('modo-impresion');
+                            }
+                            
+                            if (docHeader) {
+                                docHeader.style.display = '';
+                                docHeader.style.visibility = '';
+                                docHeader.style.opacity = '';
+                                docHeader.style.position = '';
+                                docHeader.style.zIndex = '';
+                            }
+                            
+                            // Restaurar botón
+                            btnImprimir.disabled = false;
+                            btnImprimir.innerHTML = originalText;
+                            
+                            // Mostrar alerta de éxito
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'PDF Generado',
+                                text: 'El documento se ha preparado para impresión correctamente.',
+                                timer: 2000,
+                                showConfirmButton: false,
+                                background: 'var(--card-bg)',
+                                color: 'var(--primary-text)'
+                            });
+                        }, 800); // Aumentado a 800ms para asegurar
+                    }, 400); // Aumentado a 400ms para dar tiempo a los estilos
+                }, 1600); // Aumentado a 1600ms para que coincida con el timer de Swal
+            }
+
+            // Función para confirmar eliminación
+            window.confirmDelete = function() {
+                return Swal.fire({
+                    title: '¿Eliminar Solicitud?',
+                    text: 'Esta acción no se puede deshacer. Se eliminará permanentemente la solicitud.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar',
+                    background: 'var(--card-bg)',
+                    color: 'var(--primary-text)'
+                }).then((result) => {
+                    return result.isConfirmed;
+                });
+            };
+
+            // Manejar impresión desde atajos de teclado (Ctrl+P)
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                    e.preventDefault();
+                    generarPDF();
+                }
+            });
+
+            // También manejar el evento beforeprint para asegurar estilos
+            window.addEventListener('beforeprint', function() {
+                document.body.classList.add('modo-impresion');
+                const docHeader = document.querySelector('.doc-header');
+                if (docHeader) {
+                    // Forzar estilos en el header justo antes de imprimir
+                    docHeader.style.cssText = `
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        position: relative !important;
+                        z-index: 10000 !important;
+                        background: #ffffff !important;
+                        color: #000000 !important;
+                    `;
+                }
+            });
+
+            // Restaurar después de imprimir
+            window.addEventListener('afterprint', function() {
+                document.body.classList.remove('modo-impresion');
+                const docHeader = document.querySelector('.doc-header');
+                if (docHeader) {
+                    docHeader.style.cssText = '';
+                }
+            });
+        });
+    </script>
+}

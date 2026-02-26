@@ -1,0 +1,169 @@
+﻿@model dynamic
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: #ffc107;
+            color: #333;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        .button {
+            background: #ffc107;
+            color: #333;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 13px;
+            display: inline-block;
+        }
+
+        .gasto-item {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 Sistema de Viáticos</h1>
+            <p>Correcciones Requeridas</p>
+        </div>
+
+        <div class="content">
+            <h2>⚠️ Correcciones Solicitadas</h2>
+
+            <div class="warning">
+                <p><strong>Estimado/a @Model.EmpleadoNombre,</strong></p>
+                <p>El Jefe de Proceso ha solicitado correcciones en tu comprobación <strong>@Model.CodigoComprobacion</strong>.</p>
+            </div>
+
+            <div class="details">
+                <p><span class="label">Código de Comprobación:</span> @Model.CodigoComprobacion</p>
+                <p><span class="label">Tipo de Corrección:</span> @Model.TipoCorreccion</p>
+                <p><span class="label">Fecha Límite:</span> <strong>@Model.FechaLimite</strong></p>
+                <p>
+                    <span class="label">Estado:</span>
+                    <span class="status-badge" style="background: #fff3cd; color: #856404;">⚠️ Correcciones Pendientes</span>
+                </p>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Comentarios))
+            {
+                <h3>📝 Comentarios del Jefe de Proceso:</h3>
+                <div class="details">
+                    <p>@Model.Comentarios</p>
+                </div>
+            }
+
+            <h3>📋 Gastos que Requieren Corrección (@Model.CantidadGastos):</h3>
+            @foreach (var gasto in Model.GastosDevueltos)
+            {
+                <div class="gasto-item">
+                    <p><strong>@gasto.Concepto</strong></p>
+                    <p><span class="label">Monto:</span> @gasto.Monto</p>
+                    <p><span class="label">Fecha:</span> @gasto.Fecha</p>
+                </div>
+            }
+
+            <h3>📝 Acciones Requeridas:</h3>
+            <div class="details">
+                <ul>
+                    <li>Revisa cada gasto señalado en la lista anterior</li>
+                    <li>Realiza las correcciones solicitadas en el sistema</li>
+                    <li>Vuelve a enviar la comprobación para revisión</li>
+                    <li><strong>Fecha límite para corregir:</strong> @Model.FechaLimite</li>
+                </ul>
+            </div>
+
+            <div style="text-align: center; margin: 25px 0;">
+                <a href="@Model.Url" class="button">✏️ Corregir Comprobación</a>
+            </div>
+
+            <div class="warning">
+                <p><strong>⚠️ Importante:</strong></p>
+                <p>Si no realizas las correcciones antes de la fecha límite, tu comprobación podría ser rechazada automáticamente.</p>
+            </div>
+
+            <p style="font-size: 14px; color: #666;">
+                <strong>Nota:</strong> Si tienes dudas sobre las correcciones solicitadas, contacta a tu Jefe de Proceso.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>📧 Este es un mensaje automático generado por el Sistema de Viáticos.</p>
+            <p>Por favor, no respondas a este correo.</p>
+            <p>&copy; @DateTime.Now.Year - Sistema de Viáticos | Viamtek</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,329 @@
+﻿/* sweetalert-custom.css - Estilos personalizados para SweetAlert2 */
+
+.sweetalert-dark {
+    background: #2b2e38 !important;
+    color: #f1f1f1 !important;
+    border-radius: 0.75rem !important;
+    border: 1px solid #44475a !important;
+}
+
+    .sweetalert-dark .swal2-title {
+        color: #f1f1f1 !important;
+        font-size: 1.5rem !important;
+        font-weight: 600 !important;
+    }
+
+    .sweetalert-dark .swal2-html-container {
+        color: #b0b0b0 !important;
+        font-size: 1rem !important;
+    }
+
+    .sweetalert-dark .swal2-confirm {
+        background: linear-gradient(135deg, #5cc87b, #308184) !important;
+        border: none !important;
+        border-radius: 0.375rem !important;
+        padding: 0.75rem 1.5rem !important;
+        font-weight: 500 !important;
+        transition: all 0.3s ease !important;
+    }
+
+        .sweetalert-dark .swal2-confirm:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 12px rgba(92, 200, 123, 0.3) !important;
+        }
+
+    .sweetalert-dark .swal2-cancel {
+        background: #44475a !important;
+        border: 1px solid #666 !important;
+        border-radius: 0.375rem !important;
+        padding: 0.75rem 1.5rem !important;
+        font-weight: 500 !important;
+        color: #f1f1f1 !important;
+        transition: all 0.3s ease !important;
+    }
+
+        .sweetalert-dark .swal2-cancel:hover {
+            background: #555 !important;
+            transform: translateY(-2px) !important;
+        }
+
+.btn-sweet-danger {
+    background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+}
+
+    .btn-sweet-danger:hover {
+        box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3) !important;
+    }
+
+/* Animaciones personalizadas para las alertas */
+@keyframes slideInFromTop {
+    from {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse-gentle {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.swal2-popup {
+    animation: slideInFromTop 0.5s ease-out !important;
+}
+
+.swal2-icon {
+    border: none !important;
+}
+
+.swal2-success [class^=swal2-success-line] {
+    background-color: #5cc87b !important;
+}
+
+.swal2-success .swal2-success-ring {
+    border: 4px solid rgba(92, 200, 123, 0.3) !important;
+}
+
+/* Toast notifications personalizadas */
+.swal2-toast {
+    background: #2b2e38 !important;
+    border: 1px solid #44475a !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+    .swal2-toast .swal2-title {
+        color: #f1f1f1 !important;
+        font-size: 0.9rem !important;
+    }
+
+/* Loading spinner personalizado */
+.swal2-loader {
+    border-color: #5cc87b transparent #5cc87b transparent !important;
+}
+
+
+/* sweetalert-custom.css - Estilos personalizados para SweetAlert2 - COMPROBACIONES */
+
+.sweetalert-dark {
+    background: var(--card-bg) !important;
+    color: var(--primary-text) !important;
+    border-radius: var(--border-radius-lg) !important;
+    border: 1px solid var(--border-light) !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+    .sweetalert-dark .swal2-title {
+        color: var(--primary-text) !important;
+        font-size: 1.5rem !important;
+        font-weight: 600 !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .sweetalert-dark .swal2-html-container {
+        color: var(--secondary-text) !important;
+        font-size: 1rem !important;
+        line-height: 1.5 !important;
+    }
+
+    .sweetalert-dark .swal2-confirm {
+        background: var(--button-gradient) !important;
+        border: none !important;
+        border-radius: var(--border-radius-md) !important;
+        padding: 0.875rem 2rem !important;
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        box-shadow: 0 4px 15px rgba(48, 129, 132, 0.4) !important;
+    }
+
+        .sweetalert-dark .swal2-confirm:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(92, 200, 123, 0.5) !important;
+        }
+
+    .sweetalert-dark .swal2-cancel {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid var(--border-light) !important;
+        border-radius: var(--border-radius-md) !important;
+        padding: 0.875rem 2rem !important;
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+        color: var(--secondary-text) !important;
+        transition: all 0.3s ease !important;
+    }
+
+        .sweetalert-dark .swal2-cancel:hover {
+            background: rgba(255, 255, 255, 0.15) !important;
+            border-color: var(--viamtek-green) !important;
+            color: var(--primary-text) !important;
+            transform: translateY(-2px) !important;
+        }
+
+.btn-sweet-danger {
+    background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+    border: none !important;
+}
+
+    .btn-sweet-danger:hover {
+        background: linear-gradient(135deg, #c0392b, #a93226) !important;
+        box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4) !important;
+    }
+
+.btn-sweet-confirm {
+    background: var(--button-gradient) !important;
+    border: none !important;
+}
+
+    .btn-sweet-confirm:hover {
+        background: linear-gradient(135deg, #308184, #5cc87b) !important;
+    }
+
+.btn-sweet-cancel {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid var(--border-light) !important;
+    color: var(--secondary-text) !important;
+}
+
+    .btn-sweet-cancel:hover {
+        background: rgba(255, 255, 255, 0.15) !important;
+        border-color: var(--viamtek-green) !important;
+        color: var(--primary-text) !important;
+    }
+
+/* Animaciones personalizadas para las alertas */
+@keyframes slideInFromTop {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse-gentle {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.swal2-popup {
+    animation: slideInFromTop 0.5s ease-out !important;
+}
+
+.swal2-icon {
+    border: none !important;
+    margin: 1.5rem auto 1rem !important;
+}
+
+.swal2-success [class^=swal2-success-line] {
+    background-color: var(--viamtek-green) !important;
+}
+
+.swal2-success .swal2-success-ring {
+    border: 4px solid rgba(92, 200, 123, 0.3) !important;
+}
+
+.swal2-warning {
+    border-color: #f39c12 !important;
+    color: #f39c12 !important;
+}
+
+.swal2-error {
+    border-color: #e74c3c !important;
+    color: #e74c3c !important;
+}
+
+/* Toast notifications personalizadas */
+.swal2-toast {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--border-radius-md) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(15px) !important;
+}
+
+    .swal2-toast .swal2-title {
+        color: var(--primary-text) !important;
+        font-size: 0.9rem !important;
+        font-weight: 500 !important;
+    }
+
+/* Loading spinner personalizado */
+.swal2-loader {
+    border-color: var(--viamtek-green) transparent var(--viamtek-green) transparent !important;
+}
+
+/* Estilos específicos para comprobaciones */
+.alert-dark {
+    background: rgba(40, 50, 60, 0.8) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--border-radius-md) !important;
+    color: var(--primary-text) !important;
+    padding: 1rem !important;
+    margin: 1rem 0 !important;
+}
+
+.swal2-progress-bar {
+    background: var(--button-gradient) !important;
+    border-radius: 10px !important;
+}
+
+/* Iconos personalizados */
+.swal2-icon.swal2-warning {
+    color: #f39c12 !important;
+    border-color: #f39c12 !important;
+}
+
+.swal2-icon.swal2-error {
+    color: #e74c3c !important;
+    border-color: #e74c3c !important;
+}
+
+.swal2-icon.swal2-info {
+    color: #3498db !important;
+    border-color: #3498db !important;
+}
+
+/* Animaciones para toast */
+.animate__slideInRight {
+    animation: slideInRight 0.5s ease-out !important;
+}

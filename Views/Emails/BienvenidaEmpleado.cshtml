@@ -1,0 +1,296 @@
+﻿@model dynamic
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #6f42c1 0%, #4a1d96 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+            .header h1 {
+                margin: 0;
+                font-size: 24px;
+                font-weight: bold;
+            }
+
+            .header p {
+                margin: 5px 0 0;
+                opacity: 0.9;
+                font-size: 14px;
+            }
+
+        .content {
+            padding: 25px;
+        }
+
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #6f42c1 0%, #4a1d96 100%);
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 15px 0;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(111, 66, 193, 0.2);
+            transition: all 0.3s ease;
+        }
+
+            .button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 12px rgba(111, 66, 193, 0.3);
+            }
+
+        .alert-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #6f42c1;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #6f42c1;
+        }
+
+        .status-badge {
+            background: #e9ecef;
+            color: #6f42c1;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 14px;
+            display: inline-block;
+            margin: 5px 0;
+        }
+
+        .instructions {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #007bff;
+        }
+
+        .warning {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+
+        .detail-item {
+            background: #f8f9fa;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 4px;
+            border-left: 3px solid #6f42c1;
+        }
+
+        .deadline {
+            color: #856404;
+            background: #fff3cd;
+            padding: 12px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+            border: 1px solid #ffeaa7;
+        }
+
+        .icon {
+            font-size: 20px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .feature-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .credentials-box {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 2px dashed #6f42c1;
+        }
+
+        .credentials-title {
+            text-align: center;
+            color: #6f42c1;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .credential-field {
+            margin: 10px 0;
+        }
+
+        .credential-label {
+            font-weight: bold;
+            color: #6f42c1;
+            display: inline-block;
+            width: 160px;
+        }
+
+        .credential-value {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            display: inline-block;
+            min-width: 250px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #6f42c1 0%, #4a1d96 100%);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .welcome-message {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .company-logo {
+            height: 40px;
+            margin-bottom: 10px;
+        }
+
+        .security-note {
+            font-size: 11px;
+            color: #888;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 ¡Bienvenido a Viamtek!</h1>
+            <p>Sistema de Gestión de Viáticos y Gastos</p>
+        </div>
+
+        <div class="content">
+            <p class="welcome-message">
+                Hola <strong>@Model.Empleado.Nombre @Model.Empleado.Apellidos</strong>,
+            </p>
+
+            <p>Nos complace darte la bienvenida al equipo de <strong>Viamtek</strong>. Tu cuenta ha sido creada exitosamente en nuestro Sistema de Gestión de Viáticos.</p>
+
+            <div class="alert-box">
+                <p><span class="icon">👤</span> <span class="label">Rol asignado:</span> @Model.Empleado.Rol?.Nombre</p>
+                <p><span class="icon">📅</span> <span class="label">Fecha de ingreso:</span> @Model.Empleado.FechaIngreso?.ToString("dd/MM/yyyy")</p>
+                <p><span class="icon">📍</span> <span class="label">Departamento:</span> @Model.Empleado.Departamento</p>
+            </div>
+
+            <div class="credentials-box">
+                <div class="credentials-title">🔐 Credenciales de Acceso</div>
+                <div class="credential-field">
+                    <span class="credential-label">📧 Correo electrónico:</span>
+                    <span class="credential-value">@Model.Empleado.Email</span>
+                </div>
+
+                <div class="credential-field">
+                    <span class="credential-label">🔑 Contraseña temporal:</span>
+                    <span class="credential-value highlight">@Model.ContrasenaTemporal</span>
+                </div>
+            </div>
+
+            <div class="warning">
+                <p><span class="icon">⚠️</span> <strong>IMPORTANTE:</strong> Esta es una contraseña temporal. Deberás cambiarla en tu primer acceso al sistema por motivos de seguridad.</p>
+            </div>
+
+            <div class="instructions">
+                <p><span class="icon">📋</span> <strong>Instrucciones para tu primer acceso:</strong></p>
+                <ol>
+                    <li>Haz clic en el botón "Acceder al Sistema"</li>
+                    <li>Ingresa tu correo y la contraseña temporal</li>
+                    <li>Sigue los pasos para establecer una nueva contraseña</li>
+                    <li>Explora las funcionalidades del sistema</li>
+                </ol>
+            </div>
+
+            <div style="text-align: center; margin: 25px 0;">
+                <a href="@Model.UrlLogin" class="button">🚀 Acceder al Sistema</a>
+            </div>
+            <div class="deadline">
+                <span class="icon">⏰</span> <strong>Acceso inmediato:</strong> Puedes comenzar a usar el sistema ahora mismo
+            </div>
+
+            <p style="font-size: 14px; color: #666;">
+                <strong>🔗 Enlace directo:</strong> Si el botón no funciona, copia y pega esta URL en tu navegador:
+                <br>
+                <code style="background: #f8f9fa; padding: 5px; border-radius: 3px; word-break: break-all; display: block; margin-top: 5px; font-size: 12px;">
+                    @Model.UrlLogin
+                </code>
+            </p>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 20px;">
+                <p><span class="icon">📞</span> <strong>Soporte técnico:</strong> Si encuentras algún problema con el acceso o tienes dudas, contacta al administrador del sistema.</p>
+            </div>
+
+            <p class="security-note">
+                🔒 <strong>Nota de seguridad:</strong> Por favor, no compartas tus credenciales con nadie. El equipo de Viamtek nunca te pedirá tu contraseña por correo.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>📧 Este es un mensaje automático del Sistema de Viáticos de Viamtek.</p>
+            <p>Por favor, no respondas a este correo. Para asistencia, contacta al departamento de administración.</p>
+            <p>&copy; @DateTime.Now.Year - Viamtek | Todos los derechos reservados</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,583 @@
+﻿@model IEnumerable<SVV.Models.SolicitudesViaje>
+
+@{
+    ViewData["Title"] = "Mis Solicitudes de Viáticos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="solicitud-title"><i class="fas fa-file-invoice-dollar me-2"></i>Mis Solicitudes de Viáticos</h1>
+                    <p class="solicitud-subtitle">Gestiona tus solicitudes de viaje y viáticos</p>
+                </div>
+                <a asp-action="CrearSolicitud" class="btn-viamtek-gradient btn-lg" id="nuevaSolicitudBtn">
+                    <i class="fas fa-plus me-2"></i>Nueva Solicitud
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="recent-activity-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0 text-white"><i class="fas fa-history me-2"></i>Historial de Solicitudes</h4>
+                    <div class="text-muted">
+                        <small>Total: @Model.Count() solicitudes</small>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover table-dark align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="120">Código</th>
+                                <th width="150">Proyecto</th>
+                                <th width="120">Destino</th>
+                                <th width="140">Fechas</th>
+                                <th width="120">Tipo Viático</th>
+                                <th width="120">Anticipo</th>
+                                <th width="120">Estado</th>
+                                <th width="150" class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Any())
+                            {
+                                @foreach (var solicitud in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong class="text-info">@solicitud.CodigoSolicitud</strong>
+                                        </td>
+                                        <td class="text-light">
+                                            <div class="text-truncate" style="max-width: 150px;" title="@solicitud.NombreProyecto">
+                                                @solicitud.NombreProyecto
+                                            </div>
+                                        </td>
+                                        <td class="text-light">
+                                            <div class="text-truncate" style="max-width: 120px;" title="@solicitud.Destino">
+                                                @solicitud.Destino
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <small class="text-light">
+                                                @solicitud.FechaSalida.ToString("dd/MM/yyyy")<br>
+                                                @solicitud.FechaRegreso.ToString("dd/MM/yyyy")
+                                            </small>
+                                        </td>
+                                        <td class="text-light">
+                                            <small>@solicitud.TipoViatico?.Nombre</small>
+                                        </td>
+                                        <td>
+                                            @if (solicitud.RequiereAnticipo == true)
+                                            {
+                                                if (solicitud.MontoAnticipo.HasValue && solicitud.MontoAnticipo > 0)
+                                                {
+                                                    <span class="fw-bold text-success" title="Anticipo asignado">
+                                                        @solicitud.MontoAnticipo.Value.ToString("C")
+                                                    </span>
+                                                    <br>
+                                                    <small class="text-muted">Asignado</small>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-warning" title="Pendiente de asignación">
+                                                        <i class="fas fa-clock me-1"></i>Pendiente
+                                                    </span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">No requiere</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @{
+                                                var estadoCodigo = solicitud.Estado?.Codigo ?? "BORRADOR";
+                                                var badgeClass = "badge bg-secondary";
+                                                
+                                                switch (estadoCodigo.ToUpper())
+                                                {
+                                                    case "BORRADOR":
+                                                        badgeClass = "badge bg-secondary";
+                                                        break;
+                                                    case "ENVIADA_JP":
+                                                    case "PENDIENTE":
+                                                        badgeClass = "badge bg-warning text-dark";
+                                                        break;
+                                                    case "APROBADA_JP":
+                                                        badgeClass = "badge bg-info";
+                                                        break;
+                                                    case "APROBADA_FINANZAS":
+                                                    case "APROBADA":
+                                                        badgeClass = "badge bg-success";
+                                                        break;
+                                                    case "RECHAZADA":
+                                                    case "RECHAZADA_JP":
+                                                    case "RECHAZADA_FINANZAS":
+                                                        badgeClass = "badge bg-danger";
+                                                        break;
+                                                    case "COMPLETADA":
+                                                    case "PAGADA":
+                                                        badgeClass = "badge bg-primary";
+                                                        break;
+                                                    default:
+                                                        badgeClass = "badge bg-secondary";
+                                                        break;
+                                                }
+                                            }
+                                            <span class="@badgeClass">@estadoCodigo</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a asp-action="Detalles" asp-route-id="@solicitud.Id" 
+                                                   class="btn btn-outline-info btn-action" 
+                                                   title="Ver detalles completos">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                
+                                                @if (estadoCodigo == "BORRADOR")
+                                                {
+                                                    <a asp-action="Editar" asp-route-id="@solicitud.Id" 
+                                                       class="btn btn-outline-warning btn-action" 
+                                                       title="Editar solicitud">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    
+                                                    <form asp-action="EnviarAprobacion" asp-route-id="@solicitud.Id" method="post" style="display: inline;">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" 
+                                                                class="btn btn-outline-success btn-action btn-enviar-aprobacion"
+                                                                data-solicitud-id="@solicitud.Id"
+                                                                data-solicitud-codigo="@solicitud.CodigoSolicitud"
+                                                                title="Enviar a aprobación">
+                                                            <i class="fas fa-paper-plane"></i>
+                                                        </button>
+                                                    </form>
+                                                    
+                                                    <button type="button" 
+                                                            class="btn btn-outline-danger btn-action btn-eliminar" 
+                                                            title="Eliminar solicitud"
+                                                            data-solicitud-id="@solicitud.Id"
+                                                            data-solicitud-codigo="@solicitud.CodigoSolicitud">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                }
+                                                else if (estadoCodigo == "APROBADA_FINANZAS" || estadoCodigo == "APROBADA")
+                                                {
+                                                    <span class="badge bg-success ms-2" title="Solicitud aprobada">
+                                                        <i class="fas fa-check"></i>
+                                                    </span>
+                                                }
+                                                else if (estadoCodigo.Contains("RECHAZADA"))
+                                                {
+                                                    <span class="badge bg-danger ms-2" title="Solicitud rechazada">
+                                                        <i class="fas fa-times"></i>
+                                                    </span>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="8" class="text-center py-5">
+                                        <div class="text-light">
+                                            <i class="fas fa-file-alt fa-4x text-muted mb-3"></i>
+                                            <h5 class="text-muted">No tienes solicitudes aún</h5>
+                                            <p class="text-muted mb-4">Crea tu primera solicitud de viáticos</p>
+                                            <a asp-action="CrearSolicitud" class="btn-viamtek-gradient btn-lg">
+                                                <i class="fas fa-plus me-2"></i>Crear Primera Solicitud
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario oculto para eliminar -->
+<form id="formEliminarSolicitud" method="post" style="display: none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="solicitudIdEliminar" name="id" />
+</form>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const nuevaSolicitudBtn = document.getElementById('nuevaSolicitudBtn');
+
+            if (nuevaSolicitudBtn) {
+                nuevaSolicitudBtn.addEventListener('click', function(e) {
+                    this.classList.add('loading');
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-spinner me-2"></i>Creando...';
+
+                    setTimeout(() => {
+                        this.classList.remove('loading');
+                        this.innerHTML = originalText;
+                    }, 800);
+                });
+            }
+
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Evento para eliminar solicitud
+            document.querySelectorAll('.btn-eliminar').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const solicitudId = this.getAttribute('data-solicitud-id');
+                    const solicitudCodigo = this.getAttribute('data-solicitud-codigo');
+                    
+                    Swal.fire({
+                        title: '¿Eliminar Solicitud?',
+                        html: `<div class="text-center">
+                                <div class="mb-3"><i class="fas fa-trash fa-3x" style="color: #e74c3c;"></i></div>
+                                <p>¿Estás seguro de eliminar la siguiente solicitud?</p>
+                                <div style="text-align: left; padding: 1rem; margin: 1rem 0; background: rgba(231, 76, 60, 0.1); border-radius: 10px; border: 1px solid rgba(231, 76, 60, 0.3);">
+                                    <strong>Código:</strong> <span style="color: #e74c3c;">${solicitudCodigo}</span><br>
+                                    <strong>Acción:</strong> <span style="color: #e74c3c;">ELIMINAR</span>
+                                </div>
+                                <small class="text-warning">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    <strong>Importante:</strong> Esta acción no se puede deshacer.
+                                </small>
+                              </div>`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e74c3c',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: '<i class="fas fa-trash me-2"></i>Sí, eliminar',
+                        cancelButtonText: '<i class="fas fa-times me-2"></i>Cancelar',
+                        background: '#2b2e38',
+                        color: '#f1f1f1'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Configurar y enviar formulario
+                            const form = document.getElementById('formEliminarSolicitud');
+                            const inputId = document.getElementById('solicitudIdEliminar');
+                            
+                            inputId.value = solicitudId;
+                            form.action = '@Url.Action("Eliminar", "Solicitudes")/' + solicitudId;
+                            
+                            // Enviar el formulario
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
+            // Evento para enviar a aprobación
+            document.querySelectorAll('.btn-enviar-aprobacion').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const form = this.closest('form');
+                    const solicitudCodigo = this.getAttribute('data-solicitud-codigo');
+                    
+                    Swal.fire({
+                        title: '¿Enviar a aprobación?',
+                        html: `¿Estás seguro de enviar la solicitud <strong>${solicitudCodigo}</strong> para aprobación?<br><br>
+                              <small class="text-muted">Una vez enviada, no podrás editarla.</small>`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#5cc87b',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, enviar',
+                        cancelButtonText: 'Cancelar',
+                        background: '#2b2e38',
+                        color: '#f1f1f1'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
+            document.querySelectorAll('tbody tr').forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                });
+                
+                row.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = '';
+                });
+            });
+        });
+    </script>
+}
+<style>
+    .recent-activity-card {
+        background: var(--card-bg-transparent);
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        border: 1px solid var(--border-color);
+        backdrop-filter: blur(10px);
+    }
+
+    .table-dark {
+        background: rgba(0,0,0,0.3);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .table-dark thead {
+        background: rgba(255,255,255,0.1);
+    }
+
+    .table-dark tbody tr:hover {
+        background: rgba(255,255,255,0.1);
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+
+    .btn-viamtek-gradient {
+        background: var(--button-gradient);
+        border: none;
+        color: var(--color-white);
+        font-weight: 600;
+        padding: 12px 24px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px var(--accent-glow);
+    }
+
+    .btn-viamtek-gradient:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px var(--accent-glow);
+        color: var(--color-white);
+        text-decoration: none;
+        background: linear-gradient(180deg, var(--viamtek-dark-green), var(--viamtek-green));
+    }
+
+    .btn-viamtek-gradient:active {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px var(--accent-glow);
+    }
+
+    .btn-viamtek-gradient.loading {
+        pointer-events: none;
+        opacity: 0.9;
+        background: linear-gradient(180deg, var(--viamtek-dark-green), var(--viamtek-green));
+    }
+
+    .btn-viamtek-gradient.loading .fa-plus {
+        animation: viamtek-spin 1s linear infinite;
+    }
+
+    @@keyframes viamtek-spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .btn-action {
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+        margin: 0.1rem !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0.5rem 0.6rem !important;
+        font-size: 0.8rem !important;
+        font-weight: 500 !important;
+        min-width: 35px !important;
+        min-height: 35px !important;
+        border: 2px solid transparent !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+        text-decoration: none !important;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-action::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+        text-decoration: none !important;
+    }
+
+    .btn-action:hover::before {
+        left: 100%;
+    }
+
+    .btn-outline-info {
+        color: #63b3ed !important;
+        border-color: #63b3ed !important;
+        background: rgba(99, 179, 237, 0.1) !important;
+    }
+
+    .btn-outline-info:hover {
+        background: #63b3ed !important;
+        border-color: #63b3ed !important;
+        color: #1a202c !important;
+    }
+
+    .btn-outline-success {
+        color: var(--viamtek-green) !important;
+        border-color: var(--viamtek-green) !important;
+        background: rgba(92, 200, 123, 0.1) !important;
+    }
+
+    .btn-outline-success:hover {
+        background: var(--viamtek-green) !important;
+        border-color: var(--viamtek-green) !important;
+        color: #1a202c !important;
+    }
+
+    .btn-outline-danger {
+        color: #fc8181 !important;
+        border-color: #fc8181 !important;
+        background: rgba(252, 129, 129, 0.1) !important;
+    }
+
+    .btn-outline-danger:hover {
+        background: #fc8181 !important;
+        border-color: #fc8181 !important;
+        color: #1a202c !important;
+    }
+
+    .btn-outline-warning {
+        border-color: #f6ad55 !important;
+        color: #f6ad55 !important;
+        background: rgba(246, 173, 85, 0.1) !important;
+    }
+
+    .btn-outline-warning:hover {
+        background-color: #f6ad55 !important;
+        color: #1a202c !important;
+    }
+
+    .table-dark tbody td .btn-group {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        gap: 0.25rem !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    .table-dark tbody td form {
+        display: inline !important;
+        margin: 0 !important;
+    }
+
+    .btn-outline-light {
+        border: 1px solid var(--border-light);
+        color: var(--secondary-text);
+        transition: all 0.3s ease;
+        background: transparent;
+    }
+
+    .btn-outline-light:hover {
+        background: rgba(92, 200, 123, 0.1);
+        border-color: var(--viamtek-green);
+        color: var(--color-white);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    .btn-group .btn {
+        margin-right: 5px;
+        border-radius: 6px !important;
+    }
+
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+
+    .btn-viamtek-gradient {
+        --viamtek-green: #5cc87b;
+        --viamtek-dark-green: #308184;
+        --color-white: #ffffff;
+        --accent-glow: rgba(92, 200, 123, 0.35);
+        --button-gradient: linear-gradient(180deg, var(--viamtek-dark-green), var(--viamtek-green));
+        --border-light: rgba(255, 255, 255, 0.15);
+        --secondary-text: #c8d6e5;
+        --card-bg-transparent: rgba(43, 46, 56, 0.95);
+        --border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-eliminar.loading {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    .btn-eliminar.loading .fa-trash {
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .badge {
+        font-size: 0.75em;
+        padding: 0.4em 0.6em;
+    }
+
+    .text-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    @@media (max-width: 768px) {
+        .table-responsive {
+            font-size: 0.85rem;
+        }
+        
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .recent-activity-card {
+            padding: 15px;
+        }
+
+        .btn-action {
+            padding: 0.4rem 0.5rem !important;
+            font-size: 0.75rem !important;
+            min-width: 32px !important;
+            min-height: 32px !important;
+        }
+    }
+</style>

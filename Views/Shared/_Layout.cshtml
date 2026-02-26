@@ -1,0 +1,338 @@
+﻿@using System.Security.Claims;
+@using SVV.Helpers
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Sistema Viáticos</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/comprobaciones.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+    @RenderSection("Styles", required: false)
+</head>
+<body class="theme-dark">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark custom-navbar fixed-top">
+            <div class="container-fluid">
+                <a class="navbar-brand me-4" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logohorizontal.png" alt="Logo Viamtek" class="navbar-logo">
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-home me-1"></i> Dashboard
+                            </a>
+                        </li>
+
+                        <!-- ✅ MENÚ DE VIAJES PARA TODOS LOS USUARIOS -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-plane me-1"></i> Viajes
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Solicitudes" asp-action="CrearSolicitud">
+                                        <i class="fas fa-plus-circle me-2"></i>Nueva Solicitud
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Solicitudes" asp-action="Index">
+                                        <i class="fas fa-list me-2"></i>Mis Solicitudes
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Comprobaciones" asp-action="Index">
+                                        <i class="fas fa-receipt me-2"></i>Mis Comprobaciones
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Finanzas" asp-action="Facturas">
+                                        <i class="fas fa-file-invoice me-2"></i>Subir Facturas
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- ✅ MENÚ PARA JP (JEFE DE PROCESO) - SOLO PARA ROLES 2 y 6 -->
+                        @if (User.FindFirstValue("RolId") == "2" || User.FindFirstValue("RolId") == "6")
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-tasks me-1"></i> Mis Aprobaciones
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Aprobaciones" asp-action="Pendientes">
+                                            <i class="fas fa-clock me-2"></i>Solicitudes Pendientes
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Finanzas" asp-action="RevisionActividadesJP">
+                                            <i class="fas fa-clipboard-check me-2"></i>Revisar Actividades
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+
+                        <!-- ✅ MENÚ PARA FINANZAS - SOLO PARA ROL 4 y 6 (Admin) -->
+                        @if (User.FindFirstValue("RolId") == "4" || User.FindFirstValue("RolId") == "6")
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-money-bill-wave me-1"></i> Finanzas
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Finanzas" asp-action="Facturas">
+                                            <i class="fas fa-file-invoice me-2"></i>Validar Comprobaciones
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Finanzas" asp-action="AutorizacionesPago">
+                                            <i class="fas fa-money-check me-2"></i>Autorizar Pagos
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Finanzas" asp-action="Cotizaciones">
+                                            <i class="fas fa-calculator me-2"></i>Cotizaciones
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Finanzas" asp-action="Reportes">
+                                            <i class="fas fa-chart-bar me-2"></i>Reportes
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+
+                        <!-- ✅ MENÚ DE GESTIÓN (SOLO PARA ROL 6 - Admin) -->
+                        @if (User.FindFirstValue("RolId") == "6")
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-tools me-1"></i> Administración
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Admin" asp-action="Empleados">
+                                            <i class="fas fa-users me-2"></i>Gestionar Personal
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Admin" asp-action="Catalogos">
+                                            <i class="fas fa-book me-2"></i>Catálogos/Reglas
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Finanzas" asp-action="Reportes">
+                                            <i class="fas fa-chart-line me-2"></i>Reportes Financieros
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+
+                        <!-- ✅ MENÚ PARA RH - SOLO PARA ROL 3 -->
+                        @if (User.FindFirstValue("RolId") == "3")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Aprobaciones" asp-action="Pendientes">
+                                    <i class="fas fa-eye me-1"></i> Ver Todas las Solicitudes
+                                </a>
+                            </li>
+                            <!-- RH NO tiene Gestionar Empleados -->
+                        }
+                    </ul>
+
+                    <!-- NOTIFICACIONES -->
+                    <ul class="navbar-nav me-3">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link" asp-controller="Notificaciones" asp-action="Index" title="Notificaciones">
+                                <i class="fas fa-bell"></i>
+                                <span class="badge bg-danger notification-badge" id="notificationCounter">0</span>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- USUARIO -->
+                    <ul class="navbar-nav">
+                        <li class="nav-item dropdown">
+                            @{
+                                var nombreUsuario = User.FindFirstValue(ClaimTypes.Name) ?? "Usuario";
+                                var rolNombre = User.FindFirstValue(ClaimTypes.Role) ?? "Rol";
+                                var emailUsuario = User.FindFirstValue(ClaimTypes.Email) ?? "";
+                            }
+                            <a class="nav-link dropdown-toggle user-menu" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle me-1"></i> @nombreUsuario
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><h6 class="dropdown-header">@rolNombre</h6></li>
+                                @if (!string.IsNullOrEmpty(emailUsuario))
+                                {
+                                    <li><h6 class="dropdown-header">@emailUsuario</h6></li>
+                                }
+                                <li><hr class="dropdown-divider"></li>
+                                <!-- OPCIONES DE PERFIL -->
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Perfil" asp-action="MiPerfil">
+                                        <i class="fas fa-user me-2"></i> Mi Perfil
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Perfil" asp-action="CambiarPassword">
+                                        <i class="fas fa-key me-2"></i> Cambiar Contraseña
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <!-- CERRAR SESIÓN -->
+                                <li>
+                                    <form asp-controller="Auth" asp-action="Logout" method="post">
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="main-content-container">
+        <main role="main" class="main-content">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="custom-footer">
+        <div class="container-fluid text-center">
+            &copy; @DateTime.Now.Year - Viamtek | Software de Gestión de Viáticos
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    @{
+        var sweetError = string.Empty;
+        var sweetSuccess = string.Empty;
+        var sweetWarning = string.Empty;
+        var sweetInfo = string.Empty;
+
+        if (TempData != null)
+        {
+            sweetError = TempData.ContainsKey("Error") ? TempData["Error"]?.ToString() : string.Empty;
+            sweetSuccess = TempData.ContainsKey("Success") ? TempData["Success"]?.ToString() : string.Empty;
+            sweetWarning = TempData.ContainsKey("Warning") ? TempData["Warning"]?.ToString() : string.Empty;
+            sweetInfo = TempData.ContainsKey("Info") ? TempData["Info"]?.ToString() : string.Empty;
+        }
+
+        var cleanError = !string.IsNullOrEmpty(sweetError) ? JsAlertHelper.Clean(sweetError) : null;
+        var cleanSuccess = !string.IsNullOrEmpty(sweetSuccess) ? JsAlertHelper.Clean(sweetSuccess) : null;
+        var cleanWarning = !string.IsNullOrEmpty(sweetWarning) ? JsAlertHelper.Clean(sweetWarning) : null;
+        var cleanInfo = !string.IsNullOrEmpty(sweetInfo) ? JsAlertHelper.Clean(sweetInfo) : null;
+    }
+
+    <script>
+        // Variables GLOBALES para SweetAlert (manejo seguro de nulls)
+        window.sweetAlerts = {
+            error: @Html.Raw(cleanError != null ? $"'{cleanError}'" : "null"),
+            success: @Html.Raw(cleanSuccess != null ? $"'{cleanSuccess}'" : "null"),
+            warning: @Html.Raw(cleanWarning != null ? $"'{cleanWarning}'" : "null"),
+            info: @Html.Raw(cleanInfo != null ? $"'{cleanInfo}'" : "null")
+        };
+
+        // Mostrar alertas automáticamente al cargar la página
+        $(document).ready(function() {
+            // Función para mostrar alertas
+            function mostrarAlerta(mensaje, tipo) {
+                if (!mensaje) return;
+
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer);
+                        toast.addEventListener('mouseleave', Swal.resumeTimer);
+                    }
+                });
+
+                Toast.fire({
+                    icon: tipo,
+                    title: mensaje
+                });
+            }
+
+            // Mostrar alertas según tipo
+            if (window.sweetAlerts.success) {
+                mostrarAlerta(window.sweetAlerts.success, 'success');
+            }
+            if (window.sweetAlerts.error) {
+                mostrarAlerta(window.sweetAlerts.error, 'error');
+            }
+            if (window.sweetAlerts.warning) {
+                mostrarAlerta(window.sweetAlerts.warning, 'warning');
+            }
+            if (window.sweetAlerts.info) {
+                mostrarAlerta(window.sweetAlerts.info, 'info');
+            }
+        });
+    </script>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/notificaciones.js" asp-append-version="true"></script>
+    <script src="~/js/comprobaciones.js" asp-append-version="true"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Cargar contador de notificaciones
+            function cargarContadorNotificaciones() {
+                $.get('/Notificaciones/ObtenerContadorNoLeidas', function(data) {
+                    if (data && data.count !== undefined) {
+                        $('#notificationCounter').text(data.count);
+                        if (data.count > 0) {
+                            $('#notificationCounter').removeClass('d-none');
+                        } else {
+                            $('#notificationCounter').addClass('d-none');
+                        }
+                    }
+                }).fail(function() {
+                    console.log('Error al cargar notificaciones');
+                });
+            }
+
+            cargarContadorNotificaciones();
+
+            // Actualizar cada 30 segundos
+            setInterval(cargarContadorNotificaciones, 30000);
+        });
+    </script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
