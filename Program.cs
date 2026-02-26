@@ -41,6 +41,7 @@ builder.Services.AddScoped<EmailSender, MailKitEmailSender>();
 // Registrar servicios de notificación
 builder.Services.AddSingleton<INotificationQueue, InMemoryNotificationQueue>();
 builder.Services.AddHostedService<NotificationWorker>();
+//PRUEBA
 
 // CONFIGURACIÓN DE AUTENTICACIÓN 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
