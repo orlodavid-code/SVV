@@ -1,9 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
 using SVV.Models;
 using SVV.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+ExcelPackage.License.SetNonCommercialOrganization("SVV");
+
 
 // Agregar controladores y vistas (MVC)
 builder.Services.AddControllersWithViews()

@@ -30,7 +30,6 @@ namespace SVV.Controllers
         {
             _context = context;
             _logger = logger;
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         }
 
         // Dashboard principal con múltiples rutas de acceso
