@@ -1000,8 +1000,7 @@ namespace SVV.Controllers
             {
                 var finanzasUsers = await _context.Empleados
                     .Include(e => e.Rol)
-                    .Where(e => (e.Rol.Nombre.Contains("Finanzas") || e.Rol.Nombre.Contains("FINANZAS")) &&
-                               e.Activo == true)
+                    .Where(e => e.Rol.Codigo == "FINANZAS" && e.Activo == true)
                     .ToListAsync();
 
                 foreach (var finanzas in finanzasUsers)
@@ -1088,10 +1087,9 @@ namespace SVV.Controllers
             try
             {
                 var finanzasUsers = await _context.Empleados
-                    .Include(e => e.Rol)
-                    .Where(e => (e.Rol.Nombre.Contains("Finanzas") || e.Rol.Nombre.Contains("FINANZAS")) &&
-                               e.Activo == true)
-                    .ToListAsync();
+                  .Include(e => e.Rol)
+                  .Where(e => e.Rol.Codigo == "FINANZAS" && e.Activo == true)
+                  .ToListAsync();
 
                 // ESTADÍSTICAS DE GASTOS PARA NOTIFICACIÓN
                 var gastos = await _context.GastosReales

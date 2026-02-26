@@ -307,7 +307,7 @@ namespace SVV.Controllers
                     Model = new
                     {
                         Empleado = empleado,
-                        UrlLogin = $"{baseUrl}/Account/Login",
+                        UrlLogin = $"{baseUrl}/Auth/Login",
                         ContrasenaTemporal = "Temp123!",
                         BaseUrl = baseUrl
                     }
