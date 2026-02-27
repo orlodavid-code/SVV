@@ -11,7 +11,7 @@
                    Model.SolicitudViaje.FechaSalida.ToDateTime(TimeOnly.MinValue)).Days + 1;
     }
 
-    // ✅ OBTENER LOS PRECIOS DESDE VIEWBAG (cargados en el controlador)
+    //  OBTENER LOS PRECIOS DESDE VIEWBAG (cargados en el controlador)
     var transportePrecios = ViewBag.TransportePrecios as List<ConceptoItemViewModel> ?? new List<ConceptoItemViewModel>();
     var gasolinaPrecios = ViewBag.GasolinaPrecios as List<ConceptoItemViewModel> ?? new List<ConceptoItemViewModel>();
     var uberTaxiPrecios = ViewBag.UberTaxiPrecios as List<ConceptoItemViewModel> ?? new List<ConceptoItemViewModel>();
@@ -214,7 +214,7 @@
                         </table>
                     </div>
 
-                    <!-- ✅ TABLAS DETALLADAS DE PRECIOS INDIVIDUALES -->
+                    <!--  TABLAS DETALLADAS DE PRECIOS INDIVIDUALES -->
                     <h6 class="text-accent mb-3">Desglose Detallado de Precios</h6>
 
                     <!-- Transporte -->

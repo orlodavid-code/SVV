@@ -398,7 +398,7 @@
 
             Object.entries(dependencias).forEach(([nombre, cargado]) => {
                 if (cargado) {
-                    console.log(`✅ ${nombre}: CARGADO`);
+                    console.log(` ${nombre}: CARGADO`);
                     diagnostico.info.push(`${nombre} cargado correctamente`);
                 } else {
                     console.error(`❌ ${nombre}: NO CARGADO`);
@@ -410,7 +410,7 @@
             console.log("\n%c2️⃣ VERIFICANDO SISTEMA DE REPORTES", "font-size: 16px; color: #ffcc00; font-weight: bold;");
 
             if (typeof window.sistemaReportes !== 'undefined' && window.sistemaReportes !== null) {
-                console.log("✅ SistemaReportes: INSTANCIADO");
+                console.log(" SistemaReportes: INSTANCIADO");
                 console.log("   • initialLoadDone:", window.sistemaReportes.initialLoadDone);
                 console.log("   • isLoading:", window.sistemaReportes.isLoading);
                 console.log("   • Gráficos en memoria:", Object.keys(window.sistemaReportes.charts || {}).length);
@@ -441,7 +441,7 @@
                     const ctx = canvas.getContext('2d');
                     const chart = Chart.getChart(canvas);
 
-                    console.log(`✅ ${id}:`);
+                    console.log(` ${id}:`);
                     console.log(`   • Elemento: EXISTE`);
                     console.log(`   • Contexto: ${ctx ? 'OK' : 'ERROR'}`);
                     console.log(`   • Dimensiones: ${canvas.width}x${canvas.height}`);
@@ -475,7 +475,7 @@
                     const container = element.querySelector('.chart-container');
                     const errorMsg = element.querySelector('.chart-error-message');
 
-                    console.log(`✅ Contenedor [data-chart="${wrapper}"]:`);
+                    console.log(` Contenedor [data-chart="${wrapper}"]:`);
                     console.log(`   • Contenedor existe: SÍ`);
                     console.log(`   • .chart-container: ${container ? 'SÍ' : 'NO'}`);
                     console.log(`   • Mensaje de error: ${errorMsg ? 'SÍ (HAY ERROR)' : 'NO'}`);
@@ -543,7 +543,7 @@
             )).then(results => {
                 results.forEach(result => {
                     if (result.success) {
-                        console.log(`✅ ${result.name}: Status ${result.status}, Datos: ${result.dataLength}`);
+                        console.log(` ${result.name}: Status ${result.status}, Datos: ${result.dataLength}`);
                     } else {
                         console.error(`❌ ${result.name}: ${result.error}`);
                         diagnostico.errores.push(`API ${result.name} falló: ${result.error}`);
@@ -558,7 +558,7 @@
                 console.log("%c" + "=".repeat(80), "color: #00ff00;");
 
                 if (diagnostico.errores.length === 0) {
-                    console.log("%c✅ NO SE ENCONTRARON ERRORES CRÍTICOS", "font-size: 14px; color: #00ff00; font-weight: bold;");
+                    console.log("%c NO SE ENCONTRARON ERRORES CRÍTICOS", "font-size: 14px; color: #00ff00; font-weight: bold;");
                 } else {
                     console.log("%c❌ ERRORES ENCONTRADOS:", "font-size: 14px; color: #ff0000; font-weight: bold;");
                     diagnostico.errores.forEach((error, i) => {
