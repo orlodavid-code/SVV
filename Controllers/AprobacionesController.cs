@@ -1216,7 +1216,7 @@ namespace SVV.Controllers
 
                 var tiposViatico = await _context.TiposViatico.ToListAsync();
 
-                var pdfGenerator = new AprobacionDetallePdf(solicitud, duracion, logoPath, tiposViatico);
+                var pdfGenerator = new PdfSolicitudes(solicitud, duracion, logoPath, tiposViatico);
                 var pdfBytes = pdfGenerator.GeneratePdf();
 
                 Response.Headers.Add("Content-Disposition", $"inline; filename=Solicitud_{solicitud.CodigoSolicitud}.pdf");

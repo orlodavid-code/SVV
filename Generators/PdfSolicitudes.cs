@@ -6,14 +6,14 @@ using SVV.Models;
 
 namespace SVV.Generators
 {
-    public class AprobacionDetallePdf : IDocument
+    public class PdfSolicitudes : IDocument
     {
         private readonly SolicitudesViaje _solicitud;
         private readonly int _duracionViaje;
         private readonly string _logoPath;
         private readonly List<TiposViatico> _tiposViatico;
 
-        public AprobacionDetallePdf(
+        public PdfSolicitudes(
             SolicitudesViaje solicitud,
             int duracionViaje,
             string logoPath,
