@@ -484,7 +484,6 @@ namespace SVV.Services
             {
                 {"AGUASCALIENTES", 580},
                 {"BAJA_CALIFORNIA", 2800},
-                // ... (distancias desde Puebla a otros estados)
                 {"ZACATECAS", 720}
             };
 
@@ -766,37 +765,33 @@ namespace SVV.Services
         // Calcula costo de Uber/Taxi
         private async Task CalcularUberTaxiAutomatico(CalcularCotizacionDto dto, ResultadoCotizacionDto resultado)
         {
+            // Si no requiere taxi a domicilio, no calculamos nada
+            if (!dto.RequiereTaxiDomicilio)
+            {
+                resultado.TotalUberTaxi = 0;
+                resultado.DetalleUberTaxi.Clear();
+                await Task.CompletedTask;
+                return;
+            }
+
             var costo = 0m;
             var detalles = new List<ConceptoItemDto>();
 
-            if (dto.RequiereTaxiDomicilio)
-            {
-                var costoTaxi = 200 * dto.NumeroPersonas;
-                costo += costoTaxi;
-                detalles.Add(new ConceptoItemDto
-                {
-                    Precio = costoTaxi,
-                    Descripcion = $"Taxi a domicilio ({dto.NumeroPersonas} personas)"
-                });
-            }
-
-            var diasViaje = CalcularDiasViaje(dto.FechaSalida, dto.FechaRegreso);
-            var diasLaborables = Math.Max(1, diasViaje - (dto.RequiereHospedaje ? 0 : 1));
-            var costoTraslados = diasLaborables * 2 * 70 * dto.NumeroPersonas;
-            costo += costoTraslados;
-
+            // Taxi a domicilio (origen-destino específico)
+            var costoTaxi = 200 * dto.NumeroPersonas;
+            costo += costoTaxi;
             detalles.Add(new ConceptoItemDto
             {
-                Precio = costoTraslados,
-                Descripcion = $"Traslados locales ({diasLaborables} días, {dto.NumeroPersonas} personas)"
+                Precio = costoTaxi,
+                Descripcion = $"Taxi a domicilio ({dto.NumeroPersonas} personas)"
             });
+
 
             resultado.TotalUberTaxi = costo;
             resultado.DetalleUberTaxi = detalles;
 
             await Task.CompletedTask;
         }
-
         // Calcula costo de casetas para vehículo propio
         private async Task CalcularCasetasAutomatico(CalcularCotizacionDto dto, ResultadoCotizacionDto resultado)
         {
@@ -1000,13 +995,7 @@ namespace SVV.Services
         // Aplica reglas de negocio como descuentos y validaciones
         private void AplicarReglasNegocio(CalcularCotizacionDto dto, ResultadoCotizacionDto resultado)
         {
-            if (dto.NumeroPersonas >= _cotizacionConfig.Tarifas.DescuentoGrupoGrande.MinPersonas)
-            {
-                var descuento = resultado.TotalGeneral * (_cotizacionConfig.Tarifas.DescuentoGrupoGrande.Porcentaje / 100m);
-                resultado.TotalGeneral -= descuento;
-                resultado.Alertas.Add($"Descuento del {_cotizacionConfig.Tarifas.DescuentoGrupoGrande.Porcentaje}% (${descuento:F2}) por grupo de {dto.NumeroPersonas} personas");
-            }
-
+         
             var medioTraslado = WebUtility.HtmlDecode(dto.MedioTraslado ?? "").ToLower();
             var esVehiculoPropio = EsVehiculo(medioTraslado);
 
