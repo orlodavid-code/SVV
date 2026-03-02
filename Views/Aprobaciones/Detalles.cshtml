@@ -16,7 +16,7 @@
 
     var estadoCodigo = Model?.Estado?.Codigo ?? "PENDIENTE";
     var totalSolicitado = Model?.RequiereAnticipo == true ? Model.MontoAnticipo ?? 0 : 0;
-    
+
     // Verificar si hubo cambio de tipo de viático
     var flujoAprobacion = Model?.FlujoAprobaciones?.OrderByDescending(f => f.CreatedAt).FirstOrDefault();
     var contieneCambioTipo = flujoAprobacion?.Comentarios?.Contains("Tipo de viático cambiado") ?? false;
@@ -51,9 +51,9 @@
                 <a asp-action="Pendientes" class="btn-viamtek-outline">
                     <i class="fas fa-arrow-left me-2"></i>Volver a Pendientes
                 </a>
-                <button class="btn-viamtek-gradient" id="btnImprimir">
-                    <i class="fas fa-print me-2"></i>Generar PDF
-                </button>
+                <a asp-action="DescargarPdf" asp-route-id="@Model.Id" class="btn-viamtek-gradient" target="_blank">
+                    <i class="fas fa-file-pdf me-2"></i>Generar PDF
+                </a>
             </div>
         </div>
     </div>
@@ -250,7 +250,7 @@
                         <h3 class="seccion-titulo text-accent mb-3 border-bottom-titulo">
                             <i class="fas fa-money-bill-wave me-2"></i>Anticipos Solicitados
                         </h3>
-                        
+
                         <div class="tabla-precios">
                             <div class="table-responsive">
                                 <table class="table table-sm table-dark mb-0">
@@ -301,10 +301,10 @@
                         <h3 class="seccion-titulo text-warning mb-3 border-bottom-titulo">
                             <i class="fas fa-exchange-alt me-2"></i>Gestión de Tipo de Viático
                         </h3>
-                        
+
                         <div class="alert alert-warning border-definido">
                             <i class="fas fa-exclamation-triangle me-2"></i>
-                            <strong>Finanzas puede modificar el tipo de viático:</strong> 
+                            <strong>Finanzas puede modificar el tipo de viático:</strong>
                             Cambia el tipo si no es adecuado, luego envía a Dirección.
                         </div>
 
@@ -317,24 +317,24 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6 mb-3">
                                 <div class="form-group">
                                     <label for="NuevoTipoViaticoId" class="form-label fw-bold text-light">
                                         Seleccionar Nuevo Tipo:
                                     </label>
-                                    <select class="form-control form-select-lg border-dato" 
-                                            id="NuevoTipoViaticoId" 
+                                    <select class="form-control form-select-lg border-dato"
+                                            id="NuevoTipoViaticoId"
                                             name="NuevoTipoViaticoId"
                                             data-tipo-actual="@Model.TipoViaticoId">
-                                         <option value="">-- Mantener tipo actual --</option>
-                                            @foreach (var tipo in ViewBag.TiposViatico as List<SVV.Models.TiposViatico>)
-                                            {
-                                                <option value="@tipo.Id" selected="@(Model.TipoViaticoId == tipo.Id ? "selected" : null)">
-                                                    @tipo.Nombre
-                                                </option>
-                                            }
-                                        </select>
+                                        <option value="">-- Mantener tipo actual --</option>
+                                        @foreach (var tipo in ViewBag.TiposViatico as List<SVV.Models.TiposViatico>)
+                                        {
+                                            <option value="@tipo.Id" selected="@(Model.TipoViaticoId == tipo.Id ? "selected" : null)">
+                                                @tipo.Nombre
+                                            </option>
+                                        }
+                                    </select>
                                     <small class="form-text text-muted">
                                         Selecciona un nuevo tipo de viático y guarda los cambios.
                                     </small>
@@ -354,10 +354,9 @@
                         <!-- BOTÓN DE GUARDAR CAMBIO DE TIPO -->
                         <div class="row mt-4">
                             <div class="col-md-12">
-                                <!-- FORMULARIO 1: GUARDAR CAMBIO DE TIPO -->
-                                <form id="formCambiarTipo" 
-                                      asp-action="ActualizarTipoViatico" 
-                                      asp-route-id="@Model.Id" 
+                                <form id="formCambiarTipo"
+                                      asp-action="ActualizarTipoViatico"
+                                      asp-route-id="@Model.Id"
                                       method="post">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="NuevoTipoViaticoId" id="inputNuevoTipoViatico" value="" />
@@ -375,7 +374,7 @@
                                 .OrderByDescending(f => f.CreatedAt)
                                 .ToList();
                         }
-                        
+
                         @if (cambiosTipo != null && cambiosTipo.Any())
                         {
                             <div class="mt-4 pt-3 border-top">
@@ -476,17 +475,16 @@
             <div class="col-12 text-center">
                 @if (ViewBag.RolId == 4 && (Model.EstadoId == 6 || Model.EstadoId == 7))
                 {
-                    <a asp-controller="Finanzas" asp-action="CrearCotizacion" 
+                    <a asp-controller="Finanzas" asp-action="CrearCotizacion"
                        asp-route-solicitudId="@Model.Id"
                        class="btn btn-cotizacion-especial me-3">
                         <i class="fas fa-file-invoice-dollar me-2"></i>Generar Cotización
                     </a>
 
-                    <!-- FORMULARIO 2: APROBAR Y ENVIAR A DIRECCIÓN -->
-                    <form id="formAprobarFinanzas" 
-                          asp-action="AprobarConTipoViatico" 
-                          asp-route-id="@Model.Id" 
-                          method="post" 
+                    <form id="formAprobarFinanzas"
+                          asp-action="AprobarConTipoViatico"
+                          asp-route-id="@Model.Id"
+                          method="post"
                           style="display: inline;">
                         @Html.AntiForgeryToken()
                         <button type="submit" id="btnAprobarFinanzas" class="btn-aprobar me-3">
@@ -501,7 +499,7 @@
                         </button>
                     </form>
                 }
-                else if (ViewBag.RolId != 4) 
+                else if (ViewBag.RolId != 4)
                 {
                     <!-- Para otros roles (no Finanzas) -->
                     <form asp-action="Aprobar" asp-route-id="@Model.Id" method="post" style="display: inline;">
@@ -522,6 +520,7 @@
         </div>
     }
 </div>
+
 @section Styles {
     <link rel="stylesheet" href="~/css/aprobaciones.css" asp-append-version="true" />
 }
@@ -529,7 +528,7 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 1. ELEMENTOS DEL DOM PARA LA SECCIÓN DE FINANZAS
+            // ========== ELEMENTOS DEL DOM PARA LA SECCIÓN DE FINANZAS ==========
             const selectTipo = document.getElementById('NuevoTipoViaticoId');
             const inputNuevoTipo = document.getElementById('inputNuevoTipoViatico');
             const btnGuardarTipo = document.getElementById('btnGuardarTipo');
@@ -542,31 +541,27 @@
             const tipoActualNombre = '@Model.TipoViatico?.Nombre' || 'Actual';
             const tipoActualId = parseInt('@Model.TipoViaticoId');
 
-            // 2. MANEJAR CAMBIOS EN EL SELECT (SOLO PARA FINANZAS)
+            // ========== MANEJAR CAMBIOS EN EL SELECT ==========
             if (selectTipo) {
                 selectTipo.addEventListener('change', function() {
                     const nuevoValor = parseInt(this.value);
                     const textoSeleccionado = this.options[this.selectedIndex]?.text || '';
                     const esCambio = nuevoValor && nuevoValor !== tipoActualId;
 
-                    // Actualizar input hidden
                     if (inputNuevoTipo) {
                         inputNuevoTipo.value = nuevoValor;
                     }
 
-                    // Habilitar/deshabilitar botón de guardar
                     if (btnGuardarTipo) {
                         btnGuardarTipo.disabled = !esCambio;
                     }
 
-                    // Mostrar/ocultar preview
                     if (previewCambioTipo && tipoNuevoPreview && tipoActualPreview) {
                         if (esCambio) {
                             tipoActualPreview.textContent = tipoActualNombre;
                             tipoNuevoPreview.textContent = textoSeleccionado;
                             previewCambioTipo.classList.remove('d-none');
 
-                            // Efecto visual
                             selectTipo.classList.add('tipo-cambiado');
                             selectTipo.style.borderColor = '#3b82f6';
                             selectTipo.style.boxShadow = '0 0 0 0.2rem rgba(59, 130, 246, 0.25)';
@@ -579,11 +574,10 @@
                     }
                 });
 
-                // Inicializar estado
                 selectTipo.dispatchEvent(new Event('change'));
             }
 
-            // 3. FORMULARIO PARA GUARDAR CAMBIO DE TIPO
+            // ========== FORMULARIO GUARDAR CAMBIO DE TIPO ==========
             if (formCambiarTipo) {
                 formCambiarTipo.addEventListener('submit', function(e) {
                     e.preventDefault();
@@ -617,7 +611,6 @@
                         color: 'var(--primary-text)'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            // Mostrar carga
                             Swal.fire({
                                 title: 'Guardando...',
                                 text: 'Actualizando tipo de viático en la base de datos',
@@ -627,19 +620,17 @@
                                 }
                             });
 
-                            // Enviar formulario
                             formCambiarTipo.submit();
                         }
                     });
                 });
             }
 
-            // 4. FORMULARIO PARA APROBAR Y ENVIAR A DIRECCIÓN (que ahora está en la parte inferior)
+            // ========== FORMULARIO APROBAR Y ENVIAR A DIRECCIÓN (FINANZAS) ==========
             if (formAprobarFinanzas) {
                 formAprobarFinanzas.addEventListener('submit', function(e) {
                     e.preventDefault();
 
-                    // Verificar si hubo cambios recientes
                     const cambiosRecientes = document.querySelector('.cambio-realizado');
                     const hayCambiosPendientes = selectTipo && selectTipo.value &&
                                                  parseInt(selectTipo.value) !== tipoActualId &&
@@ -664,23 +655,19 @@
                             color: 'var(--primary-text)'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                // Primero guardar cambios, luego aprobar
                                 guardarYTEnviar();
                             } else if (result.isDenied) {
-                                // Enviar sin guardar cambios
                                 enviarSinGuardar();
                             }
                         });
                     } else {
-                        // Enviar directamente
                         confirmarEnvioDireccion();
                     }
                 });
             }
 
-            // 5. FUNCIONES AUXILIARES PARA FINANZAS
+            // ========== FUNCIONES AUXILIARES ==========
             function guardarYTEnviar() {
-                // Primero guardar el cambio de tipo
                 Swal.fire({
                     title: 'Guardando cambios...',
                     text: 'Actualizando tipo de viático',
@@ -690,7 +677,6 @@
                     }
                 });
 
-                // Crear un formulario temporal para guardar
                 const formData = new FormData(formCambiarTipo);
 
                 fetch(formCambiarTipo.action, {
@@ -702,7 +688,6 @@
                 })
                 .then(response => {
                     if (response.ok) {
-                        // Luego enviar a dirección
                         Swal.fire({
                             title: 'Enviando a Dirección...',
                             text: 'Aprobando solicitud',
@@ -712,7 +697,6 @@
                             }
                         });
 
-                        // Enviar formulario de aprobación
                         formAprobarFinanzas.submit();
                     } else {
                         throw new Error('Error al guardar cambios');
@@ -739,11 +723,8 @@
                     cancelButtonText: 'Cancelar'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Restaurar valor original en el select
                         selectTipo.value = tipoActualId;
                         selectTipo.dispatchEvent(new Event('change'));
-
-                        // Enviar formulario
                         formAprobarFinanzas.submit();
                     }
                 });
@@ -779,16 +760,14 @@
                 });
             }
 
-            // 6. EFECTO VISUAL AL CARGAR SI HAY CAMBIOS RECIENTES
+            // ========== EFECTO VISUAL AL CARGAR SI HAY CAMBIOS RECIENTES ==========
             setTimeout(() => {
                 const successMessage = '@TempData["Success"]';
                 if (successMessage && successMessage.includes("Tipo de viático actualizado")) {
-                    // Resaltar visualmente
                     const seccionTipo = document.querySelector('.border-warning');
                     if (seccionTipo) {
                         seccionTipo.classList.add('cambio-realizado');
 
-                        // Actualizar el texto del tipo actual
                         const datoValor = document.querySelector('.dato-valor strong');
                         if (datoValor && successMessage.includes("→")) {
                             const nuevoNombre = successMessage.split("→")[1].split("'")[1];
@@ -798,13 +777,7 @@
                 }
             }, 500);
 
-            // 7. BOTÓN DE IMPRIMIR (mantener funcionalidad existente)
-            const btnImprimir = document.getElementById('btnImprimir');
-            if (btnImprimir) {
-                btnImprimir.addEventListener('click', generarPDF);
-            }
-
-            // 8. FORMULARIO DE RECHAZAR (para todos los roles)
+            // ========== FORMULARIO DE RECHAZAR (para todos los roles) ==========
             const formRechazar = document.querySelector('form[action*="Rechazar"]');
             if (formRechazar) {
                 formRechazar.addEventListener('submit', function(e) {
@@ -827,7 +800,7 @@
                 });
             }
 
-            // 9. FORMULARIO DE APROBAR (para otros roles, no Finanzas)
+            // ========== FORMULARIO DE APROBAR (para otros roles, no Finanzas) ==========
             const formAprobar = document.querySelector('form[action*="Aprobar"]:not(#formAprobarFinanzas)');
             if (formAprobar) {
                 formAprobar.addEventListener('submit', function(e) {
@@ -849,70 +822,6 @@
                     });
                 });
             }
-
-            // 10. FUNCIÓN GENERAR PDF (mantener existente)
-            function generarPDF(e) {
-                if (e) e.preventDefault();
-
-                if (!btnImprimir) return;
-
-                const originalText = btnImprimir.innerHTML;
-                btnImprimir.disabled = true;
-                btnImprimir.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generando PDF...';
-
-                Swal.fire({
-                    title: 'Generando PDF',
-                    html: '<i class="fas fa-file-pdf fa-3x mb-2"></i><p>Preparando documento…</p>',
-                    icon: 'info',
-                    showConfirmButton: false,
-                    allowOutsideClick: false,
-                    timer: 1500
-                });
-
-                setTimeout(() => {
-                    document.body.classList.add('printing-pdf');
-
-                    const elementosCriticos = document.querySelectorAll(
-                        '.aprobaciones-container, .recent-activity-card, .doc-header, .seccion'
-                    );
-
-                    elementosCriticos.forEach(el => {
-                        el.style.setProperty('background', '#ffffff', 'important');
-                        el.style.setProperty('color', '#000000', 'important');
-                    });
-
-                    setTimeout(() => {
-                        window.print();
-
-                        setTimeout(() => {
-                            document.body.classList.remove('printing-pdf');
-                            elementosCriticos.forEach(el => {
-                                el.style.removeProperty('background');
-                                el.style.removeProperty('color');
-                            });
-
-                            btnImprimir.disabled = false;
-                            btnImprimir.innerHTML = originalText;
-
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'PDF listo',
-                                text: 'El documento se ha generado correctamente.',
-                                timer: 1500,
-                                showConfirmButton: false
-                            });
-                        }, 500);
-                    }, 300);
-                }, 1600);
-            }
-
-            // 11. Manejar impresión desde atajos de teclado
-            document.addEventListener('keydown', function(e) {
-                if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
-                    e.preventDefault();
-                    generarPDF();
-                }
-            });
         });
     </script>
 }

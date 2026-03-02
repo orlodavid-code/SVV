@@ -378,36 +378,170 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/solicitudes.css" asp-append-version="true" />
     <style>
-        .border-definido { border: 2px solid var(--border-light) !important; border-radius: var(--border-radius-md) !important; }
-        .border-seccion { border: 1.5px solid rgba(92, 200, 123, 0.2) !important; border-radius: var(--border-radius-md) !important; padding: 1.5rem !important; background: rgba(25, 35, 45, 0.7) !important; backdrop-filter: blur(10px) !important; }
-        .border-bottom-titulo { border-bottom: 2px solid var(--viamtek-green) !important; padding-bottom: 0.75rem !important; }
-        .border-bottom-definido { border-bottom: 3px solid var(--border-light) !important; padding-bottom: 1.5rem !important; }
-        .border-top-definido { border-top: 2px solid var(--border-light) !important; }
-        .border-dato { border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: var(--border-radius-sm) !important; padding: 0.75rem 1rem !important; background: rgba(255, 255, 255, 0.05) !important; min-height: 48px !important; display: flex !important; align-items: center !important; }
-        .border-firma { border: 2px solid var(--border-light) !important; border-radius: var(--border-radius-md) !important; background: rgba(30, 40, 50, 0.8) !important; transition: all var(--transition-normal) !important; }
-        .border-firma:hover { border-color: var(--viamtek-green) !important; transform: translateY(-2px) !important; box-shadow: 0 4px 15px rgba(92, 200, 123, 0.2) !important; }
-        .badge.border-definido { border: 1px solid rgba(255, 255, 255, 0.3) !important; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important; }
-        
-        .seccion { transition: all var(--transition-normal) !important; }
-        .seccion:hover { border-color: rgba(92, 200, 123, 0.4) !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important; }
-        
-        .dato-valor { font-weight: 500 !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important; }
-        
-        .tabla-precios { background: rgba(255, 255, 255, 0.02) !important; border-radius: 8px !important; padding: 1rem !important; margin-top: 0 !important; }
-        .tabla-precios .table { width: 100% !important; border-collapse: separate !important; border-spacing: 0 !important; margin-bottom: 0 !important; }
-        .tabla-precios .table-dark thead th { border: none !important; color: var(--text-secondary) !important; font-weight: 600 !important; font-size: 0.8rem !important; padding: 10px 8px !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; background: rgba(255, 255, 255, 0.05) !important; white-space: nowrap !important; }
-        .tabla-precios .table-dark tbody td { border: none !important; padding: 12px 8px !important; vertical-align: middle !important; background: transparent !important; }
-        .tabla-precios .fila-anticipo { transition: background-color 0.2s ease; background: rgba(35, 45, 55, 0.6) !important; }
-        .tabla-precios .fila-anticipo:hover { background-color: rgba(92, 200, 123, 0.05) !important; }
-        .tabla-precios .fila-anticipo td:first-child { width: 60px !important; text-align: center !important; padding: 12px 4px !important; }
-        .tabla-precios .numero-fila { color: var(--text-secondary); font-weight: 700; font-size: 0.9rem; display: inline-block; }
-        .tabla-precios .monto-anticipo { font-size: 1rem !important; font-weight: 700 !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important; }
-        .tabla-precios .fila-anticipo td:last-child { width: 120px !important; text-align: center !important; padding: 12px 4px !important; }
-        .tabla-precios .estado-anticipo { font-size: 0.75rem !important; padding: 0.4rem 0.6rem !important; border-radius: 20px !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; }
-        .tabla-precios .total-concepto { border-top: 2px solid var(--viamtek-green) !important; background: rgba(92, 200, 123, 0.1) !important; }
-        .tabla-precios .total-concepto td { padding: 1rem 0.5rem !important; font-size: 1rem !important; }
-        .tabla-precios .subtotal { color: var(--viamtek-green) !important; font-weight: 700 !important; font-size: 1.1rem !important; margin-left: 5px !important; }
-        
+        /* ===== ESTILOS GENERALES DE LA VISTA ===== */
+        .border-definido {
+            border: 2px solid var(--border-light) !important;
+            border-radius: var(--border-radius-md) !important;
+        }
+
+        .border-seccion {
+            border: 1.5px solid rgba(92, 200, 123, 0.2) !important;
+            border-radius: var(--border-radius-md) !important;
+            padding: 1.5rem !important;
+            background: rgba(25, 35, 45, 0.7) !important;
+            backdrop-filter: blur(10px) !important;
+        }
+
+        .border-bottom-titulo {
+            border-bottom: 2px solid var(--viamtek-green) !important;
+            padding-bottom: 0.75rem !important;
+        }
+
+        .border-bottom-definido {
+            border-bottom: 3px solid var(--border-light) !important;
+            padding-bottom: 1.5rem !important;
+        }
+
+        .border-top-definido {
+            border-top: 2px solid var(--border-light) !important;
+        }
+
+        .border-dato {
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: var(--border-radius-sm) !important;
+            padding: 0.75rem 1rem !important;
+            background: rgba(255, 255, 255, 0.05) !important;
+            min-height: 48px !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        .border-firma {
+            border: 2px solid var(--border-light) !important;
+            border-radius: var(--border-radius-md) !important;
+            background: rgba(30, 40, 50, 0.8) !important;
+            transition: all var(--transition-normal) !important;
+        }
+
+        .border-firma:hover {
+            border-color: var(--viamtek-green) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 15px rgba(92, 200, 123, 0.2) !important;
+        }
+
+        .badge.border-definido {
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+        }
+
+        .seccion {
+            transition: all var(--transition-normal) !important;
+        }
+
+        .seccion:hover {
+            border-color: rgba(92, 200, 123, 0.4) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        .dato-valor {
+            font-weight: 500 !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        /* Tabla de anticipos */
+        .tabla-precios {
+            background: rgba(255, 255, 255, 0.02) !important;
+            border-radius: 8px !important;
+            padding: 1rem !important;
+            margin-top: 0 !important;
+        }
+
+        .tabla-precios .table {
+            width: 100% !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+            margin-bottom: 0 !important;
+        }
+
+        .tabla-precios .table-dark thead th {
+            border: none !important;
+            color: var(--text-secondary) !important;
+            font-weight: 600 !important;
+            font-size: 0.8rem !important;
+            padding: 10px 8px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            background: rgba(255, 255, 255, 0.05) !important;
+            white-space: nowrap !important;
+        }
+
+        .tabla-precios .table-dark tbody td {
+            border: none !important;
+            padding: 12px 8px !important;
+            vertical-align: middle !important;
+            background: transparent !important;
+        }
+
+        .tabla-precios .fila-anticipo {
+            transition: background-color 0.2s ease;
+            background: rgba(35, 45, 55, 0.6) !important;
+        }
+
+        .tabla-precios .fila-anticipo:hover {
+            background-color: rgba(92, 200, 123, 0.05) !important;
+        }
+
+        .tabla-precios .fila-anticipo td:first-child {
+            width: 60px !important;
+            text-align: center !important;
+            padding: 12px 4px !important;
+        }
+
+        .tabla-precios .numero-fila {
+            color: var(--text-secondary);
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+
+        .tabla-precios .monto-anticipo {
+            font-size: 1rem !important;
+            font-weight: 700 !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        .tabla-precios .fila-anticipo td:last-child {
+            width: 120px !important;
+            text-align: center !important;
+            padding: 12px 4px !important;
+        }
+
+        .tabla-precios .estado-anticipo {
+            font-size: 0.75rem !important;
+            padding: 0.4rem 0.6rem !important;
+            border-radius: 20px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+        }
+
+        .tabla-precios .total-concepto {
+            border-top: 2px solid var(--viamtek-green) !important;
+            background: rgba(92, 200, 123, 0.1) !important;
+        }
+
+        .tabla-precios .total-concepto td {
+            padding: 1rem 0.5rem !important;
+            font-size: 1rem !important;
+        }
+
+        .tabla-precios .subtotal {
+            color: var(--viamtek-green) !important;
+            font-weight: 700 !important;
+            font-size: 1.1rem !important;
+            margin-left: 5px !important;
+        }
+
+        /* Botones de acción */
         .btn-editar-solicitud,
         .btn-enviar-aprobacion,
         .btn-eliminar-solicitud,
@@ -428,7 +562,7 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
             margin: 0 5px !important;
         }
-        
+
         .btn-editar-solicitud::before,
         .btn-enviar-aprobacion::before,
         .btn-eliminar-solicitud::before,
@@ -443,487 +577,529 @@
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
             transition: left 0.6s;
         }
-        
+
         .btn-editar-solicitud:hover::before,
         .btn-enviar-aprobacion:hover::before,
         .btn-eliminar-solicitud:hover::before,
         .btn-volver-solicitud:hover::before,
-        .btn-comprobar-gastos:hover::before { left: 100%; }
-        
-        .btn-volver-solicitud { background: transparent !important; border-color: var(--viamtek-green) !important; color: var(--viamtek-green) !important; }
-        .btn-volver-solicitud:hover { background: var(--viamtek-green) !important; color: var(--color-white) !important; transform: translateY(-3px) !important; box-shadow: 0 6px 20px rgba(92, 200, 123, 0.4) !important; }
-        
-        .btn-editar-solicitud { background: rgba(99, 179, 237, 0.15) !important; border-color: #63b3ed !important; color: #63b3ed !important; }
-        .btn-editar-solicitud:hover { background: #63b3ed !important; color: #1a202c !important; transform: translateY(-3px) !important; box-shadow: 0 6px 20px rgba(99, 179, 237, 0.4) !important; }
-        
-        .btn-enviar-aprobacion { background: rgba(92, 200, 123, 0.15) !important; border-color: var(--viamtek-green) !important; color: var(--viamtek-green) !important; }
-        .btn-enviar-aprobacion:hover { background: var(--viamtek-green) !important; color: var(--color-white) !important; transform: translateY(-3px) !important; box-shadow: 0 6px 20px rgba(92, 200, 123, 0.4) !important; }
-        
-        .btn-eliminar-solicitud { background: rgba(252, 129, 129, 0.15) !important; border-color: #fc8181 !important; color: #fc8181 !important; }
-        .btn-eliminar-solicitud:hover { background: #fc8181 !important; color: #1a202c !important; transform: translateY(-3px) !important; box-shadow: 0 6px 20px rgba(252, 129, 129, 0.4) !important; }
-        
-        .btn-comprobar-gastos { background: rgba(246, 173, 85, 0.15) !important; border-color: #f6ad55 !important; color: #f6ad55 !important; }
-        .btn-comprobar-gastos:hover { background: #f6ad55 !important; color: #1a202c !important; transform: translateY(-3px) !important; box-shadow: 0 6px 20px rgba(246, 173, 85, 0.4) !important; }
-        
-        .detalles-botones { margin-top: 2.5rem !important; padding-top: 2rem !important; border-top: 2px solid var(--border-light) !important; }
-        
-           /* ESTILOS DE IMPRESIÓN - VERSIÓN FINAL CORREGIDA */
-    @@media print {
-        @@page {
-            size: A4 portrait !important;
-            margin: 14mm 16mm !important;
-            background: #ffffff !important;
+        .btn-comprobar-gastos:hover::before {
+            left: 100%;
         }
 
-        html, body {
-            margin: 0 !important;
-            padding: 0 !important;
-            background: #ffffff !important;
-            font-family: Arial, Helvetica, sans-serif !important;
-            font-size: 9pt !important;
-            line-height: 1.3 !important;
-            color: #000000 !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            width: 100% !important;
-            height: auto !important;
-            min-height: 100vh !important;
-            box-sizing: border-box !important;
-        }
-
-        /* ESTO ES LO MÁS IMPORTANTE: Forzar TODO a blanco y negro */
-        *,
-        *::before,
-        *::after {
-            background: #ffffff !important;
-            background-image: none !important;
-            background-color: #ffffff !important;
-            color: #000000 !important;
-            opacity: 1 !important;
-            filter: none !important;
-            text-shadow: none !important;
-            box-shadow: none !important;
-            border-color: #000000 !important;
-        }
-
-        /* EXCEPCIÓN ESPECÍFICA PARA EL HEADER - VERDE PARA EL TÍTULO */
-        .doc-header h2,
-        .doc-header .text-accent,
-        .doc-header strong.text-accent {
-            color: #2e7d32 !important;
+        .btn-volver-solicitud {
             background: transparent !important;
+            border-color: var(--viamtek-green) !important;
+            color: var(--viamtek-green) !important;
         }
 
-        /* EXCEPCIÓN PARA EL COLOR VERDE EN SECCIONES */
-        .seccion-titulo,
-        .firma-cargo {
-            color: #2e7d32 !important;
-            background: #f5f5f5 !important;
+        .btn-volver-solicitud:hover {
+            background: var(--viamtek-green) !important;
+            color: var(--color-white) !important;
+            transform: translateY(-3px) !important;
+            box-shadow: 0 6px 20px rgba(92, 200, 123, 0.4) !important;
         }
 
-        /* EXCEPCIÓN PARA FONDO GRIS CLARO EN TABLAS */
-        thead th,
-        .seccion-titulo {
-            background: #f5f5f5 !important;
+        .btn-editar-solicitud {
+            background: rgba(99, 179, 237, 0.15) !important;
+            border-color: #63b3ed !important;
+            color: #63b3ed !important;
         }
 
-        /* Ocultar elementos innecesarios */
-        .navbar, 
-        .footer, 
-        .detalles-botones, 
-        .btn, 
-        .alert, 
-        .solicitudes-header, 
-        .swal2-container,
-        .btn-group,
-        .solicitudes-title,
-        .solicitudes-subtitle,
-        .fa,
-        .fas,
-        .fab,
-        .far,
-        .bi {
-            display: none !important;
-            visibility: hidden !important;
+        .btn-editar-solicitud:hover {
+            background: #63b3ed !important;
+            color: #1a202c !important;
+            transform: translateY(-3px) !important;
+            box-shadow: 0 6px 20px rgba(99, 179, 237, 0.4) !important;
         }
 
-        /* CONTENEDOR PRINCIPAL */
-        .solicitudes-container,
-        .container-fluid {
-            width: 100% !important;
-            max-width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: #ffffff !important;
-            border: none !important;
-            box-shadow: none !important;
+        .btn-enviar-aprobacion {
+            background: rgba(92, 200, 123, 0.15) !important;
+            border-color: var(--viamtek-green) !important;
+            color: var(--viamtek-green) !important;
         }
 
-        /* TARJETA PRINCIPAL */
-        .recent-activity-card {
-            border: none !important;
-            box-shadow: none !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            background: #ffffff !important;
-            width: 100% !important;
-            min-height: auto !important;
+        .btn-enviar-aprobacion:hover {
+            background: var(--viamtek-green) !important;
+            color: var(--color-white) !important;
+            transform: translateY(-3px) !important;
+            box-shadow: 0 6px 20px rgba(92, 200, 123, 0.4) !important;
         }
 
-        /* ========== HEADER ========== */
-        .doc-header {
-            display: block !important;
-            visibility: visible !important;
-            background: #ffffff !important;
-            border-bottom: 2px solid #2e7d32 !important;
-            padding: 0 0 12px 0 !important;
-            margin: 0 0 15px 0 !important;
-            text-align: center !important;
-            page-break-before: avoid !important;
-            page-break-inside: avoid !important;
-            page-break-after: avoid !important;
-            width: 100% !important;
+        .btn-eliminar-solicitud {
+            background: rgba(252, 129, 129, 0.15) !important;
+            border-color: #fc8181 !important;
+            color: #fc8181 !important;
         }
 
-        .doc-empresa {
-            display: block !important;
-            margin: 0 0 10px 0 !important;
-            padding: 0 !important;
-            width: 100% !important;
-            background: transparent !important;
+        .btn-eliminar-solicitud:hover {
+            background: #fc8181 !important;
+            color: #1a202c !important;
+            transform: translateY(-3px) !important;
+            box-shadow: 0 6px 20px rgba(252, 129, 129, 0.4) !important;
         }
 
-        .doc-empresa h2 {
-            color: #2e7d32 !important;
-            font-size: 20pt !important;
-            font-weight: bold !important;
-            margin: 0 0 5px 0 !important;
-            padding: 0 !important;
-            text-align: center !important;
-            background: transparent !important;
+        .btn-comprobar-gastos {
+            background: rgba(246, 173, 85, 0.15) !important;
+            border-color: #f6ad55 !important;
+            color: #f6ad55 !important;
         }
 
-        .doc-empresa p {
-            color: #000000 !important;
-            font-weight: bold !important;
-            font-size: 14pt !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            text-align: center !important;
-            background: transparent !important;
+        .btn-comprobar-gastos:hover {
+            background: #f6ad55 !important;
+            color: #1a202c !important;
+            transform: translateY(-3px) !important;
+            box-shadow: 0 6px 20px rgba(246, 173, 85, 0.4) !important;
         }
 
-        .doc-header .row {
-            display: flex !important;
-            flex-wrap: nowrap !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-            margin: 10px auto 0 auto !important;
-            padding: 0 !important;
-            width: 100% !important;
-            max-width: 100% !important;
-            background: transparent !important;
+        .detalles-botones {
+            margin-top: 2.5rem !important;
+            padding-top: 2rem !important;
+            border-top: 2px solid var(--border-light) !important;
         }
 
-        .doc-header .col-md-4 {
-            flex: 1 !important;
-            text-align: center !important;
-            padding: 0 5px !important;
-            margin: 0 !important;
-            background: transparent !important;
-        }
+        /* ===== ESTILOS DE IMPRESIÓN ===== */
+        @@media print {
+            @@page {
+                size: A4 portrait !important;
+                margin: 14mm 16mm !important;
+                background: #ffffff !important;
+            }
 
-        .doc-header strong {
-            color: #2e7d32 !important;
-            font-weight: bold !important;
-            font-size: 10pt !important;
-            background: transparent !important;
-        }
+            html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #ffffff !important;
+                font-family: Arial, Helvetica, sans-serif !important;
+                font-size: 9pt !important;
+                line-height: 1.3 !important;
+                color: #000000 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                width: 100% !important;
+                height: auto !important;
+                min-height: 100vh !important;
+                box-sizing: border-box !important;
+            }
 
-        .doc-header span:not(.badge) {
-            color: #000000 !important;
-            font-weight: normal !important;
-            font-size: 10pt !important;
-            background: transparent !important;
-            margin-left: 5px !important;
-        }
+            /* Forzar todos los elementos a blanco y negro, con excepciones controladas */
+            *,
+            *::before,
+            *::after {
+                background: #ffffff !important;
+                background-image: none !important;
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                opacity: 1 !important;
+                filter: none !important;
+                text-shadow: none !important;
+                box-shadow: none !important;
+                border-color: #000000 !important;
+                transition: none !important;
+                animation: none !important;
+            }
 
-        .doc-header .badge {
-            color: #000000 !important;
-            background: #f8f9fa !important;
-            border: 1px solid #000000 !important;
-            padding: 3px 8px !important;
-            border-radius: 4px !important;
-            font-size: 9pt !important;
-            font-weight: bold !important;
-            display: inline-block !important;
-            margin-left: 8px !important;
-        }
+            /* EXCEPCIONES: elementos que deben conservar color verde */
+            .doc-header h2,
+            .doc-header .text-accent,
+            .doc-header strong.text-accent,
+            .seccion-titulo,
+            .firma-cargo {
+                color: #2e7d32 !important;
+            }
 
-        /* ========== CONTENIDO ========== */
-        .seccion {
-            border: 1px solid #b5b5b5 !important;
-            background: #ffffff !important;
-            padding: 10px 12px !important;
-            margin: 0 0 12px 0 !important;
-            page-break-inside: avoid !important;
-            page-break-after: auto !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
-        }
+            /* EXCEPCIONES: fondos grises para encabezados de tablas y secciones */
+            thead th,
+            .seccion-titulo {
+                background: #f5f5f5 !important;
+            }
 
-        .seccion-titulo {
-            font-size: 12pt !important;
-            font-weight: bold !important;
-            color: #2e7d32 !important;
-            border-bottom: 1px solid #b5b5b5 !important;
-            padding: 6px 8px !important;
-            margin: -10px -12px 10px -12px !important;
-            background: #f5f5f5 !important;
-        }
+            /* Ocultar elementos de navegación y botones */
+            .navbar,
+            .footer,
+            .detalles-botones,
+            .btn,
+            .alert,
+            .solicitudes-header,
+            .swal2-container,
+            .btn-group,
+            .solicitudes-title,
+            .solicitudes-subtitle,
+            .fa,
+            .fas,
+            .fab,
+            .far,
+            .bi {
+                display: none !important;
+                visibility: hidden !important;
+            }
 
-        .form-label {
-            font-size: 9pt !important;
-            font-weight: bold !important;
-            margin: 0 0 3px 0 !important;
-            padding: 0 !important;
-            color: #000000 !important;
-            background: transparent !important;
-        }
+            /* Contenedor principal */
+            .solicitudes-container,
+            .container-fluid {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #ffffff !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
 
-        .dato-valor,
-        .border-dato {
-            font-size: 10pt !important;
-            padding: 6px 8px !important;
-            background: #ffffff !important;
-            color: #000000 !important;
-            border: 1px solid #b5b5b5 !important;
-            display: block !important;
-            margin: 0 0 8px 0 !important;
-            min-height: auto !important;
-            border-radius: 0 !important;
-        }
+            /* Tarjeta principal */
+            .recent-activity-card {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background: #ffffff !important;
+                width: 100% !important;
+                min-height: auto !important;
+            }
 
-        /* TABLAS */
-        table {
-            width: 100% !important;
-            border-collapse: collapse !important;
-            font-size: 9pt !important;
-            margin: 8px 0 0 0 !important;
-            background: #ffffff !important;
-            color: #000000 !important;
-            border: 1px solid #b5b5b5 !important;
-        }
+            /* HEADER */
+            .doc-header {
+                display: block !important;
+                visibility: visible !important;
+                background: #ffffff !important;
+                border-bottom: 2px solid #2e7d32 !important;
+                padding: 0 0 12px 0 !important;
+                margin: 0 0 15px 0 !important;
+                text-align: center !important;
+                page-break-before: avoid !important;
+                page-break-inside: avoid !important;
+                page-break-after: avoid !important;
+                width: 100% !important;
+            }
 
-        thead {
-            background: #f5f5f5 !important;
-            display: table-header-group !important;
-        }
+            .doc-empresa {
+                display: block !important;
+                margin: 0 0 10px 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                background: transparent !important;
+            }
 
-        th {
-            border: 1px solid #b5b5b5 !important;
-            background: #f5f5f5 !important;
-            color: #000000 !important;
-            padding: 6px 4px !important;
-            font-weight: bold !important;
-            text-align: center !important;
-            font-size: 8.5pt !important;
-        }
+            .doc-empresa h2 {
+                color: #2e7d32 !important;
+                font-size: 20pt !important;
+                font-weight: bold !important;
+                margin: 0 0 5px 0 !important;
+                padding: 0 !important;
+                text-align: center !important;
+                background: transparent !important;
+            }
 
-        td {
-            border: 1px solid #b5b5b5 !important;
-            padding: 6px 4px !important;
-            text-align: center !important;
-            font-size: 9pt !important;
-            color: #000000 !important;
-            background: #ffffff !important;
-        }
+            .doc-empresa p {
+                color: #000000 !important;
+                font-weight: bold !important;
+                font-size: 14pt !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                text-align: center !important;
+                background: transparent !important;
+            }
 
-        /* FIRMAS */
-        .firmas-seccion {
-            margin: 20mm 0 0 0 !important;
-            padding: 0 !important;
-            page-break-inside: avoid !important;
-        }
+            .doc-header .row {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                margin: 10px auto 0 auto !important;
+                padding: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                background: transparent !important;
+            }
 
-        .firma-item {
-            border: 1px solid #000000 !important;
-            height: 35mm !important;
-            padding: 8px !important;
-            text-align: center !important;
-            margin: 0 0 10mm 0 !important;
-            background: #ffffff !important;
-            color: #000000 !important;
-            page-break-inside: avoid !important;
-        }
+            .doc-header .col-md-4 {
+                flex: 1 !important;
+                text-align: center !important;
+                padding: 0 5px !important;
+                margin: 0 !important;
+                background: transparent !important;
+            }
 
-        .firma-label {
-            font-size: 9pt !important;
-            font-weight: bold !important;
-            margin: 0 0 20mm 0 !important;
-            display: block !important;
-            color: #000000 !important;
-            background: transparent !important;
-        }
+            .doc-header strong {
+                color: #2e7d32 !important;
+                font-weight: bold !important;
+                font-size: 10pt !important;
+                background: transparent !important;
+            }
 
-        .firma-cargo {
-            color: #2e7d32 !important;
-            font-weight: bold !important;
-            font-size: 9pt !important;
-            margin: 5mm 0 0 0 !important;
-            display: block !important;
-            background: transparent !important;
-        }
+            .doc-header span:not(.badge) {
+                color: #000000 !important;
+                font-weight: normal !important;
+                font-size: 10pt !important;
+                background: transparent !important;
+                margin-left: 5px !important;
+            }
 
-        .firma-linea {
-            border-top: 1px solid #000000 !important;
-            margin: 3mm 0 0 0 !important;
-            padding: 0 !important;
-            display: block !important;
-            width: 100% !important;
-        }
+            .doc-header .badge {
+                color: #000000 !important;
+                background: #f8f9fa !important;
+                border: 1px solid #000000 !important;
+                padding: 3px 8px !important;
+                border-radius: 4px !important;
+                font-size: 9pt !important;
+                font-weight: bold !important;
+                display: inline-block !important;
+                margin-left: 8px !important;
+            }
 
-        /* FOOTER */
-        .doc-footer {
-            font-size: 8pt !important;
-            text-align: center !important;
-            border-top: 1px solid #b5b5b5 !important;
-            padding: 8px 0 0 0 !important;
-            margin: 15px 0 0 0 !important;
-            page-break-inside: avoid !important;
-            color: #000000 !important;
-            background: #ffffff !important;
-            width: 100% !important;
-        }
+            /* SECCIONES */
+            .seccion {
+                border: 1px solid #b5b5b5 !important;
+                background: #ffffff !important;
+                padding: 10px 12px !important;
+                margin: 0 0 12px 0 !important;
+                page-break-inside: avoid !important;
+                page-break-after: auto !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
 
-        /* LAYOUT EN IMPRESIÓN */
-        .row:not(.doc-header .row) {
-            display: block !important;
-            width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: transparent !important;
-        }
+            .seccion-titulo {
+                font-size: 12pt !important;
+                font-weight: bold !important;
+                color: #2e7d32 !important;
+                border-bottom: 1px solid #b5b5b5 !important;
+                padding: 6px 8px !important;
+                margin: -10px -12px 10px -12px !important;
+                background: #f5f5f5 !important;
+            }
 
-        .col-md-6,
-        .col-md-4,
-        .col-12 {
-            width: 50% !important;
-            float: left !important;
-            box-sizing: border-box !important;
-            padding: 0 8px !important;
-            margin: 0 0 8px 0 !important;
-            background: transparent !important;
-        }
+            .form-label {
+                font-size: 9pt !important;
+                font-weight: bold !important;
+                margin: 0 0 3px 0 !important;
+                padding: 0 !important;
+                color: #000000 !important;
+                background: transparent !important;
+            }
 
-        .col-12 {
-            width: 100% !important;
-            clear: both !important;
-            float: none !important;
-        }
+            .dato-valor,
+            .border-dato {
+                font-size: 10pt !important;
+                padding: 6px 8px !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                border: 1px solid #b5b5b5 !important;
+                display: block !important;
+                margin: 0 0 8px 0 !important;
+                min-height: auto !important;
+                border-radius: 0 !important;
+            }
 
-        .col-md-4:not(.doc-header .col-md-4) {
-            width: 33.333% !important;
-        }
+            /* TABLAS */
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                font-size: 9pt !important;
+                margin: 8px 0 0 0 !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                border: 1px solid #b5b5b5 !important;
+            }
 
-        .mb-3, .mb-4 {
-            margin-bottom: 12px !important;
-        }
+            thead {
+                background: #f5f5f5 !important;
+                display: table-header-group !important;
+            }
 
-        .mt-4 {
-            margin-top: 16px !important;
-        }
+            th {
+                border: 1px solid #b5b5b5 !important;
+                background: #f5f5f5 !important;
+                color: #000000 !important;
+                padding: 6px 4px !important;
+                font-weight: bold !important;
+                text-align: center !important;
+                font-size: 8.5pt !important;
+            }
 
-        .pt-3 {
-            padding-top: 12px !important;
-        }
+            td {
+                border: 1px solid #b5b5b5 !important;
+                padding: 6px 4px !important;
+                text-align: center !important;
+                font-size: 9pt !important;
+                color: #000000 !important;
+                background: #ffffff !important;
+            }
 
-        /* ELIMINAR TODOS LOS EFECTOS VISUALES */
-        .border-definido,
-        .border-seccion,
-        .border-bottom-titulo,
-        .border-bottom-definido,
-        .border-top-definido,
-        .border-dato,
-        .border-firma {
-            border-color: #b5b5b5 !important;
-            border-style: solid !important;
-            border-width: 1px !important;
-            box-shadow: none !important;
-            text-shadow: none !important;
-            background: #ffffff !important;
-        }
+            /* FIRMAS */
+            .firmas-seccion {
+                margin: 20mm 0 0 0 !important;
+                padding: 0 !important;
+                page-break-inside: avoid !important;
+            }
 
-        .border-definido.badge {
-            border: 1px solid #000000 !important;
-            background: #f8f9fa !important;
-        }
+            .firma-item {
+                border: 1px solid #000000 !important;
+                height: 35mm !important;
+                padding: 8px !important;
+                text-align: center !important;
+                margin: 0 0 10mm 0 !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                page-break-inside: avoid !important;
+            }
 
-        /* ASEGURAR QUE NO HAYAN FONDOS OSCUROS */
-        .tabla-precios,
-        .table-dark,
-        .alert,
-        .alert-info {
-            background: #ffffff !important;
-            color: #000000 !important;
-            border: 1px solid #b5b5b5 !important;
-        }
+            .firma-label {
+                font-size: 9pt !important;
+                font-weight: bold !important;
+                margin: 0 0 20mm 0 !important;
+                display: block !important;
+                color: #000000 !important;
+                background: transparent !important;
+            }
 
-        .table-dark thead th {
-            background: #f5f5f5 !important;
-            color: #000000 !important;
-        }
+            .firma-cargo {
+                color: #2e7d32 !important;
+                font-weight: bold !important;
+                font-size: 9pt !important;
+                margin: 5mm 0 0 0 !important;
+                display: block !important;
+                background: transparent !important;
+            }
 
-        .table-dark tbody td {
-            background: #ffffff !important;
-            color: #000000 !important;
-        }
+            .firma-linea {
+                border-top: 1px solid #000000 !important;
+                margin: 3mm 0 0 0 !important;
+                padding: 0 !important;
+                display: block !important;
+                width: 100% !important;
+            }
 
-        /* CONTROL DE PÁGINAS */
-        .control-pagina {
-            page-break-before: always !important;
-        }
+            /* FOOTER */
+            .doc-footer {
+                font-size: 8pt !important;
+                text-align: center !important;
+                border-top: 1px solid #b5b5b5 !important;
+                padding: 8px 0 0 0 !important;
+                margin: 15px 0 0 0 !important;
+                page-break-inside: avoid !important;
+                color: #000000 !important;
+                background: #ffffff !important;
+                width: 100% !important;
+            }
 
-        /* EVITAR QUE LAS SECCIONES SE ROMPAN */
-        .seccion,
-        .firmas-seccion .row,
-        .doc-header {
-            page-break-inside: avoid !important;
-        }
+            /* LAYOUT */
+            .row:not(.doc-header .row) {
+                display: block !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: transparent !important;
+            }
 
-        /* ASEGURAR QUE EL CONTENIDO NO SE SALGA */
-        .container-fluid,
-        .solicitudes-container,
-        .recent-activity-card {
-            max-width: 100% !important;
-            overflow: visible !important;
-        }
+            .col-md-6,
+            .col-md-4,
+            .col-12 {
+                width: 50% !important;
+                float: left !important;
+                box-sizing: border-box !important;
+                padding: 0 8px !important;
+                margin: 0 0 8px 0 !important;
+                background: transparent !important;
+            }
 
-        /* LIMPIAR FLOATS */
-        .row::after {
-            content: "" !important;
-            display: table !important;
-            clear: both !important;
-        }
+            .col-12 {
+                width: 100% !important;
+                clear: both !important;
+                float: none !important;
+            }
 
-        /* OCULTAR ENLACES DE URL EN EL PDF */
-        a[href]:after {
-            content: "" !important;
-        }
+            .col-md-4:not(.doc-header .col-md-4) {
+                width: 33.333% !important;
+            }
 
-        /* REMOVER TODAS LAS TRANSICIONES Y ANIMACIONES */
-        * {
-            transition: none !important;
-            animation: none !important;
+            .mb-3, .mb-4 {
+                margin-bottom: 12px !important;
+            }
+
+            .mt-4 {
+                margin-top: 16px !important;
+            }
+
+            .pt-3 {
+                padding-top: 12px !important;
+            }
+
+            /* Eliminar efectos visuales en bordes genéricos */
+            .border-definido,
+            .border-seccion,
+            .border-bottom-titulo,
+            .border-bottom-definido,
+            .border-top-definido,
+            .border-dato,
+            .border-firma {
+                border-color: #b5b5b5 !important;
+                border-style: solid !important;
+                border-width: 1px !important;
+                box-shadow: none !important;
+                text-shadow: none !important;
+                background: #ffffff !important;
+            }
+
+            .border-definido.badge {
+                border: 1px solid #000000 !important;
+                background: #f8f9fa !important;
+            }
+
+            /* Forzar fondos blancos en tablas y alerts */
+            .tabla-precios,
+            .table-dark,
+            .alert,
+            .alert-info {
+                background: #ffffff !important;
+                color: #000000 !important;
+                border: 1px solid #b5b5b5 !important;
+            }
+
+            .table-dark thead th {
+                background: #f5f5f5 !important;
+                color: #000000 !important;
+            }
+
+            .table-dark tbody td {
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+
+            /* Control de saltos de página */
+            .control-pagina {
+                page-break-before: always !important;
+            }
+
+            .seccion,
+            .firmas-seccion .row,
+            .doc-header {
+                page-break-inside: avoid !important;
+            }
+
+            /* Ajustes finales */
+            .container-fluid,
+            .solicitudes-container,
+            .recent-activity-card {
+                max-width: 100% !important;
+                overflow: visible !important;
+            }
+
+            .row::after {
+                content: "" !important;
+                display: table !important;
+                clear: both !important;
+            }
+
+            a[href]:after {
+                content: "" !important;
+            }
         }
-    }       
     </style>
 }
 
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Configurar el botón de imprimir PDF
             const btnImprimir = document.getElementById('btnImprimir');
             if (btnImprimir) {
                 btnImprimir.addEventListener('click', function (e) {
@@ -935,13 +1111,11 @@
             function generarPDF() {
                 if (!btnImprimir) return;
                 
-                // Guardar el texto original del botón
                 const originalText = btnImprimir.innerHTML;
                 
                 btnImprimir.disabled = true;
                 btnImprimir.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generando PDF...';
 
-                // Mostrar alerta de preparación
                 Swal.fire({
                     title: 'Preparando PDF',
                     html: '<i class="fas fa-file-pdf fa-3x mb-3 text-primary"></i><p class="mb-0">Generando documento para impresión...</p>',
@@ -954,18 +1128,13 @@
                     color: 'var(--primary-text)'
                 });
 
-                // Pequeño retraso para asegurar que Swal se muestre
                 setTimeout(() => {
-                    // IMPORTANTE: Agregar clase al body ANTES de imprimir
+                    // Activar modo impresión
                     document.body.classList.add('modo-impresion');
                     
-                    // También agregar clase al contenedor principal
                     const container = document.querySelector('.solicitudes-container');
-                    if (container) {
-                        container.classList.add('modo-impresion');
-                    }
+                    if (container) container.classList.add('modo-impresion');
                     
-                    // Asegurar que todos los elementos necesarios sean visibles
                     const docHeader = document.querySelector('.doc-header');
                     if (docHeader) {
                         docHeader.style.display = 'block';
@@ -975,23 +1144,16 @@
                         docHeader.style.zIndex = '10000';
                     }
                     
-                    // Pequeño retraso para que los estilos se apliquen
                     setTimeout(() => {
-                        // Forzar reflow para asegurar que los estilos se apliquen
+                        // Forzar reflow
                         document.body.offsetHeight;
                         
-                        // Disparar la impresión
                         window.print();
                         
-                        // Retraso después de imprimir
                         setTimeout(() => {
-                            // Remover clases y restaurar estilos
+                            // Restaurar
                             document.body.classList.remove('modo-impresion');
-                            
-                            if (container) {
-                                container.classList.remove('modo-impresion');
-                            }
-                            
+                            if (container) container.classList.remove('modo-impresion');
                             if (docHeader) {
                                 docHeader.style.display = '';
                                 docHeader.style.visibility = '';
@@ -1000,11 +1162,9 @@
                                 docHeader.style.zIndex = '';
                             }
                             
-                            // Restaurar botón
                             btnImprimir.disabled = false;
                             btnImprimir.innerHTML = originalText;
                             
-                            // Mostrar alerta de éxito
                             Swal.fire({
                                 icon: 'success',
                                 title: 'PDF Generado',
@@ -1014,14 +1174,14 @@
                                 background: 'var(--card-bg)',
                                 color: 'var(--primary-text)'
                             });
-                        }, 800); // Aumentado a 800ms para asegurar
-                    }, 400); // Aumentado a 400ms para dar tiempo a los estilos
-                }, 1600); // Aumentado a 1600ms para que coincida con el timer de Swal
+                        }, 800);
+                    }, 400);
+                }, 1600);
             }
 
-            // Función para confirmar eliminación
+            // Confirmación de eliminación con SweetAlert2
             window.confirmDelete = function() {
-                return Swal.fire({
+                Swal.fire({
                     title: '¿Eliminar Solicitud?',
                     text: 'Esta acción no se puede deshacer. Se eliminará permanentemente la solicitud.',
                     icon: 'warning',
@@ -1033,11 +1193,15 @@
                     background: 'var(--card-bg)',
                     color: 'var(--primary-text)'
                 }).then((result) => {
-                    return result.isConfirmed;
+                    if (result.isConfirmed) {
+                        // Enviar el formulario de eliminación
+                        document.querySelector('form[asp-action="Eliminar"]')?.submit();
+                    }
                 });
+                return false; // Prevenir envío directo del formulario
             };
 
-            // Manejar impresión desde atajos de teclado (Ctrl+P)
+            // Atajo de teclado Ctrl+P
             document.addEventListener('keydown', function(e) {
                 if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
                     e.preventDefault();
@@ -1045,12 +1209,11 @@
                 }
             });
 
-            // También manejar el evento beforeprint para asegurar estilos
+            // Eventos nativos de impresión
             window.addEventListener('beforeprint', function() {
                 document.body.classList.add('modo-impresion');
                 const docHeader = document.querySelector('.doc-header');
                 if (docHeader) {
-                    // Forzar estilos en el header justo antes de imprimir
                     docHeader.style.cssText = `
                         display: block !important;
                         visibility: visible !important;
@@ -1063,7 +1226,6 @@
                 }
             });
 
-            // Restaurar después de imprimir
             window.addEventListener('afterprint', function() {
                 document.body.classList.remove('modo-impresion');
                 const docHeader = document.querySelector('.doc-header');

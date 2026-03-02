@@ -17,6 +17,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="QuestPDF" Version="2026.2.2" />
   </ItemGroup>
 
   <ItemGroup>
