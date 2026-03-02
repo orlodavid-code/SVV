@@ -706,7 +706,8 @@ namespace SVV.Controllers
                             TipoViatico = solicitud.TipoViatico?.Nombre ?? "N/A",
                             MontoAnticipo = solicitud.MontoAnticipo?.ToString("C") ?? "N/A",
                             Destino = solicitud.Destino,
-                            EsNotificacionMultiple = true
+                            EsNotificacionMultiple = true,
+                            EsBorrador = false
                         }
                     });
                 }
