@@ -1,36 +1,50 @@
 ﻿/* 
- * REPORTES.CSS - VERSIÓN CORREGIDA Y OPTIMIZADA
- * Sistema de reportes financieros Viamtek
- * Diseño moderno, oscuro y totalmente responsive
+ * REPORTES.CSS - VERSIÓN DEFINITIVA VIAMTEK
+ * Diseño oscuro premium, 4 gráficas en grid 2x2 + una full-width abajo
+ * Tipografía Inter, badges pequeños, tabla con acciones
+ * Totalmente responsive y optimizado para móviles
  */
 
 /* ============================================
-   VARIABLES GLOBALES - TEMA OSCURO
+   VARIABLES GLOBALES - TEMA OSCURO VIAMTEK
 ============================================ */
 :root {
     --viamtek-green: #5cc87b;
     --viamtek-dark-green: #308184;
     --viamtek-blue: #2c5282;
+    --viamtek-purple: #805ad5;
     --color-white: #ffffff;
     --color-black: #000000;
-    --main-bg-color: #0f1419;
+    --color-dark: #0f1419;
+    --color-darker: #0a0f14;
+    --primary-text: #ffffff;
+    --secondary-text: #a0aec0;
+    --accent-text: #5cc87b;
+    --muted-text: #718096;
+    --bg-gradient: linear-gradient(135deg, #0a0f14 0%, #1a2a35 50%, #0f1419 100%);
+    --button-gradient: linear-gradient(135deg, var(--viamtek-dark-green), var(--viamtek-green));
     --panel-bg: rgba(15, 20, 25, 0.85);
     --card-bg: rgba(25, 35, 45, 0.95);
     --card-bg-light: rgba(35, 45, 55, 0.95);
     --border-color: rgba(92, 200, 123, 0.4);
     --border-light: rgba(255, 255, 255, 0.1);
-    --primary-text: #ffffff;
-    --secondary-text: #a0aec0;
-    --accent-text: #5cc87b;
-    --bg-gradient: linear-gradient(135deg, #0a0f14 0%, #1a2a35 50%, #0f1419 100%);
-    --button-gradient: linear-gradient(135deg, var(--viamtek-dark-green), var(--viamtek-green));
     --accent-glow: rgba(92, 200, 123, 0.3);
-    --warning-color: #f6ad55;
-    --danger-color: #fc8181;
-    --info-color: #63b3ed;
     --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
     --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.4);
     --shadow-sm: 0 5px 15px rgba(0, 0, 0, 0.3);
+    --warning-color: #f6ad55;
+    --danger-color: #fc8181;
+    --info-color: #63b3ed;
+    --success-color: #28a745;
+}
+
+/* ============================================
+   FUENTE PRINCIPAL - INTER (MODERNA Y LIMPIA)
+============================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+.reportes-page {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* ============================================
@@ -40,8 +54,7 @@
     background: var(--bg-gradient);
     min-height: 100vh;
     color: var(--primary-text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.6;
+    line-height: 1.5;
     position: relative;
     overflow-x: hidden;
     padding: 1.5rem;
@@ -67,7 +80,7 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     padding: 1.5rem 2rem;
-    border-radius: 16px;
+    border-radius: 20px;
     border: 1px solid var(--border-light);
     box-shadow: var(--shadow-md);
     margin-bottom: 2rem;
@@ -89,7 +102,7 @@
         width: 100%;
         height: 4px;
         background: var(--button-gradient);
-        border-radius: 16px 16px 0 0;
+        border-radius: 20px 20px 0 0;
     }
 
     .reportes-header h1 {
@@ -111,7 +124,7 @@
             filter: drop-shadow(0 0 10px var(--accent-glow));
             background: rgba(92, 200, 123, 0.1);
             padding: 0.75rem;
-            border-radius: 12px;
+            border-radius: 14px;
             border: 1px solid var(--border-color);
         }
 
@@ -130,7 +143,7 @@
     color: white;
     font-weight: 600;
     padding: 0.75rem 1.5rem;
-    border-radius: 10px;
+    border-radius: 12px;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: var(--shadow-sm);
     position: relative;
@@ -142,6 +155,7 @@
     min-width: 120px;
     justify-content: center;
     cursor: pointer;
+    letter-spacing: 0.3px;
 }
 
     .export-btn::before {
@@ -170,15 +184,15 @@
     }
 
 /* ============================================
-   FILTROS CON DISEÑO MEJORADO
+   FILTROS MEJORADOS - SIN ENCIMAMIENTO
 ============================================ */
 .filtros-container {
     background: var(--card-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-radius: 16px;
+    border-radius: 20px;
     border: 1px solid var(--border-light);
-    padding: 1.8rem;
+    padding: 2rem;
     margin-bottom: 2rem;
     box-shadow: var(--shadow-md);
     animation: slideUp 0.6s ease-out 0.1s both;
@@ -194,6 +208,7 @@
         width: 100%;
         height: 4px;
         background: var(--button-gradient);
+        border-radius: 20px 20px 0 0;
     }
 
 .reportes-title {
@@ -215,6 +230,7 @@
         border: 1px solid var(--border-color);
     }
 
+/* Grid de filtros mejorado para evitar superposición */
 .filtros-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -224,6 +240,7 @@
 
 .form-group {
     margin-bottom: 0;
+    min-width: 0; /* Evita desbordamiento */
 }
 
 .form-label {
@@ -232,6 +249,8 @@
     font-weight: 500;
     margin-bottom: 0.5rem;
     display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .form-control, .form-select {
@@ -244,6 +263,7 @@
     transition: all 0.3s ease;
     width: 100%;
     backdrop-filter: blur(10px);
+    height: 46px; /* Altura fija para consistencia */
 }
 
     .form-control:focus, .form-select:focus {
@@ -254,7 +274,7 @@
         outline: none;
     }
 
-/* Filtros rápidos */
+/* Filtros rápidos mejor alineados */
 .filtros-rapidos {
     display: flex;
     align-items: center;
@@ -270,6 +290,9 @@
     border: 1px solid var(--border-light);
     color: var(--secondary-text);
     transition: all 0.3s ease;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
 }
 
     .btn-group .btn-outline-primary:hover {
@@ -304,6 +327,7 @@
     font-size: 0.95rem;
     width: 100%;
     margin-top: 1.8rem;
+    height: 46px;
 }
 
     #aplicarFiltros::before {
@@ -327,11 +351,11 @@
         }
 
 /* ============================================
-   KPI CARDS (Indicadores)
+   KPI CARDS - MÁS ELEGANTES
 ============================================ */
 .kpi-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1.5rem;
     margin-top: 1rem;
 }
@@ -339,7 +363,7 @@
 .kpi-card {
     background: var(--card-bg-light);
     backdrop-filter: blur(10px);
-    border-radius: 14px;
+    border-radius: 18px;
     padding: 1.5rem;
     border: 1px solid var(--border-light);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -365,7 +389,7 @@
     .kpi-card:hover {
         transform: translateY(-8px) scale(1.03);
         border-color: var(--viamtek-green);
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        box-shadow: var(--shadow-lg);
     }
 
         .kpi-card:hover::before {
@@ -374,13 +398,13 @@
 
 .kpi-icon {
     background: rgba(92, 200, 123, 0.15);
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 1rem;
     border: 1px solid var(--border-color);
 }
 
     .kpi-icon i {
-        font-size: 2rem;
+        font-size: 2.2rem;
         color: var(--viamtek-green);
     }
 
@@ -393,6 +417,8 @@
     font-weight: 700;
     line-height: 1.2;
     margin-bottom: 0.3rem;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.5px;
 }
 
 .kpi-label {
@@ -403,7 +429,7 @@
     letter-spacing: 0.5px;
 }
 
-/* Colores de texto para KPI */
+/* Gradientes para valores KPI */
 .kpi-primary {
     background: linear-gradient(135deg, var(--viamtek-green), var(--viamtek-dark-green));
     -webkit-background-clip: text;
@@ -440,25 +466,43 @@
 }
 
 /* ============================================
-   GRID DE GRÁFICAS
+   GRID DE GRÁFICAS - 2 COLUMNAS EN ESCRITORIO + FULL-WIDTH
 ============================================ */
 .reportes-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas fijas */
     gap: 1.5rem;
     margin-bottom: 2rem;
+}
+
+/* Full width para el gráfico de evolución mensual u otros */
+.reporte-chart-wrapper.full-width {
+    grid-column: 1 / -1; /* Ocupa todo el ancho */
+}
+
+/* En móviles se convierte en 1 columna */
+@media (max-width: 768px) {
+    .reportes-grid {
+        grid-template-columns: 1fr;
+    }
+    /* En móvil, full-width sigue siendo una columna normal, pero igual lo dejamos */
+    .reporte-chart-wrapper.full-width {
+        grid-column: 1 / -1; /* Sigue siendo útil si hay más columnas, pero aquí es 1, así que es lo mismo */
+    }
 }
 
 .reporte-chart-wrapper {
     background: var(--card-bg);
     backdrop-filter: blur(15px);
-    border-radius: 16px;
+    border-radius: 20px;
     border: 1px solid var(--border-light);
     padding: 1.5rem;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
     animation: fadeIn 0.6s ease-out;
+    display: flex;
+    flex-direction: column;
 }
 
     .reporte-chart-wrapper:hover {
@@ -475,7 +519,7 @@
         width: 100%;
         height: 4px;
         background: var(--button-gradient);
-        border-radius: 16px 16px 0 0;
+        border-radius: 20px 20px 0 0;
     }
 
 .reporte-chart-header {
@@ -485,6 +529,8 @@
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid var(--border-light);
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .reporte-chart-title {
@@ -493,30 +539,35 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    font-size: 1rem;
 }
 
     .reporte-chart-title i {
         color: var(--viamtek-green);
         background: rgba(92, 200, 123, 0.1);
         padding: 0.5rem;
-        border-radius: 8px;
+        border-radius: 10px;
         font-size: 1rem;
     }
 
 .chart-actions {
     display: flex;
     gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .chart-type-btn {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border-light);
     color: var(--secondary-text);
-    border-radius: 6px;
-    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
     font-size: 0.8rem;
     transition: all 0.3s ease;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
 }
 
     .chart-type-btn:hover {
@@ -536,8 +587,8 @@
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border-light);
     color: var(--secondary-text);
-    border-radius: 6px;
-    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
     transition: all 0.3s ease;
     cursor: pointer;
 }
@@ -550,134 +601,33 @@
 
 .chart-container {
     position: relative;
-    height: 250px;
+    height: 240px;
     width: 100%;
-    margin: 1rem 0;
-}
-
-/* Full width para el gráfico de evolución mensual */
-.reporte-chart-wrapper.full-width {
-    grid-column: 1 / -1;
+    margin: 1rem 0 0.5rem 0;
+    flex: 1;
 }
 
 /* ============================================
-   TABLA DE DETALLE DE GASTOS
-============================================ */
-.table-container {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    border-radius: 16px;
-    border: 1px solid var(--border-light);
-    padding: 1.5rem;
-    margin-top: 2rem;
-    box-shadow: var(--shadow-md);
-    animation: slideUp 0.6s ease-out 0.3s both;
-    position: relative;
-    overflow: hidden;
-}
-
-    .table-container::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 4px;
-        background: var(--button-gradient);
-    }
-
-.table-responsive {
-    overflow-x: auto;
-    margin-top: 1rem;
-}
-
-.table-reportes {
-    background: transparent;
-    color: var(--primary-text);
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 100%;
-}
-
-    .table-reportes thead th {
-        background: rgba(40, 50, 60, 0.95);
-        color: var(--viamtek-green);
-        font-weight: 600;
-        border-bottom: 2px solid var(--viamtek-green);
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: 1rem;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        backdrop-filter: blur(10px);
-        white-space: nowrap;
-    }
-
-    .table-reportes tbody td {
-        padding: 1rem;
-        vertical-align: middle;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        color: var(--primary-text);
-        font-weight: 400;
-        transition: all 0.3s ease;
-        background: transparent;
-    }
-
-    .table-reportes tbody tr {
-        transition: all 0.3s ease;
-    }
-
-        .table-reportes tbody tr:nth-child(even) {
-            background: rgba(30, 40, 50, 0.8);
-        }
-
-        .table-reportes tbody tr:nth-child(odd) {
-            background: rgba(35, 45, 55, 0.8);
-        }
-
-        .table-reportes tbody tr:hover {
-            background: rgba(48, 129, 132, 0.25);
-            border-left: 4px solid var(--viamtek-green);
-            transform: translateX(2px);
-        }
-
-    .table-reportes tfoot tr {
-        background: rgba(40, 50, 60, 0.95);
-    }
-
-    .table-reportes tfoot td {
-        font-weight: 700;
-        color: var(--viamtek-green);
-        padding: 1rem;
-    }
-
-/* Totales en el footer de la tabla */
-#totalAnticipoTabla, #totalGastadoTabla, #totalDiferenciaTabla {
-    font-weight: 700;
-    color: var(--viamtek-green);
-}
-
-/* ============================================
-   BADGES PARA ESCENARIOS Y ESTADOS
+   BADGES - MÁS PEQUEÑOS Y ESTILIZADOS
 ============================================ */
 .badge {
     font-weight: 600;
-    padding: 0.4rem 0.8rem;
+    padding: 0.25rem 0.5rem;
     border-radius: 20px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(5px);
     transition: all 0.3s ease;
     display: inline-block;
     white-space: nowrap;
+    line-height: 1.4;
+    letter-spacing: 0.3px;
 }
 
 /* Escenarios */
 .badge-reposicion-empresa {
     background: linear-gradient(45deg, #ffc107, #fd7e14);
-    color: var(--color-black);
+    color: #000;
 }
 
 .badge-reposicion-colaborador {
@@ -756,74 +706,116 @@
     color: white;
 }
 
-/* Tooltips personalizados */
-[data-bs-toggle="tooltip"] {
-    cursor: help;
-}
-
-.tooltip-inner {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-    color: var(--primary-text);
-    font-size: 0.8rem;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-}
-
 /* ============================================
-   BOTONES NEON PARA ACCIONES
+   TABLA DE DETALLE DE GASTOS (con columna Acciones)
 ============================================ */
-.acciones-neon {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-}
-
-.btn-neon {
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    border: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
+.table-container {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    border: 1px solid var(--border-light);
+    padding: 1.5rem;
+    margin-top: 2rem;
+    box-shadow: var(--shadow-md);
+    animation: slideUp 0.6s ease-out 0.3s both;
     position: relative;
     overflow: hidden;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    font-size: 0.85rem;
-    min-width: 40px;
 }
 
-.btn-neon-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-}
-
-    .btn-neon-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
-        color: white;
-    }
-
-    .btn-neon-primary::before {
+    .table-container::before {
         content: '';
         position: absolute;
         top: 0;
-        left: -100%;
+        left: 0;
         width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: left 0.5s;
+        height: 4px;
+        background: var(--button-gradient);
+        border-radius: 20px 20px 0 0;
     }
 
-    .btn-neon-primary:hover::before {
-        left: 100%;
+.table-responsive {
+    overflow-x: auto;
+    margin-top: 1rem;
+    border-radius: 12px;
+}
+
+.table-reportes {
+    background: transparent;
+    color: var(--primary-text);
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+    .table-reportes thead th {
+        background: rgba(40, 50, 60, 0.95);
+        color: var(--viamtek-green);
+        font-weight: 600;
+        border-bottom: 2px solid var(--viamtek-green);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.85rem 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        backdrop-filter: blur(10px);
+        white-space: nowrap;
     }
+
+    .table-reportes tbody td {
+        padding: 0.85rem 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        color: var(--primary-text);
+        font-weight: 400;
+        transition: all 0.3s ease;
+        background: transparent;
+    }
+
+    /* Columna de acciones más estrecha */
+    .table-reportes th:last-child,
+    .table-reportes td:last-child {
+        text-align: center;
+        width: 80px;
+        min-width: 80px;
+    }
+
+    .table-reportes tbody tr {
+        transition: all 0.3s ease;
+    }
+
+        .table-reportes tbody tr:nth-child(even) {
+            background: rgba(30, 40, 50, 0.8);
+        }
+
+        .table-reportes tbody tr:nth-child(odd) {
+            background: rgba(35, 45, 55, 0.8);
+        }
+
+        .table-reportes tbody tr:hover {
+            background: rgba(48, 129, 132, 0.25);
+            transform: translateX(2px);
+        }
+
+    .table-reportes tfoot tr {
+        background: rgba(40, 50, 60, 0.95);
+    }
+
+    .table-reportes tfoot td {
+        font-weight: 700;
+        color: var(--viamtek-green);
+        padding: 0.85rem 1rem;
+        border-top: 2px solid var(--viamtek-green);
+    }
+
+/* Totales en el footer */
+#totalAnticipoTabla, #totalGastadoTabla, #totalDiferenciaTabla {
+    font-weight: 700;
+    color: var(--viamtek-green);
+    font-size: 1rem;
+}
 
 /* ============================================
    ANIMACIONES
@@ -862,69 +854,71 @@
     }
 }
 
-/* ============================================
-   RESPONSIVE DESIGN
-============================================ */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
 
-/* Pantallas grandes (1200px+) */
-@media (min-width: 1200px) {
-    .reportes-grid {
-        grid-template-columns: repeat(3, 1fr);
+    50% {
+        transform: scale(1.05);
     }
 }
 
-/* Tabletas grandes (992px - 1199px) */
-@media (min-width: 992px) and (max-width: 1199px) {
+/* ============================================
+   RESPONSIVE AVANZADO
+============================================ */
+
+/* Desktop grandes (1200px+) */
+@media (min-width: 1200px) {
     .reportes-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 
     .kpi-container {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 
-/* Tabletas (768px - 991px) */
-@media (min-width: 768px) and (max-width: 991px) {
+/* Tablets (768px - 1199px) */
+@media (min-width: 768px) and (max-width: 1199px) {
     .reportes-page {
-        padding: 1rem;
+        padding: 1.25rem;
     }
 
     .reportes-header {
-        flex-direction: column;
-        text-align: center;
-    }
-
-        .reportes-header h1 {
-            font-size: 1.8rem;
-        }
-
-    .export-buttons {
-        width: 100%;
-        justify-content: center;
+        padding: 1.25rem 1.5rem;
     }
 
     .filtros-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .reportes-grid {
-        grid-template-columns: 1fr;
-    }
-
     .kpi-container {
         grid-template-columns: repeat(2, 1fr);
     }
+
+    .reportes-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    /* Ajuste para tabla en tablets */
+    .table-reportes {
+        font-size: 0.85rem;
+    }
+
+        .table-reportes th,
+        .table-reportes td {
+            padding: 0.7rem 0.8rem;
+        }
 }
 
 /* Móviles grandes (576px - 767px) */
 @media (min-width: 576px) and (max-width: 767px) {
     .reportes-page {
-        padding: 0.75rem;
+        padding: 1rem;
     }
 
     .reportes-header h1 {
-        font-size: 1.5rem;
+        font-size: 1.6rem;
     }
 
     .export-btn {
@@ -941,40 +935,43 @@
         grid-template-columns: 1fr;
     }
 
-    .reporte-chart-wrapper {
-        padding: 1rem;
+    .reportes-grid {
+        grid-template-columns: 1fr;
     }
 
     .chart-container {
         height: 200px;
     }
 
-    .table-container {
-        padding: 1rem;
+    .badge {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.4rem;
     }
 
     .table-reportes {
         font-size: 0.8rem;
     }
 
-    .badge {
-        font-size: 0.7rem;
-        padding: 0.3rem 0.6rem;
-    }
+        .table-reportes th,
+        .table-reportes td {
+            padding: 0.6rem 0.5rem;
+        }
 }
 
 /* Móviles pequeños (<= 575px) */
 @media (max-width: 575px) {
     .reportes-page {
-        padding: 0.5rem;
+        padding: 0.75rem;
     }
 
     .reportes-header {
         padding: 1rem;
+        flex-direction: column;
+        text-align: center;
     }
 
         .reportes-header h1 {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             flex-direction: column;
             gap: 0.5rem;
         }
@@ -989,12 +986,19 @@
     }
 
     .filtros-container {
-        padding: 1rem;
+        padding: 1.25rem;
+    }
+
+    .filtros-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .kpi-container {
+        grid-template-columns: 1fr;
     }
 
     .kpi-card {
-        padding: 1rem;
-        gap: 1rem;
+        padding: 1.25rem;
     }
 
     .kpi-icon {
@@ -1002,23 +1006,20 @@
     }
 
         .kpi-icon i {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
         }
 
     .kpi-value {
-        font-size: 1.5rem;
-    }
-
-    .kpi-label {
-        font-size: 0.75rem;
+        font-size: 1.6rem;
     }
 
     .reportes-grid {
+        grid-template-columns: 1fr;
         gap: 1rem;
     }
 
     .reporte-chart-wrapper {
-        padding: 1rem;
+        padding: 1.25rem;
     }
 
     .chart-container {
@@ -1026,27 +1027,21 @@
     }
 
     .table-container {
-        padding: 0.75rem;
+        padding: 1rem;
     }
 
-    .table-reportes thead th,
-    .table-reportes tbody td {
-        padding: 0.5rem;
+    .table-reportes {
         font-size: 0.75rem;
     }
 
+        .table-reportes thead th,
+        .table-reportes tbody td {
+            padding: 0.6rem 0.5rem;
+        }
+
     .badge {
-        font-size: 0.65rem;
-        padding: 0.2rem 0.4rem;
-    }
-
-    .btn-neon {
-        padding: 0.4rem;
-        min-width: 32px;
-    }
-
-    .acciones-neon {
-        gap: 0.2rem;
+        font-size: 0.6rem;
+        padding: 0.15rem 0.3rem;
     }
 }
 
@@ -1057,65 +1052,142 @@
     }
 
     .chart-container {
-        height: 160px;
+        height: 150px;
     }
 }
 
 /* ============================================
-   MEJORAS DE ACCESIBILIDAD
+   UTILIDADES Y MEJORAS
 ============================================ */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
+.text-end {
+    text-align: right !important;
 }
 
-/* ============================================
-   UTILIDADES ADICIONALES
-============================================ */
+.text-center {
+    text-align: center !important;
+}
+
+.text-start {
+    text-align: left !important;
+}
+
+.text-muted {
+    color: var(--muted-text) !important;
+}
+
+.text-white {
+    color: white !important;
+}
+
 .text-success {
-    color: #28a745 !important;
+    color: var(--success-color) !important;
 }
 
 .text-danger {
-    color: #dc3545 !important;
+    color: var(--danger-color) !important;
 }
 
 .text-warning {
-    color: #ffc107 !important;
+    color: var(--warning-color) !important;
 }
 
 .text-info {
-    color: #17a2b8 !important;
+    color: var(--info-color) !important;
 }
 
-.text-primary {
-    color: var(--viamtek-green) !important;
+.d-flex {
+    display: flex !important;
 }
 
-.bg-success {
-    background-color: #28a745 !important;
+.align-items-center {
+    align-items: center !important;
 }
 
-.bg-danger {
-    background-color: #dc3545 !important;
+.justify-content-between {
+    justify-content: space-between !important;
 }
 
-.bg-warning {
-    background-color: #ffc107 !important;
+.w-100 {
+    width: 100% !important;
 }
 
-.bg-info {
-    background-color: #17a2b8 !important;
+.h-100 {
+    height: 100% !important;
 }
 
-.bg-primary {
-    background-color: var(--viamtek-green) !important;
+.mb-0 {
+    margin-bottom: 0 !important;
 }
 
-/* Scrollbar personalizada para toda la página */
+.mb-1 {
+    margin-bottom: 0.25rem !important;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem !important;
+}
+
+.mb-3 {
+    margin-bottom: 1rem !important;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem !important;
+}
+
+.mt-1 {
+    margin-top: 0.25rem !important;
+}
+
+.mt-2 {
+    margin-top: 0.5rem !important;
+}
+
+.mt-3 {
+    margin-top: 1rem !important;
+}
+
+.mt-4 {
+    margin-top: 1.5rem !important;
+}
+
+.me-1 {
+    margin-right: 0.25rem !important;
+}
+
+.me-2 {
+    margin-right: 0.5rem !important;
+}
+
+.ms-1 {
+    margin-left: 0.25rem !important;
+}
+
+.ms-2 {
+    margin-left: 0.5rem !important;
+}
+
+.p-0 {
+    padding: 0 !important;
+}
+
+.p-1 {
+    padding: 0.25rem !important;
+}
+
+.p-2 {
+    padding: 0.5rem !important;
+}
+
+.p-3 {
+    padding: 1rem !important;
+}
+
+.p-4 {
+    padding: 1.5rem !important;
+}
+
+/* Scrollbar personalizada */
 .reportes-page ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -1134,3 +1206,66 @@
     .reportes-page ::-webkit-scrollbar-thumb:hover {
         background: linear-gradient(135deg, var(--viamtek-dark-green), var(--viamtek-green));
     }
+
+/* Reducir movimiento si el usuario lo prefiere */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Safe areas para dispositivos con notch */
+@supports(padding: max(0px)) {
+    .reportes-page {
+        padding-left: max(0.75rem, env(safe-area-inset-left));
+        padding-right: max(0.75rem, env(safe-area-inset-right));
+        padding-top: max(0.75rem, env(safe-area-inset-top));
+        padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    }
+}
+
+/* Estilos para impresión */
+@media print {
+    .reportes-page {
+        background: white !important;
+        color: black !important;
+    }
+
+        .reportes-page::before {
+            display: none;
+        }
+
+    .export-buttons,
+    .chart-actions,
+    .filtros-rapidos,
+    .btn-close {
+        display: none !important;
+    }
+
+    .filtros-container,
+    .table-container,
+    .kpi-card,
+    .reporte-chart-wrapper {
+        background: white !important;
+        color: black !important;
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+    }
+
+    .kpi-value {
+        color: black !important;
+    }
+
+    .table-reportes {
+        color: black !important;
+    }
+
+        .table-reportes thead th {
+            background: #f0f0f0 !important;
+            color: black !important;
+            border-bottom: 2px solid black !important;
+        }
+}

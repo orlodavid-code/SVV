@@ -35,7 +35,7 @@
 
                         <div class="col-md-6 mb-3">
                             <label asp-for="TipoViaticoId" class="form-label"></label>
-                            <select asp-for="TipoViaticoId" asp-items="@(new SelectList(Model.TiposViatico, "Id", "Nombre"))" class="form-select">
+                            <select asp-for="TipoViaticoId" id="estiloSelect" asp-items="@(new SelectList(Model.TiposViatico, "Id", "Nombre"))" class="form-select">
                                 <option value="">-- Seleccione un tipo --</option>
                             </select>
                             <span asp-validation-for="TipoViaticoId" class="text-danger"></span>

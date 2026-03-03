@@ -7,15 +7,15 @@
     var solicitudesPendientes = ViewBag.SolicitudesPendientes as List<SolicitudDashboardViewModel> ?? new List<SolicitudDashboardViewModel>();
     var rolId = (int?)ViewBag.RolId;
 
-    // ✅ Variables para diferentes tipos de solicitudes pendientes - CON VALORES POR DEFECTO
+    //  Variables para diferentes tipos de solicitudes pendientes - CON VALORES POR DEFECTO
     var solicitudesPendientesJP = ViewBag.SolicitudesPendientesJP as List<SolicitudesViaje> ?? new List<SolicitudesViaje>();
     var solicitudesPendientesRH = ViewBag.SolicitudesPendientesRH as List<SolicitudesViaje> ?? new List<SolicitudesViaje>();
     var comprobacionesPendientesRevisionJP = ViewBag.ComprobacionesPendientesRevisionJP as List<ComprobacionesViaje> ?? new List<ComprobacionesViaje>();
     
-    // ✅ Variable para solicitudes recientes de empleado
+    //  Variable para solicitudes recientes de empleado
     var solicitudesRecientes = ViewBag.SolicitudesRecientes as List<SolicitudesViaje> ?? new List<SolicitudesViaje>();
     
-    // ✅ Funciones helper para formatear valores
+    //  Funciones helper para formatear valores
     string FormatCurrency(decimal? value)
     {
         if (value == null) return "$0.00";
@@ -62,7 +62,7 @@
         </div>
     }
 
-    <!-- ✅ ESTADÍSTICAS ESPECÍFICAS POR ROL -->
+    <!--  ESTADÍSTICAS ESPECÍFICAS POR ROL -->
     @if (rolId == 1) // EMPLEADO
     {
         <h4 class="section-title">Tu Resumen de Viáticos</h4>
@@ -298,14 +298,14 @@
         </div>
     }
 
-    <!-- ✅ ACCIONES UNIVERSALES PARA TODOS LOS ROLES -->
+    <!--  ACCIONES UNIVERSALES PARA TODOS LOS ROLES -->
     <h4 class="section-title">Gestiona Tus Viáticos</h4>
     <div class="row">
         <div class="col-lg-6 mb-4">
             <div class="quick-actions-card h-100">
                 <h4 class="card-title"><i class="fas fa-bolt me-2"></i> Acciones Rápidas</h4>
                 <div class="row">
-                    <!-- ✅ ACCIONES UNIVERSALES PARA TODOS -->
+                    <!--  ACCIONES UNIVERSALES PARA TODOS -->
                     <div class="col-4 mb-3">
                         <a asp-controller="Solicitudes" asp-action="CrearSolicitud" class="quick-action-btn" data-bs-toggle="tooltip">
                             <div class="action-icon">
@@ -331,7 +331,7 @@
                         </a>
                     </div>
 
-                    <!-- ✅ ACCIONES ESPECÍFICAS POR ROL -->
+                    <!--  ACCIONES ESPECÍFICAS POR ROL -->
                     @if (rolId == 6 || rolId == 5 || rolId == 4) // Admin, Dirección, Finanzas
                     {
                         @if (rolId == 4) // Finanzas
@@ -426,7 +426,7 @@
             </div>
         </div>
 
-        <!-- ✅ INFORMACIÓN IMPORTANTE ESPECÍFICA POR ROL -->
+        <!--  INFORMACIÓN IMPORTANTE ESPECÍFICA POR ROL -->
         <div class="col-lg-6 mb-4">
             <div class="info-card info-card-role-@rolId">
                 <div class="info-card-header">
@@ -644,7 +644,7 @@
         </div>
     </div>
 
-    <!-- ✅ SOLICITUDES RECIENTES (PARA ROLES QUE TIENEN SUS PROPIAS SOLICITUDES) -->
+    <!--  SOLICITUDES RECIENTES (PARA ROLES QUE TIENEN SUS PROPIAS SOLICITUDES) -->
     @if (rolId == 1) // EMPLEADO - SOLICITUDES PROPIAS
     {
         <h4 class="section-title">Tus Solicitudes Recientes</h4>
@@ -744,7 +744,7 @@
         </div>
     }
 
-    <!-- ✅ PENDIENTES DE APROBACIÓN (PARA ROLES CON PERMISOS DE APROBACIÓN) -->
+    <!--  PENDIENTES DE APROBACIÓN (PARA ROLES CON PERMISOS DE APROBACIÓN) -->
     @if (rolId == 6 || rolId == 5 || rolId == 4 || rolId == 2) // Admin, Dirección, Finanzas, JP
     {
         <h4 class="section-title">Pendientes de Aprobación</h4>
@@ -812,7 +812,7 @@
         </div>
     }
 
-    <!-- ✅ COMPROBACIONES PENDIENTES DE REVISIÓN JP (SOLO PARA ROL 2) -->
+    <!--  COMPROBACIONES PENDIENTES DE REVISIÓN JP (SOLO PARA ROL 2) -->
     @if (rolId == 2)
     {
         <h4 class="section-title">Comprobaciones Pendientes de Revisión</h4>
@@ -898,7 +898,7 @@
         </div>
     }
 
-    <!-- ✅ TODAS LAS SOLICITUDES ACTIVAS (PARA RH) -->
+    <!--  TODAS LAS SOLICITUDES ACTIVAS (PARA RH) -->
     @if (rolId == 3)
     {
         <h4 class="section-title">Todas las Solicitudes Activas</h4>

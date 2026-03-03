@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using QuestPDF.Fluent;
+using SVV.Filters;
 using SVV.Models;
+using SVV.Services;
 using SVV.ViewModels;
 using System.Security.Claims;
-using SVV.Services;
-using Microsoft.Extensions.Configuration;
 using ServicesNotificationItem = SVV.Services.NotificationItem;
-using SVV.Filters;
 
 namespace SVV.Controllers
 {
@@ -874,6 +875,56 @@ namespace SVV.Controllers
             return $"SOL-{fecha}-{(maxNumero + 1):D3}";
         }
 
+        [HttpGet]
+        public async Task<IActionResult> DescargarPdf(int id)
+        {
+            try
+            {
+                var solicitud = await _context.SolicitudesViajes
+                    .Include(s => s.Empleado)
+                    .Include(s => s.Estado)
+                    .Include(s => s.TipoViatico)
+                    .Include(s => s.Anticipos)
+                    .Include(s => s.FlujoAprobaciones)
+                        .ThenInclude(f => f.EmpleadoAprobador)
+                    .FirstOrDefaultAsync(s => s.Id == id);
+
+                if (solicitud == null)
+                {
+                    TempData["Error"] = "Solicitud no encontrada.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var duracion = 0;
+                if (solicitud.FechaSalida != DateOnly.MinValue && solicitud.FechaRegreso != DateOnly.MinValue)
+                {
+                    var salida = solicitud.FechaSalida.ToDateTime(TimeOnly.MinValue);
+                    var regreso = solicitud.FechaRegreso.ToDateTime(TimeOnly.MinValue);
+                    duracion = (regreso - salida).Days + 1;
+                }
+
+                string logoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "logoviamtek.png");
+                if (!System.IO.File.Exists(logoPath))
+                {
+                    // Usar un logo por defecto o lanzar advertencia
+                    logoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "LOGO1.png");
+                }
+
+                var tiposViatico = await _context.TiposViatico.ToListAsync();
+
+                var pdfGenerator = new SVV.Generators.PdfSolicitudes(solicitud, duracion, logoPath, tiposViatico);
+                var pdfBytes = pdfGenerator.GeneratePdf();
+
+                Response.Headers.Add("Content-Disposition", $"inline; filename=Solicitud_{solicitud.CodigoSolicitud}.pdf");
+                return File(pdfBytes, "application/pdf");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al generar PDF para solicitud {Id}", id);
+                TempData["Error"] = "Error al generar el PDF. Intente más tarde.";
+                return RedirectToAction(nameof(Detalles), new { id });
+            }
+        }
         private bool SolicitudExists(int id) => _context.SolicitudesViajes.Any(e => e.Id == id);
 
         private bool PuedeVerSolicitud(int solicitudEmpleadoId)

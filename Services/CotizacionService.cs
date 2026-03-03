@@ -30,6 +30,7 @@ namespace SVV.Services
         private readonly CotizacionConfig _cotizacionConfig;
         private readonly IWebHostEnvironment _env;
         private List<EstadoMexico> _estadosMexico = new List<EstadoMexico>();
+        private List<MunicipioDetalle> _municipios = new List<MunicipioDetalle>();
 
         // Constructor con inyección de dependencias
         public CotizacionService(
@@ -45,14 +46,15 @@ namespace SVV.Services
             _cotizacionConfig = cotizacionConfig.Value;
             _env = env;
             CargarEstadosMexico();
+            CargarMunicipios();
         }
 
-        // Carga los estados y municipios de México desde archivo JSON
         private void CargarEstadosMexico()
         {
             try
             {
                 var path = Path.Combine(_env.WebRootPath, "data", "estados-mexico.json");
+                _logger.LogInformation("Cargando estados desde: {Path}", path);
                 if (File.Exists(path))
                 {
                     var json = File.ReadAllText(path);
@@ -73,6 +75,30 @@ namespace SVV.Services
             }
         }
 
+        private void CargarMunicipios()
+        {
+            try
+            {
+                var path = Path.Combine(_env.WebRootPath, "data", "municipios.json");
+                _logger.LogInformation("Cargando municipios desde: {Path}", path);
+                if (File.Exists(path))
+                {
+                    var json = File.ReadAllText(path);
+                    var data = JsonSerializer.Deserialize<RootMunicipios>(json);
+                    _municipios = data?.Estados?.SelectMany(e => e.Municipios).ToList() ?? new List<MunicipioDetalle>();
+                    _logger.LogInformation("Cargados {Count} municipios con coordenadas", _municipios.Count);
+                }
+                else
+                {
+                    _logger.LogWarning("Archivo de municipios.json no encontrado en {Path}", path);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al cargar municipios");
+            }
+        }
+
         // Lista de respaldo por si falla la carga del archivo
         private List<EstadoMexico> CargarEstadosPorDefecto()
         {
@@ -80,7 +106,35 @@ namespace SVV.Services
             {
                 new EstadoMexico { Nombre = "Aguascalientes", Municipios = new List<string>() },
                 new EstadoMexico { Nombre = "Baja California", Municipios = new List<string>() },
-                // ... (todos los estados de México)
+                new EstadoMexico { Nombre = "Baja California Sur", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Campeche", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Chiapas", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Chihuahua", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Ciudad de México", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Coahuila de Zaragoza", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Colima", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Durango", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Guanajuato", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Guerrero", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Hidalgo", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Jalisco", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "México", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Michoacán de Ocampo", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Morelos", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Nayarit", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Nuevo León", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Oaxaca", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Puebla", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Querétaro", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Quintana Roo", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "San Luis Potosí", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Sinaloa", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Sonora", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Tabasco", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Tamaulipas", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Tlaxcala", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Veracruz de Ignacio de la Llave", Municipios = new List<string>() },
+                new EstadoMexico { Nombre = "Yucatán", Municipios = new List<string>() },
                 new EstadoMexico { Nombre = "Zacatecas", Municipios = new List<string>() }
             };
         }
@@ -254,7 +308,35 @@ namespace SVV.Services
             {
                 {"AGUASCALIENTES", "Aguascalientes"},
                 {"MEXICALI", "Baja California"},
-                // ... (todas las capitales de estados)
+                {"LA PAZ", "Baja California Sur"},
+                {"CAMPECHE", "Campeche"},
+                {"TUXTLA GUTIÉRREZ", "Chiapas"},
+                {"CHIHUAHUA", "Chihuahua"},
+                {"CIUDAD DE MÉXICO", "Ciudad de México"},
+                {"SALTILLO", "Coahuila de Zaragoza"},
+                {"COLIMA", "Colima"},
+                {"DURANGO", "Durango"},
+                {"GUANAJUATO", "Guanajuato"},
+                {"CHILPANCINGO", "Guerrero"},
+                {"PACHUCA", "Hidalgo"},
+                {"GUADALAJARA", "Jalisco"},
+                {"TOLUCA", "México"},
+                {"MORELIA", "Michoacán de Ocampo"},
+                {"CUERNAVACA", "Morelos"},
+                {"TEPIC", "Nayarit"},
+                {"MONTERREY", "Nuevo León"},
+                {"OAXACA", "Oaxaca"},
+                {"PUEBLA", "Puebla"},
+                {"QUERÉTARO", "Querétaro"},
+                {"CHETUMAL", "Quintana Roo"},
+                {"SAN LUIS POTOSÍ", "San Luis Potosí"},
+                {"CULIACÁN", "Sinaloa"},
+                {"HERMOSILLO", "Sonora"},
+                {"VILLAHERMOSA", "Tabasco"},
+                {"CIUDAD VICTORIA", "Tamaulipas"},
+                {"TLAXCALA", "Tlaxcala"},
+                {"XALAPA", "Veracruz de Ignacio de la Llave"},
+                {"MÉRIDA", "Yucatán"},
                 {"ZACATECAS", "Zacatecas"}
             };
 
@@ -352,8 +434,35 @@ namespace SVV.Services
             {
                 {"baja california", "Tijuana, Baja California, México"},
                 {"baja california sur", "La Paz, Baja California Sur, México"},
-                // ... (mapeo de estados y ciudades principales)
-                {"san luis potosi", "San Luis Potosí, San Luis Potosí, México"}
+                {"campeche", "Campeche, Campeche, México"},
+                {"chiapas", "Tuxtla Gutiérrez, Chiapas, México"},
+                {"chihuahua", "Chihuahua, Chihuahua, México"},
+                {"ciudad de méxico", "Ciudad de México, México"},
+                {"coahuila", "Saltillo, Coahuila, México"},
+                {"colima", "Colima, Colima, México"},
+                {"durango", "Durango, Durango, México"},
+                {"guanajuato", "Guanajuato, Guanajuato, México"},
+                {"guerrero", "Chilpancingo, Guerrero, México"},
+                {"hidalgo", "Pachuca, Hidalgo, México"},
+                {"jalisco", "Guadalajara, Jalisco, México"},
+                {"méxico", "Toluca, Estado de México, México"},
+                {"michoacán", "Morelia, Michoacán, México"},
+                {"morelos", "Cuernavaca, Morelos, México"},
+                {"nayarit", "Tepic, Nayarit, México"},
+                {"nuevo león", "Monterrey, Nuevo León, México"},
+                {"oaxaca", "Oaxaca, Oaxaca, México"},
+                {"puebla", "Puebla, Puebla, México"},
+                {"querétaro", "Querétaro, Querétaro, México"},
+                {"quintana roo", "Chetumal, Quintana Roo, México"},
+                {"san luis potosí", "San Luis Potosí, San Luis Potosí, México"},
+                {"sinaloa", "Culiacán, Sinaloa, México"},
+                {"sonora", "Hermosillo, Sonora, México"},
+                {"tabasco", "Villahermosa, Tabasco, México"},
+                {"tamaulipas", "Ciudad Victoria, Tamaulipas, México"},
+                {"tlaxcala", "Tlaxcala, Tlaxcala, México"},
+                {"veracruz", "Xalapa, Veracruz, México"},
+                {"yucatán", "Mérida, Yucatán, México"},
+                {"zacatecas", "Zacatecas, Zacatecas, México"}
             };
 
             foreach (var mapeo in mapeoEstados)
@@ -452,54 +561,132 @@ namespace SVV.Services
             }
         }
 
-        // Calcula distancia estimada localmente usando configuración
+        // Calcula distancia estimada localmente usando coordenadas (Haversine)
         private decimal CalcularDistanciaEstimadaLocal(string origen, string destino)
         {
             _logger.LogInformation("Calculando distancia local estimada: {Origen} -> {Destino}", origen, destino);
 
-            var origenUpper = origen?.ToUpper() ?? "";
-            var destinoUpper = destino?.ToUpper() ?? "";
+            var (origenLat, origenLng) = ObtenerCoordenadas(origen);
+            var (destinoLat, destinoLng) = ObtenerCoordenadas(destino);
 
-            origenUpper = origenUpper.Replace(" ", "_").Replace(",", "").Replace(".", "").Replace("Á", "A").Replace("É", "E").Replace("Í", "I").Replace("Ó", "O").Replace("Ú", "U");
-            destinoUpper = destinoUpper.Replace(" ", "_").Replace(",", "").Replace(".", "").Replace("Á", "A").Replace("É", "E").Replace("Í", "I").Replace("Ó", "O").Replace("Ú", "U");
-
-            var clave = $"{origenUpper}-{destinoUpper}";
-
-            if (_cotizacionConfig.DistanciasEstimadas.ContainsKey(clave))
+            if (!origenLat.HasValue || !origenLng.HasValue || !destinoLat.HasValue || !destinoLng.HasValue)
             {
-                var distancia = _cotizacionConfig.DistanciasEstimadas[clave];
-                _logger.LogInformation("Distancia encontrada en configuración: {Clave} = {Distancia} km", clave, distancia);
-                return distancia;
+                _logger.LogWarning("No se encontraron coordenadas para origen o destino. Usando valor por defecto 300 km.");
+                return 300m;
             }
 
-            var claveInverso = $"{destinoUpper}-{origenUpper}";
-            if (_cotizacionConfig.DistanciasEstimadas.ContainsKey(claveInverso))
-            {
-                var distancia = _cotizacionConfig.DistanciasEstimadas[claveInverso];
-                _logger.LogInformation("Distancia inversa encontrada: {Clave} = {Distancia} km", claveInverso, distancia);
-                return distancia;
-            }
+            var distanciaLineaRecta = CalcularDistanciaHaversine(
+                origenLat.Value, origenLng.Value,
+                destinoLat.Value, destinoLng.Value);
 
-            var distanciasDesdePuebla = new Dictionary<string, decimal>
-            {
-                {"AGUASCALIENTES", 580},
-                {"BAJA_CALIFORNIA", 2800},
-                // ... (distancias desde Puebla a otros estados)
-                {"ZACATECAS", 720}
-            };
+            // Factor de corrección por carretera (aprox 15% más)
+            var distanciaCarretera = distanciaLineaRecta * 1.15;
 
-            foreach (var estado in distanciasDesdePuebla)
+            _logger.LogInformation("Distancia calculada: {Distancia:F0} km (línea recta: {Recta:F0} km)", distanciaCarretera, distanciaLineaRecta);
+            return Math.Round((decimal)distanciaCarretera, 0);
+        }
+
+        // Obtiene coordenadas de un lugar (origen o destino) buscando en municipios.json
+        private (double? lat, double? lng) ObtenerCoordenadas(string lugar)
+        {
+            if (string.IsNullOrEmpty(lugar))
+                return (null, null);
+
+            // Tomar solo la primera parte antes de la coma (si existe)
+            var lugarLimpio = lugar.Split(',')[0].Trim();
+
+            // Normalizar quitando acentos
+            var lugarNormalizado = lugarLimpio.ToLower().Normalize(System.Text.NormalizationForm.FormD);
+            lugarNormalizado = new string(lugarNormalizado
+                .Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
+                .ToArray());
+
+            // Buscar en municipios por nombre (coincidencia parcial)
+            var municipio = _municipios.FirstOrDefault(m =>
+                m.Nombre.ToLower().Normalize(System.Text.NormalizationForm.FormD)
+                    .Contains(lugarNormalizado) ||
+                lugarNormalizado.Contains(m.Nombre.ToLower().Normalize(System.Text.NormalizationForm.FormD)));
+
+            if (municipio != null)
+                return (municipio.Latitud, municipio.Longitud);
+
+            // Si no se encuentra, intentar extraer el estado y buscar su capital
+            foreach (var estado in _estadosMexico)
             {
-                if (destinoUpper.Contains(estado.Key))
+                if (lugarNormalizado.Contains(estado.Nombre.ToLower()))
                 {
-                    _logger.LogInformation("Distancia por estado encontrada: {Origen}-{Estado} = {Distancia} km",
-                        origenUpper, estado.Key, estado.Value);
-                    return estado.Value;
+                    var capital = ObtenerCapitalPorEstado(estado.Nombre);
+                    if (!string.IsNullOrEmpty(capital))
+                    {
+                        var capitalMun = _municipios.FirstOrDefault(m =>
+                            m.Nombre.Equals(capital, StringComparison.OrdinalIgnoreCase));
+                        if (capitalMun != null)
+                            return (capitalMun.Latitud, capitalMun.Longitud);
+                    }
+                    break;
                 }
             }
 
-            _logger.LogWarning("No se encontró distancia específica, usando valor por defecto: 300 km");
-            return 300m;
+            return (null, null);
+        }
+
+        // Método auxiliar para obtener la capital de un estado
+        private string ObtenerCapitalPorEstado(string estado)
+        {
+            return estado switch
+            {
+                "Aguascalientes" => "Aguascalientes",
+                "Baja California" => "Mexicali",
+                "Baja California Sur" => "La Paz",
+                "Campeche" => "Campeche",
+                "Chiapas" => "Tuxtla Gutiérrez",
+                "Chihuahua" => "Chihuahua",
+                "Ciudad de México" => "Ciudad de México",
+                "Coahuila de Zaragoza" => "Saltillo",
+                "Colima" => "Colima",
+                "Durango" => "Durango",
+                "Guanajuato" => "Guanajuato",
+                "Guerrero" => "Chilpancingo de los Bravo",
+                "Hidalgo" => "Pachuca de Soto",
+                "Jalisco" => "Guadalajara",
+                "México" => "Toluca",
+                "Michoacán de Ocampo" => "Morelia",
+                "Morelos" => "Cuernavaca",
+                "Nayarit" => "Tepic",
+                "Nuevo León" => "Monterrey",
+                "Oaxaca" => "Oaxaca de Juárez",
+                "Puebla" => "Puebla",
+                "Querétaro" => "Querétaro",
+                "Quintana Roo" => "Chetumal",
+                "San Luis Potosí" => "San Luis Potosí",
+                "Sinaloa" => "Culiacán",
+                "Sonora" => "Hermosillo",
+                "Tabasco" => "Villahermosa",
+                "Tamaulipas" => "Ciudad Victoria",
+                "Tlaxcala" => "Tlaxcala",
+                "Veracruz de Ignacio de la Llave" => "Xalapa",
+                "Yucatán" => "Mérida",
+                "Zacatecas" => "Zacatecas",
+                _ => null
+            };
+        }
+
+        // Fórmula Haversine para calcular distancia en km entre dos puntos geográficos
+        private double CalcularDistanciaHaversine(double lat1, double lon1, double lat2, double lon2)
+        {
+            const double R = 6371; // Radio de la Tierra en km
+            var dLat = DegreesToRadians(lat2 - lat1);
+            var dLon = DegreesToRadians(lon2 - lon1);
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                    Math.Cos(DegreesToRadians(lat1)) * Math.Cos(DegreesToRadians(lat2)) *
+                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            return R * c;
+        }
+
+        private double DegreesToRadians(double degrees)
+        {
+            return degrees * Math.PI / 180.0;
         }
 
         // Calcula costo de transporte según medio seleccionado
@@ -518,12 +705,9 @@ namespace SVV.Services
 
             if (esVehiculoPropio)
             {
+                // No se agrega ningún detalle, total 0 y lista vacía
                 costo = 0;
-                detalles.Add(new ConceptoItemDto
-                {
-                    Precio = 0,
-                    Descripcion = $"Vehículo propio - Costo incluido en gasolina y casetas"
-                });
+                detalles.Clear();
             }
             // Cálculo para avión
             else if (medioParaComparar.Contains("avión") || medioParaComparar.Contains("avion") || medioParaComparar.Contains("vuelo"))
@@ -766,29 +950,25 @@ namespace SVV.Services
         // Calcula costo de Uber/Taxi
         private async Task CalcularUberTaxiAutomatico(CalcularCotizacionDto dto, ResultadoCotizacionDto resultado)
         {
+            // Si no requiere taxi a domicilio, no calculamos nada
+            if (!dto.RequiereTaxiDomicilio)
+            {
+                resultado.TotalUberTaxi = 0;
+                resultado.DetalleUberTaxi.Clear();
+                await Task.CompletedTask;
+                return;
+            }
+
             var costo = 0m;
             var detalles = new List<ConceptoItemDto>();
 
-            if (dto.RequiereTaxiDomicilio)
-            {
-                var costoTaxi = 200 * dto.NumeroPersonas;
-                costo += costoTaxi;
-                detalles.Add(new ConceptoItemDto
-                {
-                    Precio = costoTaxi,
-                    Descripcion = $"Taxi a domicilio ({dto.NumeroPersonas} personas)"
-                });
-            }
-
-            var diasViaje = CalcularDiasViaje(dto.FechaSalida, dto.FechaRegreso);
-            var diasLaborables = Math.Max(1, diasViaje - (dto.RequiereHospedaje ? 0 : 1));
-            var costoTraslados = diasLaborables * 2 * 70 * dto.NumeroPersonas;
-            costo += costoTraslados;
-
+            // Taxi a domicilio (origen-destino específico)
+            var costoTaxi = 200 * dto.NumeroPersonas;
+            costo += costoTaxi;
             detalles.Add(new ConceptoItemDto
             {
-                Precio = costoTraslados,
-                Descripcion = $"Traslados locales ({diasLaborables} días, {dto.NumeroPersonas} personas)"
+                Precio = costoTaxi,
+                Descripcion = $"Taxi a domicilio ({dto.NumeroPersonas} personas)"
             });
 
             resultado.TotalUberTaxi = costo;
@@ -1000,35 +1180,11 @@ namespace SVV.Services
         // Aplica reglas de negocio como descuentos y validaciones
         private void AplicarReglasNegocio(CalcularCotizacionDto dto, ResultadoCotizacionDto resultado)
         {
-            if (dto.NumeroPersonas >= _cotizacionConfig.Tarifas.DescuentoGrupoGrande.MinPersonas)
-            {
-                var descuento = resultado.TotalGeneral * (_cotizacionConfig.Tarifas.DescuentoGrupoGrande.Porcentaje / 100m);
-                resultado.TotalGeneral -= descuento;
-                resultado.Alertas.Add($"Descuento del {_cotizacionConfig.Tarifas.DescuentoGrupoGrande.Porcentaje}% (${descuento:F2}) por grupo de {dto.NumeroPersonas} personas");
-            }
-
             var medioTraslado = WebUtility.HtmlDecode(dto.MedioTraslado ?? "").ToLower();
             var esVehiculoPropio = EsVehiculo(medioTraslado);
 
-            if (esVehiculoPropio)
-            {
-                if (resultado.TotalTransporte > 0)
-                {
-                    resultado.Alertas.Add("Transporte ajustado a $0 por ser vehículo propio/utilitario");
-                    resultado.TotalTransporte = 0;
-                }
-
-                if (resultado.TotalGasolina == 0 && resultado.DistanciaCalculada > 0)
-                {
-                    resultado.Alertas.Add("Gasolina no calculada para vehículo propio. Verificar detección de vehículo.");
-                }
-
-                if (resultado.TotalCasetas == 0 && resultado.DistanciaCalculada > 0)
-                {
-                    resultado.Alertas.Add("Casetas no calculadas para vehículo propio. Verificar detección de vehículo.");
-                }
-            }
-
+           
+            // Advertencias sobre porcentajes
             if (resultado.TotalGeneral > 0)
             {
                 var porcentajeHospedaje = resultado.TotalHospedaje / resultado.TotalGeneral * 100;
@@ -1148,21 +1304,63 @@ namespace SVV.Services
     }
 
     // Clases para representar datos de estados de México
-    public class EstadoMexico
-    {
-        public string Nombre { get; set; } = string.Empty;
-        public List<string> Municipios { get; set; } = new List<string>();
-    }
-
     public class EstadosMexicoData
     {
+        [JsonPropertyName("estados")]
         public List<EstadoMexico> Estados { get; set; } = new List<EstadoMexico>();
     }
+
+    public class EstadoMexico
+    {
+        [JsonPropertyName("nombre")]
+        public string Nombre { get; set; } = string.Empty;
+
+        [JsonPropertyName("municipios")]
+        public List<string> Municipios { get; set; } = new List<string>();
+    }
+    
 
     public class EstadoInfo
     {
         public string Nombre { get; set; } = string.Empty;
         public int TotalMunicipios { get; set; }
+    }
+
+    // Clases para municipios con coordenadas
+    public class RootMunicipios
+    {
+        [JsonPropertyName("estados")]
+        public List<EstadoMunicipios> Estados { get; set; } = new List<EstadoMunicipios>();
+    }
+
+    public class EstadoMunicipios
+    {
+        [JsonPropertyName("nombre")]
+        public string Nombre { get; set; } = string.Empty;
+
+        [JsonPropertyName("municipios")]
+        public List<MunicipioDetalle> Municipios { get; set; } = new List<MunicipioDetalle>();
+    }
+
+    public class MunicipioDetalle
+    {
+        [JsonPropertyName("clave_entidad")]
+        public string ClaveEntidad { get; set; } = string.Empty;
+
+        [JsonPropertyName("clave_municipio")]
+        public string ClaveMunicipio { get; set; } = string.Empty;
+
+        [JsonPropertyName("nombre")]
+        public string Nombre { get; set; } = string.Empty;
+
+        [JsonPropertyName("latitud")]
+        public double Latitud { get; set; }
+
+        [JsonPropertyName("longitud")]
+        public double Longitud { get; set; }
+
+        [JsonPropertyName("poblacion")]
+        public int Poblacion { get; set; }
     }
 }
 

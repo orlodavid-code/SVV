@@ -4,7 +4,7 @@ namespace SVV.ViewModels
 {
     public class SolicitudDashboardViewModel
     {
-        public int IdSolicitud { get; set; }  // ✅ AGREGAR ESTA PROPIEDAD
+        public int IdSolicitud { get; set; }  //  AGREGAR ESTA PROPIEDAD
         public string Codigo { get; set; }
         public string EmpleadoNombre { get; set; }
         public string NombreProyecto { get; set; }

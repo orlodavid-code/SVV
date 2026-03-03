@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SVV.Filters;
+using SVV.Generators;
+using QuestPDF.Fluent;
 using SVV.Models;
 using SVV.Services;
 using System.Security.Claims;
@@ -704,7 +706,8 @@ namespace SVV.Controllers
                             TipoViatico = solicitud.TipoViatico?.Nombre ?? "N/A",
                             MontoAnticipo = solicitud.MontoAnticipo?.ToString("C") ?? "N/A",
                             Destino = solicitud.Destino,
-                            EsNotificacionMultiple = true
+                            EsNotificacionMultiple = true,
+                            EsBorrador = false
                         }
                     });
                 }
@@ -1171,6 +1174,60 @@ namespace SVV.Controllers
                 _logger.LogError(ex, "Error al exportar todas las solicitudes a Excel");
                 TempData["Error"] = "Error al generar el archivo Excel: " + ex.Message;
                 return RedirectToAction("Pendientes");
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DescargarPdf(int id)
+        {
+            try
+            {
+                var solicitud = await _context.SolicitudesViajes
+                    .Include(s => s.Empleado)
+                    .Include(s => s.Estado)
+                    .Include(s => s.TipoViatico)
+                    .Include(s => s.Anticipos)
+                    .Include(s => s.FlujoAprobaciones)
+                        .ThenInclude(f => f.EmpleadoAprobador)
+                    .FirstOrDefaultAsync(s => s.Id == id);
+
+                if (solicitud == null)
+                {
+                    TempData["Error"] = "Solicitud no encontrada.";
+                    return RedirectToAction(nameof(Pendientes));
+                }
+
+                var duracion = 0;
+                if (solicitud.FechaSalida != DateOnly.MinValue && solicitud.FechaRegreso != DateOnly.MinValue)
+                {
+                    var salida = solicitud.FechaSalida.ToDateTime(TimeOnly.MinValue);
+                    var regreso = solicitud.FechaRegreso.ToDateTime(TimeOnly.MinValue);
+                    duracion = (regreso - salida).Days + 1;
+                }
+
+                // Ruta del logo (ajusta según tu estructura)
+                string logoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "logoviamtek.jpeg");
+
+                // Opcional: si no existe, usar un logo por defecto
+                if (!System.IO.File.Exists(logoPath))
+                {
+                    _logger.LogWarning("Logo no encontrado en {LogoPath}. Usando fallback.", logoPath);
+                    logoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "LOGOHORIZONTAL.png");
+                }
+
+                var tiposViatico = await _context.TiposViatico.ToListAsync();
+
+                var pdfGenerator = new PdfSolicitudes(solicitud, duracion, logoPath, tiposViatico);
+                var pdfBytes = pdfGenerator.GeneratePdf();
+
+                Response.Headers.Add("Content-Disposition", $"inline; filename=Solicitud_{solicitud.CodigoSolicitud}.pdf");
+                return File(pdfBytes, "application/pdf");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al generar PDF para solicitud {Id}", id);
+                TempData["Error"] = "Error al generar el PDF. Intente más tarde.";
+                return RedirectToAction(nameof(Detalles), new { id });
             }
         }
     }
