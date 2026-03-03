@@ -49,12 +49,12 @@ namespace SVV.Services
             CargarMunicipios();
         }
 
-        // Carga los estados y municipios de México desde archivo JSON
         private void CargarEstadosMexico()
         {
             try
             {
                 var path = Path.Combine(_env.WebRootPath, "data", "estados-mexico.json");
+                _logger.LogInformation("Cargando estados desde: {Path}", path);
                 if (File.Exists(path))
                 {
                     var json = File.ReadAllText(path);
@@ -75,12 +75,12 @@ namespace SVV.Services
             }
         }
 
-        // Carga los municipios con coordenadas desde municipios.json
         private void CargarMunicipios()
         {
             try
             {
                 var path = Path.Combine(_env.WebRootPath, "data", "municipios.json");
+                _logger.LogInformation("Cargando municipios desde: {Path}", path);
                 if (File.Exists(path))
                 {
                     var json = File.ReadAllText(path);
@@ -592,13 +592,20 @@ namespace SVV.Services
             if (string.IsNullOrEmpty(lugar))
                 return (null, null);
 
-            var lugarNormalizado = lugar.ToLower().Normalize(System.Text.NormalizationForm.FormD);
-            lugarNormalizado = new string(lugarNormalizado.Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark).ToArray());
+            // Tomar solo la primera parte antes de la coma (si existe)
+            var lugarLimpio = lugar.Split(',')[0].Trim();
 
-            // Buscar en municipios por nombre
+            // Normalizar quitando acentos
+            var lugarNormalizado = lugarLimpio.ToLower().Normalize(System.Text.NormalizationForm.FormD);
+            lugarNormalizado = new string(lugarNormalizado
+                .Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
+                .ToArray());
+
+            // Buscar en municipios por nombre (coincidencia parcial)
             var municipio = _municipios.FirstOrDefault(m =>
-                m.Nombre.ToLower().Contains(lugarNormalizado) ||
-                lugarNormalizado.Contains(m.Nombre.ToLower()));
+                m.Nombre.ToLower().Normalize(System.Text.NormalizationForm.FormD)
+                    .Contains(lugarNormalizado) ||
+                lugarNormalizado.Contains(m.Nombre.ToLower().Normalize(System.Text.NormalizationForm.FormD)));
 
             if (municipio != null)
                 return (municipio.Latitud, municipio.Longitud);
@@ -611,7 +618,8 @@ namespace SVV.Services
                     var capital = ObtenerCapitalPorEstado(estado.Nombre);
                     if (!string.IsNullOrEmpty(capital))
                     {
-                        var capitalMun = _municipios.FirstOrDefault(m => m.Nombre.Equals(capital, StringComparison.OrdinalIgnoreCase));
+                        var capitalMun = _municipios.FirstOrDefault(m =>
+                            m.Nombre.Equals(capital, StringComparison.OrdinalIgnoreCase));
                         if (capitalMun != null)
                             return (capitalMun.Latitud, capitalMun.Longitud);
                     }
@@ -1175,14 +1183,7 @@ namespace SVV.Services
             var medioTraslado = WebUtility.HtmlDecode(dto.MedioTraslado ?? "").ToLower();
             var esVehiculoPropio = EsVehiculo(medioTraslado);
 
-            // Descuento por grupo grande si aplica
-            if (dto.NumeroPersonas >= _cotizacionConfig.Tarifas.DescuentoGrupoGrande.MinPersonas)
-            {
-                var descuento = resultado.TotalGeneral * (_cotizacionConfig.Tarifas.DescuentoGrupoGrande.Porcentaje / 100m);
-                resultado.TotalGeneral -= descuento;
-                resultado.Alertas.Add($"Descuento del {_cotizacionConfig.Tarifas.DescuentoGrupoGrande.Porcentaje}% (${descuento:F2}) por grupo de {dto.NumeroPersonas} personas");
-            }
-
+           
             // Advertencias sobre porcentajes
             if (resultado.TotalGeneral > 0)
             {
@@ -1303,16 +1304,21 @@ namespace SVV.Services
     }
 
     // Clases para representar datos de estados de México
-    public class EstadoMexico
-    {
-        public string Nombre { get; set; } = string.Empty;
-        public List<string> Municipios { get; set; } = new List<string>();
-    }
-
     public class EstadosMexicoData
     {
+        [JsonPropertyName("estados")]
         public List<EstadoMexico> Estados { get; set; } = new List<EstadoMexico>();
     }
+
+    public class EstadoMexico
+    {
+        [JsonPropertyName("nombre")]
+        public string Nombre { get; set; } = string.Empty;
+
+        [JsonPropertyName("municipios")]
+        public List<string> Municipios { get; set; } = new List<string>();
+    }
+    
 
     public class EstadoInfo
     {
@@ -1323,22 +1329,37 @@ namespace SVV.Services
     // Clases para municipios con coordenadas
     public class RootMunicipios
     {
+        [JsonPropertyName("estados")]
         public List<EstadoMunicipios> Estados { get; set; } = new List<EstadoMunicipios>();
     }
 
     public class EstadoMunicipios
     {
+        [JsonPropertyName("nombre")]
         public string Nombre { get; set; } = string.Empty;
+
+        [JsonPropertyName("municipios")]
         public List<MunicipioDetalle> Municipios { get; set; } = new List<MunicipioDetalle>();
     }
 
     public class MunicipioDetalle
     {
+        [JsonPropertyName("clave_entidad")]
         public string ClaveEntidad { get; set; } = string.Empty;
+
+        [JsonPropertyName("clave_municipio")]
         public string ClaveMunicipio { get; set; } = string.Empty;
+
+        [JsonPropertyName("nombre")]
         public string Nombre { get; set; } = string.Empty;
+
+        [JsonPropertyName("latitud")]
         public double Latitud { get; set; }
+
+        [JsonPropertyName("longitud")]
         public double Longitud { get; set; }
+
+        [JsonPropertyName("poblacion")]
         public int Poblacion { get; set; }
     }
 }
