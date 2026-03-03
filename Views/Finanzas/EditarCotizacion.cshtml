@@ -3,24 +3,23 @@
     ViewData["Title"] = "Editar Cotización";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
-    // Variables para controlar si el modelo es null
+    // VALIDACIÓN DE MODELO PARA PREVENIR ERRORES DE NULL REFERENCE
     var modelExists = Model != null;
 
-    // Helper para formatear DateOnly
+    // FUNCIONES AUXILIARES PARA FORMATEO DE DATOS
     string FormatDateOnly(DateOnly? date)
     {
         if (!date.HasValue) return string.Empty;
         return date.Value.ToString("dd/MM/yyyy");
     }
 
-    // Helper para mostrar valores decimales
     string FormatDecimal(decimal? value)
     {
         if (!value.HasValue) return "0.00";
         return value.Value.ToString("N2");
     }
 
-    // Verificar explícitamente si Model es null
+    // PREPARACIÓN DE DATOS PARA SERIALIZACIÓN JSON
     var alertasJson = "[]";
     var erroresJson = "[]";
 
@@ -32,8 +31,646 @@
             System.Text.Json.JsonSerializer.Serialize(Model.ErroresCalculo) : "[]";
     }
 }
+
 <style>
-    /* ... (todo tu CSS existente se mantiene igual) ... */
+    /* SISTEMA DE VARIABLES CSS PARA MANTENIBILIDAD */
+    :root {
+        --viamtek-green: #5cc87b;
+        --viamtek-dark-green: #308184;
+        --main-bg-color: #0f1419;
+        --card-bg: #1a222d;
+        --border-color: rgba(92, 200, 123, 0.3);
+        --text-primary: #ffffff;
+        --text-secondary: #a0aec0;
+    }
+
+    /* ESTILOS GENERALES DE LA INTERFAZ */
+    .section-title {
+        font-weight: 500;
+        color: var(--viamtek-green);
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 8px;
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+    }
+
+    .app-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid var(--border-color);
+    }
+
+    .card-title {
+        font-weight: 500;
+        color: var(--viamtek-green);
+        margin-bottom: 20px;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(92, 200, 123, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        border: 1px solid var(--viamtek-green);
+    }
+
+    .icon-xl {
+        font-size: 1.2rem;
+        color: var(--viamtek-green);
+    }
+
+    /* SISTEMA DINÁMICO DE CONCEPTOS DE COTIZACIÓN */
+    .conceptos-dinamicos {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .concepto-grupo {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+    }
+
+        .concepto-grupo:hover {
+            border-color: var(--border-color);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+    .concepto-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .concepto-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(92, 200, 123, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        border: 1px solid var(--viamtek-green);
+    }
+
+    .concepto-title {
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 1.1rem;
+        flex: 1;
+    }
+
+    .concepto-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .cantidad-label {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-bottom: 0;
+    }
+
+    .cantidad-input {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+        width: 80px;
+        transition: all 0.3s ease;
+    }
+
+        .cantidad-input:focus {
+            background-color: rgba(255, 255, 255, 0.08);
+            border-color: var(--viamtek-green);
+            box-shadow: 0 0 0 2px rgba(92, 200, 123, 0.15);
+        }
+
+    /* TABLAS DE PRECIOS DINÁMICAS */
+    .tabla-precios {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+        .tabla-precios th {
+            border: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.8rem;
+            padding: 0.75rem 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tabla-precios td {
+            border: none;
+            padding: 0.75rem 0.5rem;
+            vertical-align: middle;
+        }
+
+    .fila-precio:hover {
+        background: rgba(92, 200, 123, 0.05);
+    }
+
+    .numero-fila {
+        color: var(--text-secondary);
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .input-group-text {
+        background-color: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-secondary);
+        border-radius: 6px 0 0 6px !important;
+    }
+
+    .precio-input {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0 6px 6px 0 !important;
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+        transition: all 0.3s ease;
+    }
+
+        .precio-input:focus {
+            background-color: rgba(255, 255, 255, 0.08);
+            border-color: var(--viamtek-green);
+            box-shadow: 0 0 0 2px rgba(92, 200, 123, 0.15);
+        }
+
+    .total-concepto {
+        background: rgba(92, 200, 123, 0.1) !important;
+        border-top: 2px solid var(--viamtek-green) !important;
+    }
+
+    .subtotal {
+        color: var(--viamtek-green);
+        font-weight: 700;
+    }
+
+    /* SISTEMA DE BOTONES Y CONTROLES */
+    .btn-primary {
+        background: var(--viamtek-green);
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background: var(--viamtek-dark-green);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(92, 200, 123, 0.3);
+        }
+
+    .btn-secondary {
+        background: #4a5568;
+        border: none;
+        color: var(--text-secondary);
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-success {
+        background: var(--viamtek-green);
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 0.4rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-info {
+        background: #4299e1;
+        border: none;
+        color: white;
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+        .btn-info:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+        }
+
+    /* INDICADORES DE CARGA Y ESTADO */
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+    }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* CARD DE TOTALES PRINCIPALES */
+    .total-card {
+        background: rgba(92, 200, 123, 0.1);
+        border: 2px solid var(--viamtek-green);
+        border-radius: 16px;
+        padding: 1.5rem !important;
+        margin: 1.5rem 0;
+        text-align: center;
+    }
+
+    .total-glow {
+        color: var(--viamtek-green);
+        font-size: 2rem;
+        font-weight: 600;
+        margin: 0.5rem 0;
+    }
+
+    .text-secondary-label {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    /* CONTROLES DE FORMULARIO */
+    .textarea-rounded {
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-primary);
+        padding: 1rem;
+        font-size: 0.9rem;
+        resize: vertical;
+        min-height: 80px;
+        transition: all 0.3s ease;
+    }
+
+        .textarea-rounded:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--viamtek-green);
+            box-shadow: 0 0 0 0.2rem rgba(92, 200, 123, 0.15);
+        }
+
+    /* SECCIÓN DE INFORMACIÓN DEL VIAJE */
+    .info-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .section-divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+        margin: 1rem 0;
+    }
+
+    .info-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.25rem;
+        border-bottom: 1px solid rgba(92, 200, 123, 0.2);
+    }
+
+    .info-header-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: rgba(92, 200, 123, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 8px;
+    }
+
+    .info-header-text {
+        color: var(--viamtek-green);
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .info-label {
+        color: var(--text-secondary);
+        font-weight: 500;
+        font-size: 0.75rem;
+        flex: 0 0 40%;
+    }
+
+    .info-value {
+        color: var(--text-primary);
+        font-size: 0.8rem;
+        flex: 0 0 58%;
+        text-align: right;
+    }
+
+    .info-subtext {
+        color: var(--text-secondary);
+        font-size: 0.7rem;
+        margin-top: 0.2rem;
+        display: block;
+    }
+
+    /* VISUALIZACIÓN DE RUTA DE VIAJE */
+    .ruta-viaje {
+        background: rgba(92, 200, 123, 0.08);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+
+    .ruta-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .ruta-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--viamtek-green);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        font-size: 0.6rem;
+        color: white;
+    }
+
+    .ruta-text {
+        color: var(--text-primary);
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .ruta-flecha {
+        text-align: center;
+        color: var(--viamtek-green);
+        margin: 0.3rem 0;
+        font-size: 0.9rem;
+    }
+
+    .ruta-taxi-section {
+        background: rgba(92, 200, 123, 0.08);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.5rem;
+        margin: 0.5rem 0;
+    }
+
+    .taxi-badge {
+        background: var(--viamtek-green);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        margin-top: 0.25rem;
+        display: inline-block;
+    }
+
+    .taxi-icon {
+        background: var(--viamtek-green) !important;
+        color: white !important;
+    }
+
+    /* CAMPOS DE DESCRIPCIÓN */
+    .descripcion-input {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+        transition: all 0.3s ease;
+    }
+
+    /* ITEMS DE PARTICIPANTES */
+    .participante-item {
+        padding: 8px 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+        border-left: 3px solid var(--viamtek-green);
+    }
+
+    .participante-nombre {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    /* SISTEMA DE NOTIFICACIONES API */
+    .api-status {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        min-width: 300px;
+    }
+
+    .toast {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .toast-header {
+        background: rgba(92, 200, 123, 0.1);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--viamtek-green);
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .toast-body {
+        color: var(--text-primary);
+        font-size: 0.85rem;
+    }
+
+    /* SECCIÓN DE CÁLCULOS AUTOMÁTICOS */
+    .calculos-section {
+        background: rgba(66, 153, 225, 0.1);
+        border: 1px solid rgba(66, 153, 225, 0.3);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .calculos-header {
+        color: #4299e1;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+        .calculos-header i {
+            margin-right: 0.5rem;
+        }
+
+    .calculos-option {
+        margin-bottom: 1rem;
+    }
+
+    .calculos-results {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(66, 153, 225, 0.2);
+    }
+
+    .distancia-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+    }
+
+    /* SISTEMA DE ALERTAS Y ERRORES */
+    .alerta-item {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+        margin-bottom: 0.5rem;
+        color: #f6ad55;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: flex-start;
+    }
+
+        .alerta-item i {
+            margin-right: 0.5rem;
+            margin-top: 0.1rem;
+        }
+
+    .error-item {
+        background: rgba(245, 101, 101, 0.1);
+        border: 1px solid rgba(245, 101, 101, 0.3);
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+        margin-bottom: 0.5rem;
+        color: #f56565;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: flex-start;
+    }
+
+        .error-item i {
+            margin-right: 0.5rem;
+            margin-top: 0.1rem;
+        }
+
+    .calculos-buttons {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    /* ESTILOS PARA VALIDACIÓN PERSONALIZADA */
+    .cantidad-input.is-invalid {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25) !important;
+    }
+
+    .cantidad-input.is-valid {
+        border-color: #28a745 !important;
+    }
+
+    .precio-input.is-invalid {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25) !important;
+    }
+
+    .precio-input.is-valid {
+        border-color: #28a745 !important;
+        background-color: rgba(40, 167, 69, 0.1) !important;
+    }
+
+    /* Mensaje de error específico */
+    .error-cantidad {
+        font-size: 0.75rem;
+        color: #dc3545;
+        margin-top: 2px;
+        display: block;
+    }
+
+    /* SISTEMA RESPONSIVE COMPLETO */
+    @@media (min-width: 1200px) { /* Estilos para pantallas grandes */
+    }
+
+    @@media (min-width: 992px) and (max-width: 1199px) { /* Tabletas grandes */
+    }
+
+    @@media (min-width: 768px) and (max-width: 991px) { /* Tabletas */
+    }
+
+    @@media (min-width: 576px) and (max-width: 767px) { /* Móviles grandes */
+    }
+
+    @@media (max-width: 575px) { /* Móviles pequeños */
+    }
+
+    @@media (max-width: 380px) { /* Dispositivos muy pequeños */
+    }
+
+    @@media (max-width: 767px) and (orientation: landscape) { /* Orientación horizontal */
+    }
 </style>
 
 <div class="container-fluid">
@@ -41,32 +678,7 @@
         <div class="col-xl-10 col-lg-12">
             <h4 class="section-title">Editar Cotización</h4>
 
-            <!-- MOSTRAR MENSAJES DE TEMPDATA -->
-            @if (TempData["Success"] != null)
-            {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle me-2"></i>@Html.Raw(TempData["Success"])
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
-
-            @if (TempData["Error"] != null)
-            {
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-circle me-2"></i>@Html.Raw(TempData["Error"])
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
-
-            @if (TempData["Warning"] != null)
-            {
-                <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-triangle me-2"></i>@Html.Raw(TempData["Warning"])
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
-
-            <!-- API Status Toast -->
+            <!-- SISTEMA DE NOTIFICACIONES DE API -->
             <div id="apiStatus" class="api-status" style="display: none;">
                 <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
                     <div class="toast-header">
@@ -80,7 +692,7 @@
                 </div>
             </div>
 
-            <!-- MOSTRAR ERRORES DE VALIDACIÓN -->
+            <!-- VALIDACIÓN DE ERRORES DEL MODELO -->
             @if (!ViewData.ModelState.IsValid)
             {
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -95,6 +707,7 @@
                 </div>
             }
 
+            <!-- VALIDACIÓN DE EXISTENCIA DEL MODELO -->
             @if (!modelExists)
             {
                 <div class="alert alert-danger">
@@ -108,22 +721,371 @@
                 return;
             }
 
+            <!-- ESTRUCTURA PRINCIPAL DE DOS COLUMNAS -->
             <div class="row g-4">
+                <!-- COLUMNA IZQUIERDA: INFORMACIÓN DE LA SOLICITUD -->
                 <div class="col-lg-5">
-                    <!-- ... (todo el contenido de la columna izquierda se mantiene igual) ... -->
+                    <div class="app-card">
+                        <h5 class="card-title">
+                            <span class="icon-circle" style="width: 35px; height: 35px;">
+                                <i class="fas fa-info-circle" style="font-size: 1rem;"></i>
+                            </span>
+                            Detalles de la Solicitud
+                        </h5>
+
+                        <!-- SECCIÓN DE CÁLCULOS AUTOMÁTICOS INTEGRADA -->
+                        <div class="calculos-section">
+                            <div class="calculos-header">
+                                <i class="fas fa-calculator"></i>
+                                Cálculos Automáticos
+                            </div>
+
+                            <div class="calculos-option">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="usarCalculoAutomatico"
+                                           @(Model.UsarCalculoAutomatico ? "checked" : "")>
+                                    <label class="form-check-label" for="usarCalculoAutomatico">
+                                        Usar cálculo automático
+                                    </label>
+                                    <small class="text-secondary-label d-block mt-1">
+                                        El sistema calculará automáticamente los costos basándose en la solicitud.
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div class="calculos-buttons">
+                                <button type="button" class="btn btn-info btn-sm" id="btnCalcularAuto"
+                                        onclick="calcularAutomatico()"
+                                        @(!Model.UsarCalculoAutomatico ? "disabled" : "")>
+                                    <i class="fas fa-calculator me-1"></i> Calcular Automáticamente
+                                </button>
+
+                                <button type="button" class="btn btn-outline-info btn-sm" id="btnLimpiarCalculo"
+                                        onclick="limpiarCalculoAutomatico()">
+                                    <i class="fas fa-broom me-1"></i> Limpiar Cálculo
+                                </button>
+                            </div>
+
+                            <!-- RESULTADOS DE CÁLCULOS AUTOMÁTICOS -->
+                            <div id="calculosResults" class="calculos-results"
+                                 style="@(Model.DistanciaCalculada.HasValue || Model.CalculoRealizado ? "display: block;" : "display: none;")">
+                                @if (Model.DistanciaCalculada.HasValue)
+                                {
+                                    <div class="distancia-info">
+                                        <i class="fas fa-route"></i>
+                                        <span id="distanciaCalculada">
+                                            <strong>@Model.DistanciaCalculada.Value.ToString("N0") km</strong>
+                                            (@Model.DistanciaCalculada.Value.ToString("N2") km)
+                                        </span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="distancia-info">
+                                        <i class="fas fa-route"></i>
+                                        <span id="distanciaCalculada">Distancia no calculada</span>
+                                    </div>
+                                }
+
+                                <div id="alertasCalculo" style="margin-top: 1rem;">
+                                    @if (Model.AlertasCalculo?.Any() == true)
+                                    {
+                                        foreach (var alerta in Model.AlertasCalculo)
+                                        {
+                                            <div class="alerta-item">
+                                                <i class="fas fa-exclamation-triangle"></i> @alerta
+                                            </div>
+                                        }
+                                    }
+                                </div>
+
+                                <div id="erroresCalculo" style="margin-top: 1rem;">
+                                    @if (Model.ErroresCalculo?.Any() == true)
+                                    {
+                                        foreach (var error in Model.ErroresCalculo)
+                                        {
+                                            <div class="error-item">
+                                                <i class="fas fa-times-circle"></i> @error
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- VISUALIZACIÓN DE RUTA DEL VIAJE -->
+                        <div class="ruta-viaje">
+                            <div class="info-header">
+                                <div class="info-header-icon">
+                                    <i class="fas fa-route" style="font-size: 0.7rem; color: var(--viamtek-green);"></i>
+                                </div>
+                                <div class="info-header-text">Ruta del Viaje</div>
+                            </div>
+                            <div class="ruta-item">
+                                <div class="ruta-icon">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <div class="ruta-text">
+                                    <strong>Origen del Empleado:</strong><br />
+                                    @if (!string.IsNullOrEmpty(Model.UbicacionBase))
+                                    {
+                                        @Model.UbicacionBase
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No especificado</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="ruta-flecha">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                            <div class="ruta-item">
+                                <div class="ruta-icon">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div class="ruta-text">
+                                    <strong>Destino Final:</strong><br />
+                                    @Model.Destino
+                                </div>
+                            </div>
+                            @if (Model.DistanciaCalculada.HasValue)
+                            {
+                                <div class="mt-2 text-center">
+                                    <span class="taxi-badge">
+                                        <i class="fas fa-route me-1"></i> @FormatDecimal(Model.DistanciaCalculada) km
+                                    </span>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- SECCIÓN DE TAXI A DOMICILIO -->
+                        @if (Model.RequiereTaxiDomicilio)
+                        {
+                            <div class="ruta-taxi-section mt-3">
+                                <div class="info-header">
+                                    <div class="info-header-icon taxi-icon">
+                                        <i class="fas fa-taxi" style="font-size: 0.7rem; color: white;"></i>
+                                    </div>
+                                    <div class="info-header-text">Servicio de Taxi</div>
+                                </div>
+                                <div class="ruta-item mt-2">
+                                    <div class="ruta-icon" style="background: var(--viamtek-green);">
+                                        <i class="fas fa-map-marker-alt" style="font-size: 0.6rem; color: white;"></i>
+                                    </div>
+                                    <div class="ruta-text">
+                                        <strong>Origen Taxi:</strong><br />
+                                        @if (!string.IsNullOrEmpty(Model.DireccionTaxiOrigen))
+                                        {
+                                            @Model.DireccionTaxiOrigen
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No especificado</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="ruta-flecha">
+                                    <i class="fas fa-arrow-right" style="color: var(--viamtek-green);"></i>
+                                </div>
+                                <div class="ruta-item">
+                                    <div class="ruta-icon" style="background: var(--viamtek-green);">
+                                        <i class="fas fa-plane" style="font-size: 0.6rem; color: white;"></i>
+                                    </div>
+                                    <div class="ruta-text">
+                                        <strong>Destino Taxi:</strong><br />
+                                        @if (!string.IsNullOrEmpty(Model.DireccionTaxiDestino))
+                                        {
+                                            @Model.DireccionTaxiDestino
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No especificado</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <span class="taxi-badge">
+                                        <i class="fas fa-car me-1"></i> Servicio de taxi incluido
+                                    </span>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- INFORMACIÓN GENERAL DE LA SOLICITUD -->
+                        <div class="info-section">
+                            <div class="info-header">
+                                <div class="info-header-icon">
+                                    <i class="fas fa-id-card" style="font-size: 0.7rem; color: var(--viamtek-green);"></i>
+                                </div>
+                                <div class="info-header-text">Información General</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Código:</div>
+                                <div class="info-value">@Model.CodigoSolicitud</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Solicitante:</div>
+                                <div class="info-value">@Model.EmpleadoNombre</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Proyecto:</div>
+                                <div class="info-value">@Model.Proyecto</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Viajeros:</div>
+                                <div class="info-value">
+                                    @Model.NumeroPersonas persona(s)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <!-- FECHAS Y HORAS DEL VIAJE -->
+                        <div class="info-section">
+                            <div class="info-header">
+                                <div class="info-header-icon">
+                                    <i class="fas fa-calendar-alt" style="font-size: 0.7rem; color: var(--viamtek-green);"></i>
+                                </div>
+                                <div class="info-header-text">Fechas y Horas del Viaje</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Salida:</div>
+                                <div class="info-value">
+                                    @if (Model.FechaSalida.HasValue)
+                                    {
+                                        <div>@FormatDateOnly(Model.FechaSalida)</div>
+                                        @if (Model.HoraSalida.HasValue)
+                                        {
+                                            <div class="info-subtext">
+                                                <i class="fas fa-clock me-1"></i>
+                                                @Model.HoraSalida.Value.ToString(@"hh\:mm") hrs
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="info-subtext">
+                                                <i class="fas fa-clock me-1"></i>
+                                                <span class="text-muted">Hora no especificada</span>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No especificada</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Regreso:</div>
+                                <div class="info-value">
+                                    @if (Model.FechaRegreso.HasValue)
+                                    {
+                                        <div>@FormatDateOnly(Model.FechaRegreso)</div>
+                                        @if (Model.HoraRegreso.HasValue)
+                                        {
+                                            <div class="info-subtext">
+                                                <i class="fas fa-clock me-1"></i>
+                                                @Model.HoraRegreso.Value.ToString(@"hh\:mm") hrs
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="info-subtext">
+                                                <i class="fas fa-clock me-1"></i>
+                                                <span class="text-muted">Hora no especificada</span>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No especificada</span>
+                                    }
+                                </div>
+                            </div>
+
+                            @if (Model.FechaSalida.HasValue && Model.FechaRegreso.HasValue)
+                            {
+                                <div class="info-row">
+                                    <div class="info-label">Duración:</div>
+                                    <div class="info-value">
+                                        @{
+                                            var diasViaje = (Model.FechaRegreso.Value.DayNumber - Model.FechaSalida.Value.DayNumber) + 1;
+                                            <text>@diasViaje día(s)</text>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <!-- INFORMACIÓN DE HOSPEDAJE -->
+                        <div class="info-section">
+                            <div class="info-header">
+                                <div class="info-header-icon">
+                                    <i class="fas fa-hotel" style="font-size: 0.7rem; color: var(--viamtek-green);"></i>
+                                </div>
+                                <div class="info-header-text">Hospedaje</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Requiere hospedaje:</div>
+                                <div class="info-value">
+                                    @(Model.RequiereHospedaje ? "Sí" : "No")
+                                    @if (Model.RequiereHospedaje && Model.NochesHospedaje > 0)
+                                    {
+                                        <span class="info-subtext">@Model.NochesHospedaje noche(s)</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <!-- INFORMACIÓN DE TRANSPORTE -->
+                        <div class="info-section">
+                            <div class="info-header">
+                                <div class="info-header-icon">
+                                    <i class="fas fa-bus" style="font-size: 0.7rem; color: var(--viamtek-green);"></i>
+                                </div>
+                                <div class="info-header-text">Transporte</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Medio principal:</div>
+                                <div class="info-value">@(Model.MedioTraslado ?? "No especificado")</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Taxi a domicilio:</div>
+                                <div class="info-value">
+                                    @(Model.RequiereTaxiDomicilio ? "Sí" : "No")
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
+                <!-- COLUMNA DERECHA: FORMULARIO DE COTIZACIÓN -->
                 <div class="col-lg-7">
                     <div class="app-card">
                         <form asp-action="EditarCotizacion" method="post" id="cotizacionForm">
                             @Html.AntiForgeryToken()
 
-                            <!-- Campos principales -->
+                            <!-- CAMPOS OCULTOS PARA DATOS PRINCIPALES -->
                             <input type="hidden" asp-for="Id" />
                             <input type="hidden" asp-for="SolicitudViajeId" />
                             <input type="hidden" asp-for="UsarCalculoAutomatico" id="UsarCalculoAutomatico" />
 
-                            <!-- CAMPOS OCULTOS PARA LOS TOTALES -->
+                            <!-- CAMPOS OCULTOS PARA TOTALES POR CONCEPTO -->
                             <input type="hidden" asp-for="TotalTransporte" id="TotalTransporte" />
                             <input type="hidden" asp-for="TotalGasolina" id="TotalGasolina" />
                             <input type="hidden" asp-for="TotalUberTaxi" id="TotalUberTaxi" />
@@ -132,7 +1094,7 @@
                             <input type="hidden" asp-for="TotalAlimentos" id="TotalAlimentos" />
                             <input type="hidden" asp-for="Total" id="TotalGeneral" />
 
-                            <!-- CAMPOS OCULTOS PARA EL CÁLCULO AUTOMÁTICO -->
+                            <!-- CAMPOS OCULTOS PARA DATOS DE CÁLCULO AUTOMÁTICO -->
                             <input type="hidden" asp-for="UbicacionBase" id="UbicacionBase" />
                             <input type="hidden" asp-for="Destino" id="Destino" />
                             <input type="hidden" asp-for="FechaSalida" id="FechaSalida" />
@@ -147,15 +1109,15 @@
                             <input type="hidden" asp-for="DireccionTaxiOrigen" id="DireccionTaxiOrigen" />
                             <input type="hidden" asp-for="DireccionTaxiDestino" id="DireccionTaxiDestino" />
 
-                            <!-- CAMPOS OCULTOS PARA LAS CANTIDADES -->
+                            <!-- CAMPOS OCULTOS PARA CANTIDADES DINÁMICAS -->
                             <input type="hidden" asp-for="TransporteCantidad" id="TransporteCantidad" />
                             <input type="hidden" asp-for="GasolinaCantidad" id="GasolinaCantidad" />
-                            <input type="hidden" asp-for="UberTaxiCantidad" id="UberTaxiCantidad" />
+                            <input type="hidden" asp-for="UberTaxiCantidad" id="UbertaxiCantidad" />
                             <input type="hidden" asp-for="CasetasCantidad" id="CasetasCantidad" />
                             <input type="hidden" asp-for="HospedajeCantidad" id="HospedajeCantidad" />
                             <input type="hidden" asp-for="AlimentosCantidad" id="AlimentosCantidad" />
 
-                            <!-- CAMPOS OCULTOS ADICIONALES PARA CÁLCULO AUTOMÁTICO -->
+                            <!-- CAMPOS OCULTOS PARA RESULTADOS DE CÁLCULO -->
                             <input type="hidden" asp-for="DistanciaCalculada" id="DistanciaCalculada" />
                             <input type="hidden" asp-for="CalculoRealizado" id="CalculoRealizado" />
                             <input type="hidden" asp-for="MensajeCalculo" id="MensajeCalculo" />
@@ -169,8 +1131,9 @@
                                 Editar Cotización - Sistema Dinámico
                             </h5>
 
+                            <!-- CONTENEDOR DINÁMICO DE CONCEPTOS DE COTIZACIÓN -->
                             <div class="conceptos-dinamicos">
-                                <!-- TRANSPORTE -->
+                                <!-- CONCEPTO: TRANSPORTE -->
                                 <div class="concepto-grupo" data-concepto="transporte">
                                     <div class="concepto-header">
                                         <div class="concepto-icon">
@@ -181,9 +1144,12 @@
                                             <label class="cantidad-label">Número de Precios:</label>
                                             <input asp-for="TransporteCantidad"
                                                    class="form-control cantidad-input"
-                                                   type="number" min="1" max="30"
+                                                   type="text"
+                                                   inputmode="numeric"
                                                    data-concepto="transporte"
-                                                   value="@Model.TransporteCantidad" />
+                                                   value="@Model.TransporteCantidad"
+                                                   onchange="actualizarFilasPorCantidad(this)"
+                                                   oninput="validarCantidadPrecios(this)" />
                                             <button type="button" class="btn btn-success btn-sm ms-2"
                                                     onclick="agregarFilaManual('transporte')">
                                                 <i class="fas fa-plus"></i> Agregar
@@ -214,7 +1180,8 @@
                                                                        type="text"
                                                                        inputmode="decimal"
                                                                        data-concepto="transporte"
-                                                                       value="@FormatDecimal(Model.TransportePrecios[i].Precio)" />
+                                                                       value="@Model.TransportePrecios[i].Precio.ToString("F2")"
+                                                                       oninput="validarPrecioDecimal(this)" />
                                                             </div>
                                                         </td>
                                                         <td>
@@ -244,7 +1211,7 @@
                                     </div>
                                 </div>
 
-                                <!-- GASOLINA -->
+                                <!-- CONCEPTO: GASOLINA -->
                                 <div class="concepto-grupo" data-concepto="gasolina">
                                     <div class="concepto-header">
                                         <div class="concepto-icon">
@@ -255,9 +1222,12 @@
                                             <label class="cantidad-label">Número de Precios:</label>
                                             <input asp-for="GasolinaCantidad"
                                                    class="form-control cantidad-input"
-                                                   type="number" min="1" max="30"
+                                                   type="text"
+                                                   inputmode="numeric"
                                                    data-concepto="gasolina"
-                                                   value="@Model.GasolinaCantidad" />
+                                                   value="@Model.GasolinaCantidad"
+                                                   onchange="actualizarFilasPorCantidad(this)"
+                                                   oninput="validarCantidadPrecios(this)" />
                                             <button type="button" class="btn btn-success btn-sm ms-2"
                                                     onclick="agregarFilaManual('gasolina')">
                                                 <i class="fas fa-plus"></i> Agregar
@@ -288,7 +1258,8 @@
                                                                        type="text"
                                                                        inputmode="decimal"
                                                                        data-concepto="gasolina"
-                                                                       value="@FormatDecimal(Model.GasolinaPrecios[i].Precio)" />
+                                                                       value="@Model.GasolinaPrecios[i].Precio.ToString("F2")"
+                                                                       oninput="validarPrecioDecimal(this)" />
                                                             </div>
                                                         </td>
                                                         <td>
@@ -318,7 +1289,7 @@
                                     </div>
                                 </div>
 
-                                <!-- UBER/TAXI -->
+                                <!-- CONCEPTO: UBER/TAXI -->
                                 <div class="concepto-grupo" data-concepto="ubertaxi">
                                     <div class="concepto-header">
                                         <div class="concepto-icon">
@@ -329,9 +1300,12 @@
                                             <label class="cantidad-label">Número de Precios:</label>
                                             <input asp-for="UberTaxiCantidad"
                                                    class="form-control cantidad-input"
-                                                   type="number" min="1" max="30"
+                                                   type="text"
+                                                   inputmode="numeric"
                                                    data-concepto="ubertaxi"
-                                                   value="@Model.UberTaxiCantidad" />
+                                                   value="@Model.UberTaxiCantidad"
+                                                   onchange="actualizarFilasPorCantidad(this)"
+                                                   oninput="validarCantidadPrecios(this)" />
                                             <button type="button" class="btn btn-success btn-sm ms-2"
                                                     onclick="agregarFilaManual('ubertaxi')">
                                                 <i class="fas fa-plus"></i> Agregar
@@ -362,7 +1336,8 @@
                                                                        type="text"
                                                                        inputmode="decimal"
                                                                        data-concepto="ubertaxi"
-                                                                       value="@FormatDecimal(Model.UberTaxiPrecios[i].Precio)" />
+                                                                       value="@Model.UberTaxiPrecios[i].Precio.ToString("F2")"
+                                                                       oninput="validarPrecioDecimal(this)" />
                                                             </div>
                                                         </td>
                                                         <td>
@@ -392,7 +1367,7 @@
                                     </div>
                                 </div>
 
-                                <!-- CASETAS -->
+                                <!-- CONCEPTO: CASETAS -->
                                 <div class="concepto-grupo" data-concepto="casetas">
                                     <div class="concepto-header">
                                         <div class="concepto-icon">
@@ -403,9 +1378,12 @@
                                             <label class="cantidad-label">Número de Precios:</label>
                                             <input asp-for="CasetasCantidad"
                                                    class="form-control cantidad-input"
-                                                   type="number" min="1" max="30"
+                                                   type="text"
+                                                   inputmode="numeric"
                                                    data-concepto="casetas"
-                                                   value="@Model.CasetasCantidad" />
+                                                   value="@Model.CasetasCantidad"
+                                                   onchange="actualizarFilasPorCantidad(this)"
+                                                   oninput="validarCantidadPrecios(this)" />
                                             <button type="button" class="btn btn-success btn-sm ms-2"
                                                     onclick="agregarFilaManual('casetas')">
                                                 <i class="fas fa-plus"></i> Agregar
@@ -436,7 +1414,8 @@
                                                                        type="text"
                                                                        inputmode="decimal"
                                                                        data-concepto="casetas"
-                                                                       value="@FormatDecimal(Model.CasetasPrecios[i].Precio)" />
+                                                                       value="@Model.CasetasPrecios[i].Precio.ToString("F2")"
+                                                                       oninput="validarPrecioDecimal(this)" />
                                                             </div>
                                                         </td>
                                                         <td>
@@ -466,7 +1445,7 @@
                                     </div>
                                 </div>
 
-                                <!-- HOSPEDAJE -->
+                                <!-- CONCEPTO: HOSPEDAJE -->
                                 <div class="concepto-grupo" data-concepto="hospedaje">
                                     <div class="concepto-header">
                                         <div class="concepto-icon">
@@ -477,9 +1456,12 @@
                                             <label class="cantidad-label">Número de Precios:</label>
                                             <input asp-for="HospedajeCantidad"
                                                    class="form-control cantidad-input"
-                                                   type="number" min="1" max="30"
+                                                   type="text"
+                                                   inputmode="numeric"
                                                    data-concepto="hospedaje"
-                                                   value="@Model.HospedajeCantidad" />
+                                                   value="@Model.HospedajeCantidad"
+                                                   onchange="actualizarFilasPorCantidad(this)"
+                                                   oninput="validarCantidadPrecios(this)" />
                                             <button type="button" class="btn btn-success btn-sm ms-2"
                                                     onclick="agregarFilaManual('hospedaje')">
                                                 <i class="fas fa-plus"></i> Agregar
@@ -510,7 +1492,8 @@
                                                                        type="text"
                                                                        inputmode="decimal"
                                                                        data-concepto="hospedaje"
-                                                                       value="@FormatDecimal(Model.HospedajePrecios[i].Precio)" />
+                                                                       value="@Model.HospedajePrecios[i].Precio.ToString("F2")"
+                                                                       oninput="validarPrecioDecimal(this)" />
                                                             </div>
                                                         </td>
                                                         <td>
@@ -540,7 +1523,7 @@
                                     </div>
                                 </div>
 
-                                <!-- ALIMENTOS -->
+                                <!-- CONCEPTO: ALIMENTOS -->
                                 <div class="concepto-grupo" data-concepto="alimentos">
                                     <div class="concepto-header">
                                         <div class="concepto-icon">
@@ -551,9 +1534,12 @@
                                             <label class="cantidad-label">Número de Precios:</label>
                                             <input asp-for="AlimentosCantidad"
                                                    class="form-control cantidad-input"
-                                                   type="number" min="1" max="30"
+                                                   type="text"
+                                                   inputmode="numeric"
                                                    data-concepto="alimentos"
-                                                   value="@Model.AlimentosCantidad" />
+                                                   value="@Model.AlimentosCantidad"
+                                                   onchange="actualizarFilasPorCantidad(this)"
+                                                   oninput="validarCantidadPrecios(this)" />
                                             <button type="button" class="btn btn-success btn-sm ms-2"
                                                     onclick="agregarFilaManual('alimentos')">
                                                 <i class="fas fa-plus"></i> Agregar
@@ -584,7 +1570,8 @@
                                                                        type="text"
                                                                        inputmode="decimal"
                                                                        data-concepto="alimentos"
-                                                                       value="@FormatDecimal(Model.AlimentosPrecios[i].Precio)" />
+                                                                       value="@Model.AlimentosPrecios[i].Precio.ToString("F2")"
+                                                                       oninput="validarPrecioDecimal(this)" />
                                                             </div>
                                                         </td>
                                                         <td>
@@ -615,6 +1602,7 @@
                                 </div>
                             </div>
 
+                            <!-- TARJETA DE TOTAL GENERAL -->
                             <div class="total-card">
                                 <div class="text-secondary-label mb-2">TOTAL AUTORIZADO</div>
                                 <div class="total-glow">
@@ -623,6 +1611,7 @@
                                 <div class="text-secondary-label mt-2">Monto asignado como anticipo de viáticos</div>
                             </div>
 
+                            <!-- CAMPO DE OBSERVACIONES -->
                             <div class="mb-4">
                                 <label class="form-label text-secondary-label d-flex align-items-center mb-2">
                                     <span class="icon-circle" style="width: 35px; height: 35px; margin-right: 12px;">
@@ -635,6 +1624,7 @@
                                 <span asp-validation-for="Observaciones" class="text-danger small"></span>
                             </div>
 
+                            <!-- BOTONES DE ACCIÓN DEL FORMULARIO -->
                             <div class="d-flex gap-3 justify-content-end">
                                 <a asp-action="Cotizaciones" class="btn btn-secondary d-flex align-items-center">
                                     <i class="fas fa-arrow-left me-2"></i>Cancelar
