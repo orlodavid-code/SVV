@@ -907,7 +907,7 @@ namespace SVV.Controllers
                 if (!System.IO.File.Exists(logoPath))
                 {
                     // Usar un logo por defecto o lanzar advertencia
-                    logoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "LOGO1.png");
+                    logoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "logoviamtek.png");
                 }
 
                 var tiposViatico = await _context.TiposViatico.ToListAsync();

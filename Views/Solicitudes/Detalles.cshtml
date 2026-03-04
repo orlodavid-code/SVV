@@ -365,7 +365,7 @@
                 
                 @if (Model?.EstadoId == 9) // APROBADA_DIRECCION
                 {
-                    <a asp-controller="Comprobaciones" asp-action="Comprobar" asp-route-solicitudId="@Model.Id" 
+                    <a asp-controller="Comprobaciones" asp-action="Comprobar" asp-route-id="@Model.Id" 
                        class="btn btn-comprobar-gastos">
                         <i class="fas fa-receipt me-2"></i>Comprobar Gastos
                     </a>
