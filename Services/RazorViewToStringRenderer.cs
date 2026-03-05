@@ -103,7 +103,7 @@ namespace SVV.Services
                 };
 
                 // CONFIGURAR ESQUEMA Y HOST PARA URLs
-                httpContext.Request.Scheme = "https";
+               // httpContext.Request.Scheme = "https";
                 httpContext.Request.Host = new HostString("localhost");
             }
 
