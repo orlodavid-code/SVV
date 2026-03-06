@@ -359,25 +359,8 @@
                         <i class="fas fa-save me-1"></i> Guardar como Borrador
                     </button>
 
-                    <button type="submit" name="action" value="enviar" id="btnEnviarAprobacion" class="btn btn-primary">
-                        <i class="fas fa-paper-plane me-1"></i> Enviar a Aprobación
-                    </button>
-
                     <button type="reset" class="btn btn-outline-secondary">Limpiar</button>
                     <a asp-action="Index" class="btn btn-outline-danger">Cancelar</a>
-                </div>
-
-                <div class="alert alert-info mt-3">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <strong>Nota:</strong>
-                    <ul class="mb-0 mt-2">
-                        <li><strong>Guardar como Borrador:</strong> Solo se notificará a Recursos Humanos y podrás editarla después.</li>
-                        <li>
-                            <strong>Enviar a Aprobación:</strong>
-                            - Si tienes jefe directo, se enviará a él primero<br>
-                            - Si NO tienes jefe directo, se enviará directamente a Finanzas
-                        </li>
-                    </ul>
                 </div>
             </form>
         </div>
@@ -938,9 +921,9 @@
                     if (!this.value) return;
                     let valor = parseInt(this.value) || 1;
                     if (valor < 1) valor = 1;
-                    if (valor > 30) {
-                        valor = 30;
-                        mostrarErrorNumerico(this, "No se permiten más de 30 noches de hospedaje.");
+                    if (valor > 100) {
+                        valor = 100;
+                        mostrarErrorNumerico(this, "No se permiten más de 100 noches de hospedaje.");
                     } else {
                         limpiarErrorNumerico(this);
                     }
@@ -1030,7 +1013,7 @@
                         fechaRealista: "La fecha debe ser a partir de hoy y no mayor a 5 años en el futuro"
                     },
                     NochesHospedaje: {
-                        range: "Las noches de hospedaje deben estar entre 1 y 30"
+                        range: "Las noches de hospedaje deben estar entre 1 y 100"
                     },
                     NumeroPersonas: {
                         range: "El número de personas debe estar entre 1 y 50"
