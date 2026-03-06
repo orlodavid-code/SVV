@@ -232,8 +232,7 @@ namespace SVV.Services
                         dto.FechaRegreso = solicitud.FechaRegreso;
                         dto.NumeroPersonas = solicitud.NumeroPersonas ?? 1;
                         dto.RequiereHospedaje = solicitud.RequiereHospedaje ?? false;
-                        dto.NochesHospedaje = solicitud.NochesHospedaje ?? 0;
-
+                        dto.NochesHospedaje = CalcularNoches(dto.FechaSalida, dto.FechaRegreso);
                         // Decodificar HTML entities en el medio de traslado
                         var medioTrasladoPrincipal = solicitud.MedioTrasladoPrincipal ?? "Avión";
                         dto.MedioTraslado = WebUtility.HtmlDecode(medioTrasladoPrincipal);
@@ -243,6 +242,7 @@ namespace SVV.Services
                         dto.DireccionTaxiDestino = solicitud.DireccionTaxiDestino;
                         dto.HoraSalida = solicitud.HoraSalida;
                         dto.HoraRegreso = solicitud.HoraRegreso;
+                   
                     }
                 }
 
@@ -1265,7 +1265,15 @@ namespace SVV.Services
             [JsonPropertyName("status")]
             public string Status { get; set; } = string.Empty;
         }
+        private int CalcularNoches(DateOnly? fechaSalida, DateOnly? fechaRegreso)
+        {
+            if (!fechaSalida.HasValue || !fechaRegreso.HasValue)
+                return 0;
 
+            // Diferencia en días: si el viaje es del 15 al 18, días = 3 → 3 noches
+            int dias = fechaRegreso.Value.DayNumber - fechaSalida.Value.DayNumber;
+            return Math.Max(0, dias);
+        }
         public class GoogleMapsRow
         {
             [JsonPropertyName("elements")]
