@@ -1,18 +1,58 @@
 ﻿@model dynamic
 @{
-    // Extraer propiedades del modelo dinámico
-    var solicitud = Model.Solicitud as SVV.Models.SolicitudesViaje;
-    var url = Model.Url as string;
-    var esBorrador = Model.EsBorrador ?? false;
-    var esEnvioAprobacion = Model.EsEnvioAprobacion ?? false;
-    var esParaRH = Model.EsParaRH ?? false;
-    var esParaJP = Model.EsParaJP ?? false;
-    var esParaFinanzas = Model.EsParaFinanzas ?? false;
-    var esSinJefe = Model.EsSinJefe ?? false;
-    var esNotificacionMultiple = Model.EsNotificacionMultiple ?? false;
-    var empleadoSolicitante = Model.EmpleadoSolicitante as string ?? "N/A";
-    var jefeDestinatario = Model.JefeDestinatario as string ?? "N/A";
-    var mensaje = Model.Mensaje as string ?? "";
+    SVV.Models.SolicitudesViaje solicitud = null;
+    try
+    {
+        solicitud = Model.Solicitud as SVV.Models.SolicitudesViaje;
+    }
+    catch
+    {
+        // La propiedad no existe, intentamos usar el modelo directamente
+        try
+        {
+            solicitud = Model as SVV.Models.SolicitudesViaje;
+        }
+        catch { }
+    }
+
+    // Si aún es null, creamos uno vacío para evitar errores
+    if (solicitud == null)
+    {
+        solicitud = new SVV.Models.SolicitudesViaje();
+    }
+
+    string url = "";
+    try { url = Model.Url as string ?? ""; } catch { }
+
+    bool esBorrador = false;
+    try { esBorrador = Model.EsBorrador ?? false; } catch { }
+
+    bool esEnvioAprobacion = false;
+    try { esEnvioAprobacion = Model.EsEnvioAprobacion ?? false; } catch { }
+
+    bool esParaRH = false;
+    try { esParaRH = Model.EsParaRH ?? false; } catch { }
+
+    bool esParaJP = false;
+    try { esParaJP = Model.EsParaJP ?? false; } catch { }
+
+    bool esParaFinanzas = false;
+    try { esParaFinanzas = Model.EsParaFinanzas ?? false; } catch { }
+
+    bool esSinJefe = false;
+    try { esSinJefe = Model.EsSinJefe ?? false; } catch { }
+
+    bool esNotificacionMultiple = false;
+    try { esNotificacionMultiple = Model.EsNotificacionMultiple ?? false; } catch { }
+
+    string empleadoSolicitante = "N/A";
+    try { empleadoSolicitante = Model.EmpleadoSolicitante as string ?? "N/A"; } catch { }
+
+    string jefeDestinatario = "N/A";
+    try { jefeDestinatario = Model.JefeDestinatario as string ?? "N/A"; } catch { }
+
+    string mensaje = "";
+    try { mensaje = Model.Mensaje as string ?? ""; } catch { }
 
     // Determinar título
     string tituloCorreo = "Notificación de Solicitud de Viáticos";
@@ -131,6 +171,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -154,12 +195,10 @@
                     }
                     else if (esParaJP)
                     {
-
                         <span>Autorizador/Jefe Directo (@jefeDestinatario)</span>
                     }
                     else if (esParaFinanzas)
                     {
-
                         <span>Departamento de Finanzas</span>
                     }
                 </div>
@@ -212,7 +251,6 @@
                         }
                         else
                         {
-
                             <span>Monto por determinar</span>
                         }
                     </p>
@@ -228,12 +266,10 @@
                     }
                     else if (esBorrador)
                     {
-
                         <span>👁️ VER BORRADOR</span>
                     }
                     else
                     {
-
                         <span>🔍 VER DETALLES COMPLETOS</span>
                     }
                 </a>
