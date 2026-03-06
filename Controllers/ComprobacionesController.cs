@@ -35,26 +35,22 @@ namespace SVV.Controllers
         public async Task<IActionResult> Index()
         {
             var empleadoId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
             var hoy = DateOnly.FromDateTime(DateTime.Now);
-            var hace5Dias = hoy.AddDays(-5);
 
-            // PROCESAMIENTO AUTOMÁTICO DE COMPROBACIONES EXPIRADAS
+            // Procesa comprobaciones expiradas (5 días después del regreso)
             await ProcesarComprobacionesExpiradas(empleadoId);
 
-            // SOLICITUDES APROBADAS SIN COMPROBACIÓN CREADA
             var solicitudesAprobadas = await _context.SolicitudesViajes
                 .Include(s => s.Estado)
                 .Include(s => s.Empleado)
                 .Include(s => s.Anticipos)
                 .Where(s => s.EmpleadoId == empleadoId
                          && s.Estado.Codigo == "APROBADA_DIRECCION"
-                         && s.FechaRegreso <= hoy
-                         && s.FechaRegreso >= hace5Dias
+                         && s.FechaSalida <= hoy
                          && !_context.ComprobacionesViaje.Any(c => c.SolicitudViajeId == s.Id))
                 .ToListAsync();
 
-            // COMPROBACIONES PENDIENTES DE ENVÍO (ESTADO 1)
+            // Comprobaciones pendientes de envío (estado 1)
             var comprobacionesPendientes = await _context.ComprobacionesViaje
                 .Include(c => c.SolicitudViaje)
                 .Include(c => c.EstadoComprobacion)
@@ -62,7 +58,7 @@ namespace SVV.Controllers
                            c.EstadoComprobacionId == 1)
                 .ToListAsync();
 
-            // COMPROBACIONES EN REVISIÓN POR FINANZAS (ESTADO 2)
+            // Comprobaciones en revisión por Finanzas (estado 2)
             var comprobacionesEnProceso = await _context.ComprobacionesViaje
                 .Include(c => c.SolicitudViaje)
                 .Include(c => c.EstadoComprobacion)
@@ -70,7 +66,7 @@ namespace SVV.Controllers
                            c.EstadoComprobacionId == 2)
                 .ToListAsync();
 
-            // COMPROBACIONES CON GASTOS DEVUELTOS PARA CORRECCIÓN (ESTADOS 8, 9)
+            // Comprobaciones con gastos devueltos para corrección (estados 8 y 9)
             var comprobacionesConCorrecciones = await _context.ComprobacionesViaje
                 .Include(c => c.SolicitudViaje)
                     .ThenInclude(s => s.Empleado)
@@ -84,7 +80,7 @@ namespace SVV.Controllers
                             g.EstadoGasto.Codigo == "DEVUELTO_CORRECCION"))
                 .ToListAsync();
 
-            // COMPROBACIONES GENERADAS AUTOMÁTICAMENTE POR SISTEMA
+            // Comprobaciones generadas automáticamente por sistema
             var comprobacionesAutomaticas = await _context.ComprobacionesViaje
                 .Include(c => c.SolicitudViaje)
                 .Include(c => c.EstadoComprobacion)
