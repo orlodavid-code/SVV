@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd" Version="4.0" Serie="10QRI" Folio="2412646251029155022998" Fecha="2025-10-29T08:50:23" Exportacion="01" Sello="TjsYkpTGPmSs5fAjYhVOYlbvNcS5zmbJ37JCZc6X0Q279qHH6YS6L04Sl9lBbxx1GLXtakX/ncj1aUfytuH/DsXaXGfi/ORZ0DlFiS4u5RZ1mlvZTtup43SpHMuuOl1bsEqv1QAvnn1h1lcA6rwPrnOzdTKaNje6wgDued99o/qjP7caWarKBKZKSr2r/tf2ymWZ8dCxxFs3P2CgOoB/xlZdF65RELlsp11yZihCZJlSMdUp2JA+JhoR/6SYCD16TXhl/25feDsbI4FTIqaBzSHSH4iviYzyrO0ZQz8M9jRP29HU6axck0QUlZOZvvqfsn/ChU7i7uNkzumc5INBqg==" FormaPago="28" NoCertificado="00001000000713776116" Certificado="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" SubTotal="110.86" Moneda="MXN" Total="122.00" TipoDeComprobante="I" MetodoPago="PUE" LugarExpedicion="76260">
+<cfdi:Emisor Nombre="CADENA COMERCIAL OXXO" Rfc="CCO8605231N4" RegimenFiscal="623"/>
+<cfdi:Receptor Rfc="CSO141105V43" Nombre="CUVITEK SOFTWARE" UsoCFDI="G03" DomicilioFiscalReceptor="72570" RegimenFiscalReceptor="601"/>
+<cfdi:Conceptos>
+<cfdi:Concepto ClaveProdServ="50192100" NoIdentificacion="7501000264049" Cantidad="1.00" ClaveUnidad="EA" Unidad="EA" Descripcion="PAPAS CHIPS SAL DE MAR BARCEL 60 GR" ValorUnitario="30.555556" Importe="30.555556" ObjetoImp="02">
+<cfdi:Impuestos>
+<cfdi:Traslados>
+<cfdi:Traslado Base="30.56" Impuesto="003" TipoFactor="Tasa" TasaOCuota="0.080000" Importe="2.44"/>
+<cfdi:Traslado Base="33.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00"/>
+</cfdi:Traslados>
+</cfdi:Impuestos>
+</cfdi:Concepto>
+<cfdi:Concepto ClaveProdServ="50181900" NoIdentificacion="7501030472698" Cantidad="1.00" ClaveUnidad="EA" Unidad="EA" Descripcion="BIMBUNUELOS SP 6P 99G BIMBO" ValorUnitario="31.481481" Importe="31.481481" ObjetoImp="02">
+<cfdi:Impuestos>
+<cfdi:Traslados>
+<cfdi:Traslado Base="31.48" Impuesto="003" TipoFactor="Tasa" TasaOCuota="0.080000" Importe="2.52"/>
+<cfdi:Traslado Base="34.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00"/>
+</cfdi:Traslados>
+</cfdi:Impuestos>
+</cfdi:Concepto>
+<cfdi:Concepto ClaveProdServ="50202309" NoIdentificacion="7501035046375" Cantidad="1.00" ClaveUnidad="EA" Unidad="EA" Descripcion="BOOST 235ML" ValorUnitario="28.448276" Importe="28.448276" ObjetoImp="02">
+<cfdi:Impuestos>
+<cfdi:Traslados>
+<cfdi:Traslado Base="28.45" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="4.55"/>
+</cfdi:Traslados>
+</cfdi:Impuestos>
+</cfdi:Concepto>
+<cfdi:Concepto ClaveProdServ="50192100" NoIdentificacion="7502294224047" Cantidad="1.00" ClaveUnidad="EA" Unidad="EA" Descripcion="CACAHUATE TAJIN BITZ 160 GR" ValorUnitario="20.37037" Importe="20.370370" ObjetoImp="02">
+<cfdi:Impuestos>
+<cfdi:Traslados>
+<cfdi:Traslado Base="20.37" Impuesto="003" TipoFactor="Tasa" TasaOCuota="0.080000" Importe="1.63"/>
+<cfdi:Traslado Base="22.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00"/>
+</cfdi:Traslados>
+</cfdi:Impuestos>
+</cfdi:Concepto>
+</cfdi:Conceptos>
+<cfdi:Impuestos TotalImpuestosTrasladados="11.14">
+<cfdi:Traslados>
+<cfdi:Traslado Impuesto="003" TipoFactor="Tasa" TasaOCuota="0.080000" Base="82.41" Importe="6.59"/>
+<cfdi:Traslado Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Base="89.00" Importe="0.00"/>
+<cfdi:Traslado Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Base="28.45" Importe="4.55"/>
+</cfdi:Traslados>
+</cfdi:Impuestos>
+<cfdi:Complemento><tfd:TimbreFiscalDigital xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/sitio_internet/cfd/TimbreFiscalDigital/TimbreFiscalDigitalv11.xsd" Version="1.1" UUID="72b058cb-f67f-43a5-a829-59bca2f31102" FechaTimbrado="2025-10-29T09:50:23" RfcProvCertif="AUR100128NN3" SelloSAT="mSHzM1KdiCK9RNu+ZLaZyUPOpq5AohKfJroEXg+dYZvjgIfop+65uCm/3dqqRKcKcHm/mx+qyhnxu6RHED/p6/fOhlKj//xbBXdO3eqf6xELJ/jglhqoZCmuWyEu8Oi5XgkLS6cnFk/KByNMf/lVuREUcSDXvq0tNV9vo6L1LDxO9BOYz6HUBwiKZllZWViOsndLJcDu1MiR0c+8+1qV09yGI+2OOeYeTBaFBRI/AgKjUOa6+g15m+n+d5ciNb/Svoel5O7HajDd+7L0hNATJqdq8aSdtxNGjgKtKqBj1GmoUWJbQVK4O7hgR5W0PK8UDyjT/HuRkaogK544otrgYw==" SelloCFD="TjsYkpTGPmSs5fAjYhVOYlbvNcS5zmbJ37JCZc6X0Q279qHH6YS6L04Sl9lBbxx1GLXtakX/ncj1aUfytuH/DsXaXGfi/ORZ0DlFiS4u5RZ1mlvZTtup43SpHMuuOl1bsEqv1QAvnn1h1lcA6rwPrnOzdTKaNje6wgDued99o/qjP7caWarKBKZKSr2r/tf2ymWZ8dCxxFs3P2CgOoB/xlZdF65RELlsp11yZihCZJlSMdUp2JA+JhoR/6SYCD16TXhl/25feDsbI4FTIqaBzSHSH4iviYzyrO0ZQz8M9jRP29HU6axck0QUlZOZvvqfsn/ChU7i7uNkzumc5INBqg==" NoCertificadoSAT="00001000000710611637" /></cfdi:Complemento><cfdi:Addenda>
+<ns:Oxxo xmlns:ns="https://www.oxxo.com/ns/addenda/oxxo/1" version="1.1">
+<ns:generales tipoDocumento="Factura"/>
+<ns:clavesDescripcion c_MetodoPago="Pago en una sola exhibición" c_RegimenFiscal="General de Ley Personas Morales" c_TipoDeComprobante="Ingreso" c_UsoCFDI="Gastos en general" e_RegimenFiscal="Opcional para Grupos de Sociedades"/>
+<ns:receptor>
+<ns:domicilioFiscalR calle="RIO NAZAS" ciudad="PUEBLA" codigoPostal="72570" colonia="JARDINES DE SAN MANUEL" estado="PUEBLA" municipio="PUEBLA" numero="5325" pais="MEX"/>
+</ns:receptor>
+<ns:datosTienda codigoPostal="76260" direccion="Libramiento Noroeste De Queret El Lobo 50LJI EL MARQUES, QRO" nombre="Libramiento Sur Qro"/>
+<ns:id>PORTAL108418731</ns:id>
+</ns:Oxxo>
+</cfdi:Addenda>
+</cfdi:Comprobante>
