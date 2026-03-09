@@ -360,6 +360,14 @@
                                     <span class="action-text">Autorizar Pagos</span>
                                 </a>
                             </div>
+                             <div class="col-4 mb-3">
+                                <a asp-controller="Admin" asp-action="Empleados" class="quick-action-btn" data-bs-toggle="tooltip">
+                                    <div class="action-icon">
+                                        <i class="fas fa-user-tie"></i>
+                                    </div>
+                                    <span class="action-text">Gestionar Personal</span>
+                                </a>
+                            </div>
                         }
 
                         @if (rolId == 6) // Solo Admin
@@ -420,7 +428,6 @@
                                 <span class="action-text">Ver Todas Solicitudes</span>
                             </a>
                         </div>
-                        <!-- RH NO tiene Gestionar Empleados -->
                     }
                 </div>
             </div>
