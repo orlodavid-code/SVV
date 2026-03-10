@@ -237,7 +237,7 @@ body {
         position: relative;
     }
 
-/* ===== STATS CARDS ===== */
+/* ===== STATS CARDS MEJORADAS ===== */
 .stats-card {
     background: var(--card-bg-transparent);
     border-radius: var(--radius-md);
@@ -247,6 +247,9 @@ body {
     position: relative;
     overflow: hidden;
     height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
     .stats-card::before {
@@ -271,10 +274,8 @@ body {
         }
 
 .stats-icon {
-    font-size: 2.2rem;
-    margin-bottom: 1rem;
+    font-size: 2rem;
     color: var(--viamtek-green);
-    display: inline-block;
     background: rgba(92, 200, 123, 0.1);
     width: 60px;
     height: 60px;
@@ -283,22 +284,34 @@ body {
     align-items: center;
     justify-content: center;
     border: 2px solid var(--border-color);
+    flex-shrink: 0;
 }
 
-.stats-content h3 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    color: var(--primary-text);
-    line-height: 1;
+.stats-content {
+    flex: 1;
+    min-width: 0; /* Permite que el texto se ajuste */
 }
 
-.stats-content p {
-    color: var(--secondary-text);
-    margin: 0;
-    font-size: 0.95rem;
-    font-weight: 500;
-}
+    .stats-content h3 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        color: var(--primary-text);
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .stats-content p {
+        color: var(--secondary-text);
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
 /* Variantes de stats cards */
 .stats-card.primary {
@@ -309,16 +322,6 @@ body {
         color: #63b3ed;
         background: rgba(99, 179, 237, 0.1);
         border-color: rgba(99, 179, 237, 0.3);
-    }
-
-.stats-card.warning {
-    border-color: #f6ad55;
-}
-
-    .stats-card.warning .stats-icon {
-        color: #f6ad55;
-        background: rgba(246, 173, 85, 0.1);
-        border-color: rgba(246, 173, 85, 0.3);
     }
 
 .stats-card.success {
