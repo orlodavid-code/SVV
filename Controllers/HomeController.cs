@@ -177,12 +177,20 @@ namespace SVV.Controllers
                     .AsNoTracking()
                     .CountAsync(s => s.EmpleadoId == empleadoId && s.EstadoId == 10);
 
-                // TOTAL DE ANTICIPOS AUTORIZADOS PARA ESTE EMPLEADO
+                // Obtener IDs de solicitudes que ya tienen al menos una comprobación saldada
+                var solicitudesConComprobacionSaldada = await _context.ComprobacionesViaje
+                    .AsNoTracking()
+                    .Where(c => c.EstadoComprobacionId == 4) // 4 = SALDADA
+                    .Select(c => c.SolicitudViajeId)
+                    .Distinct()
+                    .ToListAsync();
+
+                // Sumar anticipos de solicitudes que NO están en esa lista
                 ViewBag.TotalAnticiposAutorizados = await _context.Anticipos
                     .AsNoTracking()
-                    .Include(a => a.SolicitudViaje)
                     .Where(a => a.SolicitudViaje.EmpleadoId == empleadoId &&
-                               (a.Estado == "AUTORIZADO" || a.Estado == "LIQUIDADO"))
+                               (a.Estado == "AUTORIZADO" || a.Estado == "LIQUIDADO") &&
+                               !solicitudesConComprobacionSaldada.Contains(a.SolicitudViajeId))
                     .SumAsync(a => (decimal?)a.MontoAutorizado) ?? 0m;
 
                 // HISTÓRICO DE SOLICITUDES RECIENTES DEL EMPLEADO
