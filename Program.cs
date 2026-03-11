@@ -60,9 +60,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
         options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
-            ? Microsoft.AspNetCore.Http.CookieSecurePolicy.None
-            : Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
+        options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest;
         options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
         options.ReturnUrlParameter = "returnUrl";
         options.Events.OnSigningOut = async context =>
@@ -73,7 +71,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
             await Task.CompletedTask;
         };
     });
-
 // Políticas de autorización
 builder.Services.AddAuthorization(options =>
 {
@@ -91,9 +88,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
     options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
     options.Cookie.Name = ".AspNetCore.Session";
-    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
-        ? Microsoft.AspNetCore.Http.CookieSecurePolicy.None
-        : Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
+    options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest;
 });
 
 var app = builder.Build();
@@ -120,7 +115,7 @@ else
     app.UseDeveloperExceptionPage();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();

@@ -24,17 +24,20 @@ namespace SVV.Services
         private readonly ITempDataProvider _tempDataProvider;
         private readonly IServiceProvider _serviceProvider;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IConfiguration _configuration; 
 
         public RazorViewToStringRenderer(
             IRazorViewEngine viewEngine,
             ITempDataProvider tempDataProvider,
             IServiceProvider serviceProvider,
-            IHttpContextAccessor httpContextAccessor) // AGREGAR ESTE PARÁMETRO
+            IHttpContextAccessor httpContextAccessor,
+            IConfiguration configuration)
         {
             _viewEngine = viewEngine;
             _tempDataProvider = tempDataProvider;
             _serviceProvider = serviceProvider;
-            _httpContextAccessor = httpContextAccessor; // GUARDAR LA REFERENCIA
+            _httpContextAccessor = httpContextAccessor;
+            _configuration = configuration;
         }
 
         public async Task<string> RenderViewToStringAsync<TModel>(string viewName, TModel model)
