@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -24,7 +25,7 @@ namespace SVV.Services
         private readonly ITempDataProvider _tempDataProvider;
         private readonly IServiceProvider _serviceProvider;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IConfiguration _configuration; 
+        private readonly IConfiguration _configuration;
 
         public RazorViewToStringRenderer(
             IRazorViewEngine viewEngine,
@@ -63,7 +64,6 @@ namespace SVV.Services
                 new HtmlHelperOptions()
             );
 
-            // CONFIGURAR RUTAS PARA EVITAR ERRORES DE URL HELPER
             viewContext.RouteData = new RouteData();
 
             await view.RenderAsync(viewContext);
@@ -72,7 +72,6 @@ namespace SVV.Services
 
         private IView FindView(ActionContext actionContext, string viewName)
         {
-            // MEJORAR LA BÚSQUEDA DE VISTAS
             var getViewResult = _viewEngine.GetView(executingFilePath: null, viewPath: viewName, isMainPage: false);
             if (getViewResult.Success)
                 return getViewResult.View;
@@ -95,7 +94,6 @@ namespace SVV.Services
 
         private ActionContext GetActionContext()
         {
-            // USAR CONTEXTO HTTP REAL SI ESTÁ DISPONIBLE
             var httpContext = _httpContextAccessor.HttpContext;
 
             if (httpContext == null)
@@ -105,9 +103,21 @@ namespace SVV.Services
                     RequestServices = _serviceProvider
                 };
 
-                // CONFIGURAR ESQUEMA Y HOST PARA URLs
-               // httpContext.Request.Scheme = "https";
-                httpContext.Request.Host = new HostString("localhost");
+                // Leer la URL base desde la configuración (appsettings.json)
+                var baseUrl = _configuration["AppBaseUrl"];
+                if (!string.IsNullOrEmpty(baseUrl))
+                {
+                    var uri = new Uri(baseUrl);
+                    httpContext.Request.Scheme = uri.Scheme;
+                    httpContext.Request.Host = new HostString(uri.Host, uri.Port);
+                    httpContext.Request.PathBase = uri.AbsolutePath.TrimEnd('/');
+                }
+                else
+                {
+                    // Fallback seguro: usar localhost (solo para desarrollo)
+                    httpContext.Request.Scheme = "http";
+                    httpContext.Request.Host = new HostString("localhost");
+                }
             }
 
             return new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
