@@ -307,7 +307,49 @@
     border-color: var(--viamtek-green);
     box-shadow: 0 4px 12px rgba(92, 200, 123, 0.3);
 }
+#departamento {
+    background-color: rgba(30, 40, 50, 0.9) !important;
+    color: var(--primary-text) !important;
+    border: 1px solid var(--border-light) !important;
+    backdrop-filter: blur(10px);
+}
 
+    #departamento option {
+        background-color: var(--card-bg) !important;
+        color: var(--primary-text) !important;
+        padding: 0.75rem 1rem;
+        transition: background-color var(--transition-fast);
+        border-bottom: 1px solid var(--border-light);
+    }
+
+        #departamento option:hover,
+        #departamento option:checked {
+            background-color: var(--viamtek-dark-green) !important;
+            color: var(--color-white) !important;
+            font-weight: 600;
+        }
+
+#escenario {
+    background-color: rgba(30, 40, 50, 0.9) !important;
+    color: var(--primary-text) !important;
+    border: 1px solid var(--border-light) !important;
+    backdrop-filter: blur(10px);
+}
+
+    #escenario option {
+        background-color: var(--card-bg) !important;
+        color: var(--primary-text) !important;
+        padding: 0.75rem 1rem;
+        transition: background-color var(--transition-fast);
+        border-bottom: 1px solid var(--border-light);
+    }
+
+        #escenario option:hover,
+        #escenario option:checked {
+            background-color: var(--viamtek-dark-green) !important;
+            color: var(--color-white) !important;
+            font-weight: 600;
+        }
 /* Botón aplicar filtros */
 #aplicarFiltros {
     background: var(--button-gradient);
