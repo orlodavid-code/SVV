@@ -135,13 +135,15 @@ app.Use(async (context, next) =>
 
 app.UseAuthorization();
 
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Auth}/{action=Login}/{id?}");
+
 // Rutas
 app.MapControllerRoute(
     name: "api",
     pattern: "api/{controller}/{action}/{id?}");
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Auth}/{action=Login}/{id?}");
+
 
 app.Run();
