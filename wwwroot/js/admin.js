@@ -276,8 +276,6 @@ function showSimpleNotification(title, message, type = 'info') {
 function showFormNotification(message, type = 'error') {
     showSimpleNotification(type === 'error' ? 'Error' : 'Advertencia', message, type);
 }
-// SECCIÓN: EFECTOS VISUALES Y ANIMACIONES
- */
 function setupVisualEffects() {
     setupCardHoverEffects();
     setupEntryAnimations();

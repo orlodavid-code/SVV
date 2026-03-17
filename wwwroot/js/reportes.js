@@ -527,7 +527,7 @@ class SistemaReportes {
             link.href = chart.toBase64Image();
             link.click();
         } catch (error) {
-            console.error(`SistemaReportes: Error exportando gráfico ${chartId}`, error);
+           console.error('SistemaReportes: Error exportando gráfico ${chartId}', error);
         }
     }
 
