@@ -527,8 +527,6 @@
             console.error(`SistemaReportes: Error exportando gráfico ${chartId}`, error);
         }
     }
-
-    // INICIALIZACIÓN DE TABLA DATA TABLE CON SERVER-SIDE PROCESSING
     inicializarTablaDetalle() {
         console.log('SistemaReportes: Inicializando tabla detalle');
 
@@ -546,10 +544,10 @@
             order: [[0, 'asc']],
             pageLength: 25,
             lengthMenu: [10, 25, 50, 100],
-            language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-MX.json' },
+            language: { url: '/data/datatables/es-MX.json' },
 
             ajax: {
-                url: '/Reportes/api/GetDetalleGastos',
+                url: 'Viaticos/Reportes/api/GetDetalleGastos',
                 type: 'GET',
                 data: d => {
                     const filtros = this.obtenerFiltrosActuales();

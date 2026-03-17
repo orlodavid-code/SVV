@@ -54,12 +54,15 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options =>
     {
         options.Cookie.Name = "SVV.Auth";
-        options.LoginPath = "/Auth/Login";
-        options.LogoutPath = "/Auth/Logout";
-        options.AccessDeniedPath = "/Auth/AccessDenied";
+        // 👇 IMPORTANTE: Rutas de login/logout con el prefijo de la aplicación
+        options.LoginPath = "/Viaticos/Auth/Login";
+        options.LogoutPath = "/Viaticos/Auth/Logout";
+        options.AccessDeniedPath = "/Viaticos/Auth/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
         options.Cookie.HttpOnly = true;
+        // 👇 Path de la cookie para que solo se envíe en /Viaticos
+        options.Cookie.Path = "/Viaticos";
         options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest;
         options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
         options.ReturnUrlParameter = "returnUrl";
@@ -71,6 +74,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
             await Task.CompletedTask;
         };
     });
+
 // Políticas de autorización
 builder.Services.AddAuthorization(options =>
 {
@@ -88,13 +92,18 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
     options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
     options.Cookie.Name = ".AspNetCore.Session";
+    // 👇 Path de la cookie de sesión
+    options.Cookie.Path = "/Viaticos";
     options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest;
 });
 
 var app = builder.Build();
 
+// 👇 1. Primero: definir el path base (indica que la app está en /Viaticos)
+app.UsePathBase("/Viaticos");
+
 // Logging solo en desarrollo
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsProduction())
 {
     app.Use(async (context, next) =>
     {
@@ -105,7 +114,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-if (!app.Environment.IsDevelopment())
+// 2. Middleware de manejo de errores (después de UsePathBase)
+if (!app.Environment.IsProduction())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
@@ -115,13 +125,19 @@ else
     app.UseDeveloperExceptionPage();
 }
 
-//app.UseHttpsRedirection();
+// 3. Archivos estáticos
 app.UseStaticFiles();
+
+// 4. Enrutamiento
 app.UseRouting();
+
+// 5. Sesión (después de UseRouting)
 app.UseSession();
+
+// 6. Autenticación
 app.UseAuthentication();
 
-// Middleware anti-caché
+// 7. Middleware anti-caché (opcional, puede ir antes o después de Authorization)
 app.Use(async (context, next) =>
 {
     if (context.User?.Identity?.IsAuthenticated == true)
@@ -133,17 +149,16 @@ app.Use(async (context, next) =>
     await next();
 });
 
+// 8. Autorización
 app.UseAuthorization();
 
+// 9. Mapeo de rutas
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Auth}/{action=Login}/{id?}");
-
 // Rutas
 app.MapControllerRoute(
     name: "api",
     pattern: "api/{controller}/{action}/{id?}");
-
-
 
 app.Run();
