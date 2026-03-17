@@ -252,7 +252,8 @@
             warning: @Html.Raw(cleanWarning != null ? $"'{cleanWarning}'" : "null"),
             info: @Html.Raw(cleanInfo != null ? $"'{cleanInfo}'" : "null")
         };
-
+             // ===== DEFINICIÓN GLOBAL DE BASE_URL =====
+        window.BASE_URL = '@Url.Content("~")';
         // Mostrar alertas automáticamente al cargar la página
         $(document).ready(function() {
             // Función para mostrar alertas

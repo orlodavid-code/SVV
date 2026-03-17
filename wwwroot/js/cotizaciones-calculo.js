@@ -1,9 +1,10 @@
 ﻿// cotizaciones-calculo.js - Sistema de Cálculo Automático de Cotizaciones
-// Responsable: Cálculo automático de costos de viaje basado en rutas y parámetros
+const BASE_URL = window.BASE_URL || (window.location.pathname.includes('/Viaticos') ? '/Viaticos' : '');
 
 class CalculoAutomaticoManager {
     constructor() {
-        this.apiBase = '/api/CotizacionesApi';
+        // Se añade BASE_URL para que la ruta sea completa
+        this.apiBase = `${BASE_URL}/api/CotizacionesApi`;
         this.isCalculating = false;
         this.solicitudId = document.getElementById('SolicitudViajeId')?.value;
         this.init();

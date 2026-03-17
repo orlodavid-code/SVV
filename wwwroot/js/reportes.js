@@ -1,4 +1,7 @@
-﻿class SistemaReportes {
+﻿// Si no existe BASE_URL global, lo definimos (por si acaso)
+const BASE_URL = window.BASE_URL || (window.location.pathname.includes('/Viaticos') ? '/Viaticos' : '');
+
+class SistemaReportes {
     constructor() {
         this.charts = {};
         this.isLoading = false;
@@ -163,7 +166,7 @@
             if (!canvas) return;
 
             const params = this.construirParametros();
-            const response = await fetch(`/Reportes/api/GetGastosPorDepartamento?${params}`);
+            const response = await fetch(`${BASE_URL}/Reportes/api/GetGastosPorDepartamento?${params}`);
 
             if (!response.ok) {
                 this.mostrarMensajeEnGrafico(canvas.id, 'Sin datos');
@@ -217,7 +220,7 @@
             if (!canvas) return;
 
             const params = this.construirParametros();
-            const response = await fetch(`/Reportes/api/GetAnticiposMayores?${params}&top=10`);
+            const response = await fetch(`${BASE_URL}/Reportes/api/GetAnticiposMayores?${params}&top=10`);
 
             if (!response.ok) {
                 this.mostrarMensajeEnGrafico(canvas.id, 'Sin datos');
@@ -274,7 +277,7 @@
             if (!canvas) return;
 
             const params = this.construirParametros();
-            const response = await fetch(`/Reportes/api/GetEstadisticasPorEscenario?${params}`);
+            const response = await fetch(`${BASE_URL}/Reportes/api/GetEstadisticasPorEscenario?${params}`);
 
             if (!response.ok) {
                 this.mostrarMensajeEnGrafico(canvas.id, 'Sin datos');
@@ -329,7 +332,7 @@
             if (!canvas) return;
 
             const params = this.construirParametros();
-            const response = await fetch(`/Reportes/api/GetComprobacionesPorEstado?${params}`);
+            const response = await fetch(`${BASE_URL}/Reportes/api/GetComprobacionesPorEstado?${params}`);
 
             if (!response.ok) {
                 this.mostrarMensajeEnGrafico(canvas.id, 'Sin datos');
@@ -384,7 +387,7 @@
             if (!canvas) return;
 
             const params = this.construirParametros();
-            const response = await fetch(`/Reportes/api/GetGastosMensuales?${params}`);
+            const response = await fetch(`${BASE_URL}/Reportes/api/GetGastosMensuales?${params}`);
 
             if (!response.ok) {
                 this.mostrarMensajeEnGrafico(canvas.id, 'Sin datos');
@@ -527,6 +530,7 @@
             console.error(`SistemaReportes: Error exportando gráfico ${chartId}`, error);
         }
     }
+
     inicializarTablaDetalle() {
         console.log('SistemaReportes: Inicializando tabla detalle');
 
@@ -544,10 +548,10 @@
             order: [[0, 'asc']],
             pageLength: 25,
             lengthMenu: [10, 25, 50, 100],
-            language: { url: '/data/datatables/es-MX.json' },
+            language: { url: `${BASE_URL}/data/datatables/es-MX.json` }, // <-- Corregido con BASE_URL
 
             ajax: {
-                url: 'Viaticos/Reportes/api/GetDetalleGastos',
+                url: `${BASE_URL}/Reportes/api/GetDetalleGastos`, // <-- Corregido con BASE_URL y barra inicial
                 type: 'GET',
                 data: d => {
                     const filtros = this.obtenerFiltrosActuales();
@@ -600,7 +604,7 @@
                     orderable: false,
                     searchable: false,
                     render: id => `
-                    <a href="/Reportes/DetallesCompletos/${id}"
+                    <a href="${BASE_URL}/Reportes/DetallesCompletos/${id}"
                        class="btn btn-sm btn-primary"
                        data-bs-toggle="tooltip"
                        title="Ver expediente completo">
@@ -760,7 +764,7 @@
     async cargarResumenGeneral() {
         try {
             const params = this.construirParametros();
-            const response = await fetch(`/Reportes/api/GetResumenGeneral?${params}`);
+            const response = await fetch(`${BASE_URL}/Reportes/api/GetResumenGeneral?${params}`);
 
             if (!response.ok) return;
 
@@ -864,7 +868,7 @@
     exportarExcel() {
         try {
             const params = this.construirParametros();
-            const url = `/Reportes/api/ExportarExcel?${params}&tipoReporte=COMPLETO`;
+            const url = `${BASE_URL}/Reportes/api/ExportarExcel?${params}&tipoReporte=COMPLETO`;
             window.open(url, '_blank');
         } catch (error) {
             console.error('SistemaReportes: Error exportando Excel', error);
