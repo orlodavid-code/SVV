@@ -317,7 +317,7 @@
             mostrarLoading('Cargando detalles para autorización...');
 
             $.ajax({
-                url: '/Finanzas/CargarDetalleAutorizacion',
+                url:  window.BASE_URL + '/Finanzas/CargarDetalleAutorizacion',
                 type: 'GET',
                 data: { id: id },
                 success: function(data) {
@@ -332,7 +332,7 @@
 
         function cargarRevisionJP(id) {
             $.ajax({
-                url: '/Finanzas/CargarRevisionJP',
+                url: window.BASE_URL + '/Finanzas/CargarRevisionJP',
                 type: 'GET',
                 data: { id: id },
                 success: function(data) {
@@ -459,7 +459,7 @@
             mostrarLoading(`Procesando ${tipoAccion.toLowerCase()}...`);
 
             $.ajax({
-                url: '/Finanzas/AutorizarPagoIndividual',
+                url: window.BASE_URL + '/Finanzas/AutorizarPagoIndividual',
                 type: 'POST',
                 data: {
                     id: id,
@@ -690,7 +690,7 @@
             mostrarLoading('Autorizando pagos...');
 
             $.ajax({
-                url: '/Finanzas/AutorizarPagosMasivo',
+                url: window.BASE_URL + '/Finanzas/AutorizarPagosMasivo',
                 type: 'POST',
                 data: {
                     ids: ids,
