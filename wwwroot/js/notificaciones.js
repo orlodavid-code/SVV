@@ -1,5 +1,4 @@
-﻿
-class NotificacionesManager {
+﻿class NotificacionesManager {
     constructor() {
         this.config = {
             theme: {
