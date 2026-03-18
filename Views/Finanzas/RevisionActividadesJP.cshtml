@@ -568,7 +568,7 @@
 
         function cargarHistorialRevisiones() {
             $.ajax({
-                url: '/Finanzas/ObtenerHistorialRevisiones',
+                url: window.BASE_URL + '/Finanzas/ObtenerHistorialRevisiones',
                 type: 'GET',
                 success: function(data) {
                     $('#historialRevisiones').html(data);
