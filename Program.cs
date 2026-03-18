@@ -7,7 +7,6 @@ using QuestPDF.Infrastructure;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
-// === FORZAR CULTURA A MÉXICO ===  // 👈 Inserta esto AQUÍ
 var defaultCulture = new CultureInfo("es-MX");
 CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
 CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;

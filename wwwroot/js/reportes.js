@@ -527,7 +527,7 @@ class SistemaReportes {
             link.href = chart.toBase64Image();
             link.click();
         } catch (error) {
-           console.error('SistemaReportes: Error exportando gráfico ${chartId}', error);
+            console.error(`SistemaReportes: Error exportando gráfico ${chartId}`, error);
         }
     }
 
@@ -543,7 +543,7 @@ class SistemaReportes {
         this.tablaDetalleGastos = $('#tablaDetalleGastos').DataTable({
             processing: true,
             serverSide: true,
-            searching: true,
+            searching: false,
             ordering: true,
             order: [[0, 'asc']],
             pageLength: 25,
