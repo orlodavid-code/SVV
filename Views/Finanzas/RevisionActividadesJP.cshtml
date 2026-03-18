@@ -524,7 +524,7 @@
             mostrarLoading('Cargando detalles de la comprobación...');
 
             $.ajax({
-                url: '/Finanzas/CargarRevisionJP',
+                url: window.BASE_URL + '/Finanzas/CargarRevisionJP',
                 type: 'GET',
                 data: { id: id },
                 success: function(data) {

@@ -307,12 +307,12 @@
 
         function cargarDetalleAutorizacion(id) {
             if (!$('#detalle-autorizacion-css').length) {
-                $('<link>', {
-                    id: 'detalle-autorizacion-css',
-                    rel: 'stylesheet',
-                    href: '/css/detalle-autorizacion.css'
-                }).appendTo('head');
-            }
+            $('<link>', {
+                id: 'detalle-autorizacion-css',
+                rel: 'stylesheet',
+                href: window.BASE_URL + '/css/detalle-autorizacion.css'   // ← usa BASE_URL
+            }).appendTo('head');
+        }
 
             mostrarLoading('Cargando detalles para autorización...');
 
