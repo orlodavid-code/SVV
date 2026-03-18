@@ -223,7 +223,7 @@
             async function cargarEstados() {
                 try {
                     console.log('Cargando datos de estados desde servidor...');
-                    const response = await fetch('/data/estados-mexico.json');
+                    const response = await fetch(window.BASE_URL + '/data/estados-mexico.json');
                     if (!response.ok) throw new Error('Error en la respuesta del servidor');
 
                     const data = await response.json();
