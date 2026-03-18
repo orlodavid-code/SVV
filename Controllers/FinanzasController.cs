@@ -800,8 +800,6 @@ namespace SVV.Controllers
         [HttpGet]
         public async Task<IActionResult> ExportarCotizacionesExcel()
         {
-            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-
             try
             {
                 var cotizaciones = await _context.CotizacionesFinanzas
