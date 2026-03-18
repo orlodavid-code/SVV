@@ -542,7 +542,7 @@ class SistemaReportes {
 
         this.tablaDetalleGastos = $('#tablaDetalleGastos').DataTable({
             processing: true,
-            serverSide: true,
+            serverSide: false,
             searching: false,
             ordering: true,
             order: [[0, 'asc']],
