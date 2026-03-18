@@ -486,11 +486,6 @@
     <script>
         let estadosData = [];
         const LIMITE_PERSONAS = 30;
-
-        // ============================================
-        // INICIALIZACIÓN GLOBAL (UNA SOLA VEZ)
-        // ============================================
-
         $(async function () {
             console.log('Inicializando formulario de solicitud...');
 
@@ -556,7 +551,7 @@
 
         async function cargarEstados() {
             try {
-                const response = await fetch('/data/estados-mexico.json');
+                const response = await fetch(window.BASE_URL + 'data/estados-mexico.json');
                 if (!response.ok) throw new Error('No se pudo cargar el JSON');
 
                 const data = await response.json();
