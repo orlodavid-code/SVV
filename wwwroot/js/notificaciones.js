@@ -1,7 +1,4 @@
-﻿// notificaciones.js - Sistema de Notificaciones y Confirmaciones Interactivas
-// Responsable: Gestión de alertas, confirmaciones y flujos de aprobación/rechazo
-// Dependencias: SweetAlert2, Animate.css, Bootstrap 5
-
+﻿
 class NotificacionesManager {
     constructor() {
         this.config = {
