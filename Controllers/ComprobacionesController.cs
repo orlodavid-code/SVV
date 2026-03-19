@@ -17,7 +17,7 @@ namespace SVV.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly ILogger<ComprobacionesController> _logger;
         private readonly INotificationQueue _queue;
-
+        private readonly IConfiguration _configuration;
         // CONSTRUCTOR CON INYECCIÓN DE DEPENDENCIAS PARA CONTEXTO, ENTORNO WEB, LOGGING Y COLA DE NOTIFICACIONES
         public ComprobacionesController(
             SvvContext context,
