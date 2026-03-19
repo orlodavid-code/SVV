@@ -495,6 +495,8 @@ namespace SVV.Controllers
         }
 
         // ==================== MÉTODOS AUXILIARES ====================
+        // ==================== MÉTODOS AUXILIARES ====================
+
         private async Task EnviarCorreoSinBloquear(SolicitudesViaje solicitud, string baseUrl, bool esParaFinanzas = false)
         {
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
@@ -517,11 +519,12 @@ namespace SVV.Controllers
                     }
 
                     var empleadoSolicitante = solicitudActualizada.Empleado;
+                    
+
                     var urlSolic = $"{baseUrl}/Aprobaciones/Detalles/{solicitud.Id}";
 
                     if (esParaFinanzas)
                     {
-                        // Caso: sin jefe directo → enviar a todos los de FINANZAS
                         var emailsFinanzas = await ObtenerEmailsPorRolConContexto(newContext, "FINANZAS");
                         if (!emailsFinanzas.Any())
                         {
@@ -557,7 +560,6 @@ namespace SVV.Controllers
                     }
                     else
                     {
-                        // Caso normal: hay jefe directo
                         if (empleadoSolicitante?.JefeDirecto == null || string.IsNullOrEmpty(empleadoSolicitante.JefeDirecto.Email))
                         {
                             _logger.LogError("Error de lógica: se esperaba jefe directo pero no se encontró para solicitud {Id}", solicitud.Id);
@@ -595,6 +597,7 @@ namespace SVV.Controllers
                 }
             }
         }
+
         private async Task<List<string>> ObtenerEmailsPorRolConContexto(SvvContext context, string rolCodigo)
         {
             var emails = new List<string>();
@@ -609,7 +612,6 @@ namespace SVV.Controllers
                 if (!emails.Any())
                 {
                     _logger.LogWarning("No se encontraron empleados activos con rol {RolCodigo}", rolCodigo);
-                    // Opcional: puedes agregar un fallback a configuración, pero se recomienda tener los datos en BD
                 }
                 _logger.LogInformation("Encontrados {Count} emails para rol {RolCodigo}", emails.Count, rolCodigo);
             }
@@ -700,7 +702,13 @@ namespace SVV.Controllers
                     return;
                 }
 
-                var urlSolic = $"{Request.Scheme}://{Request.Host}/Aprobaciones/Detalles/{solicitud.Id}";
+                // Obtener la URL base desde configuración
+                var baseUrl = _configuration["AppBaseUrl"];
+                if (string.IsNullOrEmpty(baseUrl))
+                {
+                    baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                }
+                var urlSolic = $"{baseUrl}/Aprobaciones/Detalles/{solicitud.Id}";
                 string subject = $"Solicitud de Viáticos para aprobación - {solicitud.CodigoSolicitud}";
 
                 var empleadoSolicitante = await _context.Empleados.FindAsync(solicitud.EmpleadoId);
@@ -753,7 +761,12 @@ namespace SVV.Controllers
                     return;
                 }
 
-                var urlSolic = $"{Request.Scheme}://{Request.Host}/Aprobaciones/Detalles/{solicitud.Id}";
+                var baseUrl = _configuration["AppBaseUrl"];
+                if (string.IsNullOrEmpty(baseUrl))
+                {
+                    baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                }
+                var urlSolic = $"{baseUrl}/Aprobaciones/Detalles/{solicitud.Id}";
                 string subject = $"Solicitud de Viáticos (Sin Jefe) - {solicitud.CodigoSolicitud}";
 
                 foreach (var email in emailsFinanzas)
@@ -789,6 +802,7 @@ namespace SVV.Controllers
                 _logger.LogError(ex, "Error al enviar notificación a Finanzas para solicitud {Id}", solicitud.Id);
             }
         }
+
         private async Task EnviarNotificacionRH(SolicitudesViaje solicitud, Empleados empleadoSolicitante, string tipoNotificacion)
         {
             try
@@ -806,7 +820,12 @@ namespace SVV.Controllers
                     return;
                 }
 
-                var urlSolic = $"{Request.Scheme}://{Request.Host}/Solicitudes/Detalles/{solicitud.Id}";
+                var baseUrl = _configuration["AppBaseUrl"];
+                if (string.IsNullOrEmpty(baseUrl))
+                {
+                    baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                }
+                var urlSolic = $"{baseUrl}/Solicitudes/Detalles/{solicitud.Id}";
                 string subject = tipoNotificacion == "BORRADOR"
                     ? $"Nueva Solicitud de Viáticos (Borrador) - {solicitud.CodigoSolicitud}"
                     : $"Nueva Solicitud de Viáticos - {solicitud.CodigoSolicitud}";

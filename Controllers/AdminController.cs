@@ -295,25 +295,29 @@ namespace SVV.Controllers
         {
             try
             {
-                var baseUrl = $"{Request.Scheme}://{Request.Host}";
-
-                var subject = "Bienvenido al Sistema de Viáticos de Viamtek";
+                // Leer la URL base desde la configuración (appsettings.json)
+                var baseUrl = _configuration["AppBaseUrl"];
+                if (string.IsNullOrEmpty(baseUrl))
+                {
+                    // Fallback para desarrollo local (sin path base)
+                    baseUrl = $"{Request.Scheme}://{Request.Host}";
+                }
 
                 _queue.Enqueue(new Services.NotificationItem
                 {
                     ToEmail = empleado.Email,
-                    Subject = subject,
+                    Subject = "Bienvenido al Sistema de Viáticos de Viamtek",
                     TemplateName = "/Views/Emails/BienvenidaEmpleado.cshtml",
                     Model = new
                     {
                         Empleado = empleado,
-                        UrlLogin = $"{baseUrl}/Auth/Login",
+                        UrlLogin = $"{baseUrl}/Auth/Login",  // Ahora incluye /Viaticos si está configurado
                         ContrasenaTemporal = "Temp123!",
                         BaseUrl = baseUrl
                     }
                 });
 
-                Console.WriteLine($"Correo de bienvenida encolado para {empleado.Email}");
+                Console.WriteLine($"Correo de bienvenida encolado para {empleado.Email} con URL base: {baseUrl}");
             }
             catch (Exception ex)
             {

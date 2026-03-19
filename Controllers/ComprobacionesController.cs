@@ -1083,9 +1083,9 @@ namespace SVV.Controllers
             try
             {
                 var finanzasUsers = await _context.Empleados
-                  .Include(e => e.Rol)
-                  .Where(e => e.Rol.Codigo == "FINANZAS" && e.Activo == true)
-                  .ToListAsync();
+                    .Include(e => e.Rol)
+                    .Where(e => e.Rol.Codigo == "FINANZAS" && e.Activo == true)
+                    .ToListAsync();
 
                 // ESTADÍSTICAS DE GASTOS PARA NOTIFICACIÓN
                 var gastos = await _context.GastosReales
@@ -1141,6 +1141,8 @@ namespace SVV.Controllers
         {
             try
             {
+                var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+
                 _queue.Enqueue(new Services.NotificationItem
                 {
                     ToEmail = usuarioFinanzas.Email,
@@ -1158,9 +1160,8 @@ namespace SVV.Controllers
                         GastosCompletos = gastosConDocumentos,
                         TotalGastos = totalGastos,
                         PorcentajeCompletos = totalGastos > 0 ? ((double)gastosConDocumentos / totalGastos * 100) : 0,
-                        EnlaceRevisar = Url.Action("DetallesFactura", "Finanzas", new { id = comprobacion.Id },
-                            protocol: HttpContext.Request.Scheme),
-                        EnlaceDashboard = Url.Action("Facturas", "Finanzas", null, protocol: HttpContext.Request.Scheme)
+                        EnlaceRevisar = $"{baseUrl}/Finanzas/DetallesFactura/{comprobacion.Id}",
+                        EnlaceDashboard = $"{baseUrl}/Finanzas/Facturas"
                     }
                 });
 
@@ -1181,6 +1182,8 @@ namespace SVV.Controllers
                 var empleado = comprobacion.SolicitudViaje.Empleado;
                 if (empleado == null || string.IsNullOrEmpty(empleado.Email)) return;
 
+                var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+
                 _queue.Enqueue(new Services.NotificationItem
                 {
                     ToEmail = empleado.Email,
@@ -1192,9 +1195,11 @@ namespace SVV.Controllers
                         CodigoComprobacion = comprobacion.CodigoComprobacion,
                         Comentarios = comentarios,
                         FechaAprobacion = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
-                        Url = $"{Request.Scheme}://{Request.Host}/Comprobaciones/Index"
+                        Url = $"{baseUrl}/Comprobaciones/Index"
                     }
                 });
+
+                _logger.LogInformation("Correo de corrección aprobada encolado para {Email}", empleado.Email);
             }
             catch (Exception ex)
             {

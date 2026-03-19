@@ -648,7 +648,8 @@ namespace SVV.Controllers
                     return;
                 }
 
-                var urlSolic = $"{Request.Scheme}://{Request.Host}/Solicitudes/Detalles/{solicitud.Id}";
+                var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                var urlSolic = $"{baseUrl}/Solicitudes/Detalles/{solicitud.Id}";
                 string subject = $"Solicitud de Viáticos RECHAZADA - {solicitud.CodigoSolicitud}";
 
                 _queue.Enqueue(new Services.NotificationItem
@@ -686,7 +687,8 @@ namespace SVV.Controllers
                     return;
                 }
 
-                var urlSolic = $"{Request.Scheme}://{Request.Host}/Aprobaciones/Detalles/{solicitud.Id}";
+                var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                var urlSolic = $"{baseUrl}/Aprobaciones/Detalles/{solicitud.Id}";
                 string subject = $"Solicitud de Viáticos para aprobación - {solicitud.CodigoSolicitud}";
 
                 foreach (var email in emails)
@@ -732,7 +734,8 @@ namespace SVV.Controllers
                     return;
                 }
 
-                var urlSolic = $"{Request.Scheme}://{Request.Host}/Solicitudes/Detalles/{solicitud.Id}";
+                var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                var urlSolic = $"{baseUrl}/Solicitudes/Detalles/{solicitud.Id}";
                 string subject = $"Solicitud de Viáticos APROBADA - {solicitud.CodigoSolicitud}";
 
                 _queue.Enqueue(new Services.NotificationItem
@@ -770,7 +773,8 @@ namespace SVV.Controllers
                     return;
                 }
 
-                var urlSolic = $"{Request.Scheme}://{Request.Host}/Solicitudes/Detalles/{solicitud.Id}";
+                var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                var urlSolic = $"{baseUrl}/Solicitudes/Detalles/{solicitud.Id}";
                 string subject = $"Solicitud APROBADA por Dirección - {solicitud.CodigoSolicitud}";
 
                 foreach (var email in emailsFinanzas)

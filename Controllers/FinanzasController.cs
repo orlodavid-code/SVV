@@ -2612,7 +2612,13 @@ namespace SVV.Controllers
                     return;
                 }
 
-                var url = $"{Request.Scheme}://{Request.Host}/Comprobaciones/Index";
+                // Construir URL base
+                var baseUrl = _configuration["AppBaseUrl"];
+                if (string.IsNullOrEmpty(baseUrl))
+                {
+                    baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                }
+                var url = $"{baseUrl}/Comprobaciones/Index";
 
                 string mensajeProceso = "";
                 if (requiereJP)
@@ -2688,7 +2694,12 @@ namespace SVV.Controllers
 
                 if (jefe != null && !string.IsNullOrEmpty(jefe.Email))
                 {
-                    var url = $"{Request.Scheme}://{Request.Host}/Finanzas/RevisionActividadesJP";
+                    var baseUrl = _configuration["AppBaseUrl"];
+                    if (string.IsNullOrEmpty(baseUrl))
+                    {
+                        baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                    }
+                    var url = $"{baseUrl}/Finanzas/RevisionActividadesJP";
 
                     _queue.Enqueue(new ServicesNotificationItem
                     {
@@ -2725,7 +2736,12 @@ namespace SVV.Controllers
                         .Where(e => e.Rol.Codigo == "FINANZAS" && e.Activo == true)
                         .ToListAsync();
 
-                var url = $"{Request.Scheme}://{Request.Host}/Finanzas/AutorizacionesPago";
+                var baseUrl = _configuration["AppBaseUrl"];
+                if (string.IsNullOrEmpty(baseUrl))
+                {
+                    baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                }
+                var url = $"{baseUrl}/Finanzas/AutorizacionesPago";
 
                 foreach (var finanzas in finanzasUsers)
                 {
@@ -2745,7 +2761,7 @@ namespace SVV.Controllers
                             Url = url,
                             Fecha = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
                             Nota = "NO REQUIERE APROBACIÓN DEL Jefe Directo",
-                            AccionRequerida= "Procesar pago desde el módulo de Autorizaciones"
+                            AccionRequerida = "Procesar pago desde el módulo de Autorizaciones"
                         }
                     });
                 }
@@ -2783,7 +2799,12 @@ namespace SVV.Controllers
                  .Where(e => e.Activo == true && e.Rol.Codigo == "FINANZAS")
                  .ToListAsync();
 
-                var urlFinanzas = $"{Request.Scheme}://{Request.Host}/Finanzas/AutorizacionesPago";
+                var baseUrl = _configuration["AppBaseUrl"];
+                if (string.IsNullOrEmpty(baseUrl))
+                {
+                    baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                }
+                var urlFinanzas = $"{baseUrl}/Finanzas/AutorizacionesPago";
 
                 foreach (var finanzas in finanzasUsers)
                 {
@@ -2814,7 +2835,7 @@ namespace SVV.Controllers
                 var empleado = comprobacion.SolicitudViaje?.Empleado;
                 if (empleado != null && !string.IsNullOrEmpty(empleado.Email))
                 {
-                    var urlEmpleado = $"{Request.Scheme}://{Request.Host}/Comprobaciones/Detalle/{comprobacion.Id}";
+                    var urlEmpleado = $"{baseUrl}/Comprobaciones/Detalle/{comprobacion.Id}";
 
                     _queue.Enqueue(new ServicesNotificationItem
                     {
@@ -2849,7 +2870,12 @@ namespace SVV.Controllers
 
                 if (empleado != null && !string.IsNullOrEmpty(empleado.Email))
                 {
-                    var url = $"{Request.Scheme}://{Request.Host}/Comprobaciones/CorregirGastos/{comprobacion.Id}";
+                    var baseUrl = _configuration["AppBaseUrl"];
+                    if (string.IsNullOrEmpty(baseUrl))
+                    {
+                        baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                    }
+                    var url = $"{baseUrl}/Comprobaciones/CorregirGastos/{comprobacion.Id}";
 
                     _queue.Enqueue(new ServicesNotificationItem
                     {
@@ -2884,6 +2910,14 @@ namespace SVV.Controllers
 
                 if (empleado != null && !string.IsNullOrEmpty(empleado.Email))
                 {
+                    var baseUrl = _configuration["AppBaseUrl"];
+                    if (string.IsNullOrEmpty(baseUrl))
+                    {
+                        baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                    }
+                    // La URL no es necesaria para este correo, pero se puede incluir si se desea.
+                    // var url = $"{baseUrl}/Comprobaciones/Index";
+
                     _queue.Enqueue(new ServicesNotificationItem
                     {
                         ToEmail = empleado.Email,
@@ -2939,7 +2973,12 @@ namespace SVV.Controllers
                 }
 
                 var empleado = comprobacion.SolicitudViaje.Empleado;
-                var url = $"{Request.Scheme}://{Request.Host}/Comprobaciones/CorregirGastos/{comprobacion.Id}";
+                var baseUrl = _configuration["AppBaseUrl"];
+                if (string.IsNullOrEmpty(baseUrl))
+                {
+                    baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                }
+                var url = $"{baseUrl}/Comprobaciones/CorregirGastos/{comprobacion.Id}";
 
                 _queue.Enqueue(new ServicesNotificationItem
                 {
@@ -2987,7 +3026,12 @@ namespace SVV.Controllers
                 }
 
                 var empleado = comprobacion.SolicitudViaje.Empleado;
-                var url = $"{Request.Scheme}://{Request.Host}/Comprobaciones/CorregirGastos/{comprobacion.Id}";
+                var baseUrl = _configuration["AppBaseUrl"];
+                if (string.IsNullOrEmpty(baseUrl))
+                {
+                    baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                }
+                var url = $"{baseUrl}/Comprobaciones/CorregirGastos/{comprobacion.Id}";
 
                 _queue.Enqueue(new ServicesNotificationItem
                 {
@@ -3019,6 +3063,13 @@ namespace SVV.Controllers
                 var empleado = comprobacion.SolicitudViaje.Empleado;
                 if (empleado == null || string.IsNullOrEmpty(empleado.Email)) return;
 
+                var baseUrl = _configuration["AppBaseUrl"];
+                if (string.IsNullOrEmpty(baseUrl))
+                {
+                    baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                }
+                var url = $"{baseUrl}/Comprobaciones/Detalles/{comprobacion.Id}";
+
                 _queue.Enqueue(new ServicesNotificationItem
                 {
                     ToEmail = empleado.Email,
@@ -3031,7 +3082,7 @@ namespace SVV.Controllers
                         FechaAprobacion = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
                         Comentarios = comentarios,
                         CantidadGastosAprobados = cantidadGastosAprobados,
-                        Url = $"{Request.Scheme}://{Request.Host}/Comprobaciones/Detalles/{comprobacion.Id}"
+                        Url = url
                     }
                 });
             }
@@ -3053,6 +3104,13 @@ namespace SVV.Controllers
                     .Where(g => model.GastosSeleccionados.Contains(g.Id))
                     .ToList();
 
+                var baseUrl = _configuration["AppBaseUrl"];
+                if (string.IsNullOrEmpty(baseUrl))
+                {
+                    baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                }
+                var url = $"{baseUrl}/Comprobaciones/CorregirGastos/{comprobacion.Id}";
+
                 _queue.Enqueue(new ServicesNotificationItem
                 {
                     ToEmail = empleado.Email,
@@ -3072,7 +3130,7 @@ namespace SVV.Controllers
                             Monto = g.Monto.ToString("C"),
                             Fecha = g.FechaGasto.ToString("dd/MM/yyyy")
                         }).ToList(),
-                        Url = $"{Request.Scheme}://{Request.Host}/Comprobaciones/CorregirGastos/{comprobacion.Id}"
+                        Url = url
                     }
                 });
             }
@@ -3083,6 +3141,37 @@ namespace SVV.Controllers
         }
 
         // ============================================
+        // NOTIFICACIÓN A FINANZAS SOBRE CORRECCIONES COMPLETADAS (interna)
+        private async Task NotificarFinanzasCorreccionCompletada(ComprobacionesViaje comprobacion, int gastosCorregidos)
+        {
+            try
+            {
+                var finanzasUsers = await _context.Empleados
+                    .Include(e => e.Rol)
+                    .Where(e => e.Rol.Codigo == "FINANZAS" && e.Activo == true)
+                    .ToListAsync();
+
+                foreach (var finanzas in finanzasUsers)
+                {
+                    await CrearNotificacion(
+                        finanzas.Id,
+                        $"Corrección Completada - {comprobacion.CodigoComprobacion}",
+                        $"El empleado ha completado las correcciones de {gastosCorregidos} gastos.\n" +
+                        $"Comprobación: {comprobacion.CodigoComprobacion}\n" +
+                        $"Estado: CON_CORRECCIONES_PENDIENTES\n" +
+                        $"Haga clic en 'Revisar Corrección' para verificar los archivos corregidos.",
+                        "CORRECCION_COMPLETADA",
+                        comprobacion.Id
+                    );
+                }
+
+                _logger.LogInformation("Notificaciones enviadas a {Cantidad} usuarios de Finanzas", finanzasUsers.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al notificar a Finanzas");
+            }
+        }
         // MÉTODOS DE NOTIFICACIONES EN SISTEMA
         // ============================================
 
