@@ -324,7 +324,7 @@
             // Inicializar DataTable con configuración
             var table = $('#tablaFacturas').DataTable({
                 "language": {
-                    "url": "/data/datatables/Spanish.json"
+                      url: '@Url.Content("~/data/datatables/Spanish.json")'
                 },
                 "order": [[2, "desc"]], // Ordenar por fecha descendente
                 "responsive": true,
