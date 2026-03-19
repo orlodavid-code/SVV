@@ -2595,56 +2595,52 @@ namespace SVV.Controllers
         }
 
         // ============================================
+        private string ObtenerBaseUrl()
+        {
+            var baseUrl = _configuration["AppBaseUrl"];
+
+            if (string.IsNullOrEmpty(baseUrl))
+            {
+                baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+            }
+
+            return baseUrl.TrimEnd('/');
+        }
         // MÉTODOS DE ENVÍO DE CORREOS ELECTRÓNICOS
         // ============================================
 
         // ENVÍA CORREO DE VALIDACIÓN AL EMPLEADO
         private async Task EnviarCorreoValidacionEmpleado(ComprobacionesViaje comprobacion, string comentarios,
-                                                  decimal diferencia, string escenario, bool requiereJP)
+     decimal diferencia, string escenario, bool requiereJP)
         {
             try
             {
                 var empleado = comprobacion.SolicitudViaje.Empleado;
 
                 if (empleado == null || string.IsNullOrEmpty(empleado.Email))
-                {
-                    Console.WriteLine("No se pudo enviar correo: empleado o email no encontrado");
                     return;
-                }
 
-                // Construir URL base
-                var baseUrl = _configuration["AppBaseUrl"];
-                if (string.IsNullOrEmpty(baseUrl))
-                {
-                    baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
-                }
+                var baseUrl = ObtenerBaseUrl();
                 var url = $"{baseUrl}/Comprobaciones/Index";
 
                 string mensajeProceso = "";
+
                 if (requiereJP)
                 {
                     var jefeNombre = comprobacion.SolicitudViaje.Empleado.JefeDirecto != null
                         ? $"{comprobacion.SolicitudViaje.Empleado.JefeDirecto.Nombre} {comprobacion.SolicitudViaje.Empleado.JefeDirecto.Apellidos}"
                         : "Jefe de Proceso";
 
-                    mensajeProceso = $"Tu comprobación ha sido enviada a <strong>{jefeNombre}</strong> para revisión de actividades. " +
-                                    $"Una vez que sea aprobada, Finanzas procederá con el proceso de pago/reintegro.";
+                    mensajeProceso = $"Tu comprobación ha sido enviada a <strong>{jefeNombre}</strong> para revisión.";
                 }
                 else
                 {
-                    if (escenario == "REPOSICION_EMPRESA")
+                    mensajeProceso = escenario switch
                     {
-                        mensajeProceso = $"Finanzas procederá con el pago de <strong>{diferencia:C}</strong> a tu favor en los próximos días.";
-                    }
-                    else if (escenario == "REPOSICION_COLABORADOR")
-                    {
-                        mensajeProceso = $"Debes reintegrar a la empresa el monto de <strong>{diferencia:C}</strong>. " +
-                                        $"Finanzas se pondrá en contacto contigo para coordinar el proceso.";
-                    }
-                    else
-                    {
-                        mensajeProceso = "Tu comprobación ha sido validada y está lista para el proceso de liquidación.";
-                    }
+                        "REPOSICION_EMPRESA" => $"Finanzas pagará <strong>{diferencia:C}</strong>.",
+                        "REPOSICION_COLABORADOR" => $"Debes reintegrar <strong>{diferencia:C}</strong>.",
+                        _ => "Tu comprobación ha sido validada."
+                    };
                 }
 
                 _queue.Enqueue(new ServicesNotificationItem
@@ -2656,23 +2652,14 @@ namespace SVV.Controllers
                     {
                         EmpleadoNombre = $"{empleado.Nombre} {empleado.Apellidos}",
                         CodigoComprobacion = comprobacion.CodigoComprobacion,
-                        FechaProcesamiento = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
-                        TotalGastos = comprobacion.TotalGastosComprobados?.ToString("C") ?? "$0.00",
-                        TotalAnticipo = comprobacion.TotalAnticipo?.ToString("C") ?? "$0.00",
-                        Diferencia = (escenario == "REPOSICION_COLABORADOR" ? "-" : "") + diferencia.ToString("C"),
-                        Comentarios = comentarios,
                         Url = url,
-                        RequiereJP = requiereJP,
-                        MensajeProceso = mensajeProceso,
-                        Escenario = escenario
+                        MensajeProceso = mensajeProceso
                     }
                 });
-
-                Console.WriteLine($"Correo enviado al empleado: {empleado.Email}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al enviar correo al empleado: {ex.Message}");
+                Console.WriteLine(ex.Message);
             }
         }
 
@@ -2692,40 +2679,28 @@ namespace SVV.Controllers
                         .FirstOrDefaultAsync();
                 }
 
-                if (jefe != null && !string.IsNullOrEmpty(jefe.Email))
-                {
-                    var baseUrl = _configuration["AppBaseUrl"];
-                    if (string.IsNullOrEmpty(baseUrl))
-                    {
-                        baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
-                    }
-                    var url = $"{baseUrl}/Finanzas/RevisionActividadesJP";
+                if (jefe == null) return;
 
-                    _queue.Enqueue(new ServicesNotificationItem
+                var baseUrl = ObtenerBaseUrl();
+                var url = $"{baseUrl}/Finanzas/RevisionActividadesJP";
+
+                _queue.Enqueue(new ServicesNotificationItem
+                {
+                    ToEmail = jefe.Email,
+                    Subject = $"Revisión Pendiente - {comprobacion.CodigoComprobacion}",
+                    TemplateName = "/Views/Emails/ComprobacionPendienteJP.cshtml",
+                    Model = new
                     {
-                        ToEmail = jefe.Email,
-                        Subject = $"Revisión Pendiente - {comprobacion.CodigoComprobacion}",
-                        TemplateName = "/Views/Emails/ComprobacionPendienteJP.cshtml",
-                        Model = new
-                        {
-                            JefeNombre = $"{jefe.Nombre} {jefe.Apellidos}",
-                            EmpleadoNombre = $"{empleado.Nombre} {empleado.Apellidos}",
-                            CodigoComprobacion = comprobacion.CodigoComprobacion,
-                            Escenario = escenario,
-                            Diferencia = diferencia.ToString("C"),
-                            Comentarios = comentarios,
-                            Url = url,
-                            Fecha = DateTime.Now.ToString("dd/MM/yyyy HH:mm")
-                        }
-                    });
-                }
+                        Url = url,
+                        CodigoComprobacion = comprobacion.CodigoComprobacion
+                    }
+                });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al enviar correo al JP: {ex.Message}");
+                Console.WriteLine(ex.Message);
             }
         }
-
         // ENVÍA CORREO DE PROCESAMIENTO DE PAGO A FINANZAS
         private async Task EnviarCorreoProcesarPago(ComprobacionesViaje comprobacion, string comentarios, decimal diferencia, string escenario)
         {

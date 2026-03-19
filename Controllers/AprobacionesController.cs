@@ -636,6 +636,19 @@ namespace SVV.Controllers
             }
         }
 
+        // METoDO centrAL
+        private string ObtenerBaseUrl()
+        {
+            var baseUrl = _configuration["AppBaseUrl"];
+
+            if (string.IsNullOrEmpty(baseUrl))
+            {
+                baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+            }
+
+            return baseUrl.TrimEnd('/');
+        }
+
         // NOTIFICACIÓN DE RECHAZO AL EMPLEADO SOLICITANTE
         private async Task EnviarNotificacionRechazo(SolicitudesViaje solicitud, Empleados empleadoAprobador)
         {
@@ -648,7 +661,7 @@ namespace SVV.Controllers
                     return;
                 }
 
-                var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                var baseUrl = ObtenerBaseUrl();
                 var urlSolic = $"{baseUrl}/Solicitudes/Detalles/{solicitud.Id}";
                 string subject = $"Solicitud de Viáticos RECHAZADA - {solicitud.CodigoSolicitud}";
 
@@ -674,7 +687,6 @@ namespace SVV.Controllers
                 _logger.LogError(ex, "Error al enviar notificación de rechazo");
             }
         }
-
         // NOTIFICACIÓN A LA SIGUIENTE ETAPA DEL FLUJO DE APROBACIÓN
         private async Task EnviarNotificacionSiguienteEtapa(SolicitudesViaje solicitud, string siguienteEtapa)
         {
@@ -687,7 +699,7 @@ namespace SVV.Controllers
                     return;
                 }
 
-                var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                var baseUrl = ObtenerBaseUrl();
                 var urlSolic = $"{baseUrl}/Aprobaciones/Detalles/{solicitud.Id}";
                 string subject = $"Solicitud de Viáticos para aprobación - {solicitud.CodigoSolicitud}";
 
@@ -721,7 +733,6 @@ namespace SVV.Controllers
                 _logger.LogError(ex, "Error al enviar notificación a siguiente etapa");
             }
         }
-
         // NOTIFICACIÓN DE APROBACIÓN FINAL AL EMPLEADO SOLICITANTE
         private async Task EnviarNotificacionAprobacionFinal(SolicitudesViaje solicitud, Empleados empleadoAprobador)
         {
@@ -734,7 +745,7 @@ namespace SVV.Controllers
                     return;
                 }
 
-                var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                var baseUrl = ObtenerBaseUrl();
                 var urlSolic = $"{baseUrl}/Solicitudes/Detalles/{solicitud.Id}";
                 string subject = $"Solicitud de Viáticos APROBADA - {solicitud.CodigoSolicitud}";
 
@@ -760,7 +771,6 @@ namespace SVV.Controllers
                 _logger.LogError(ex, "Error al enviar notificación de aprobación final");
             }
         }
-
         // NOTIFICACIÓN A FINANZAS CUANDO DIRECCIÓN HA APROBADO
         private async Task EnviarNotificacionAprobacionFinanzas(SolicitudesViaje solicitud, Empleados empleadoAprobador)
         {
@@ -773,7 +783,7 @@ namespace SVV.Controllers
                     return;
                 }
 
-                var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                var baseUrl = ObtenerBaseUrl();
                 var urlSolic = $"{baseUrl}/Solicitudes/Detalles/{solicitud.Id}";
                 string subject = $"Solicitud APROBADA por Dirección - {solicitud.CodigoSolicitud}";
 
@@ -803,7 +813,6 @@ namespace SVV.Controllers
                 _logger.LogError(ex, "Error al enviar notificación a Finanzas sobre aprobación de Dirección");
             }
         }
-
         // OBTIENE LISTA DE EMAILS POR ROL SEGÚN CONFIGURACIÓN
         private async Task<List<string>> ObtenerEmailsPorRol(string rolCodigo)
         {

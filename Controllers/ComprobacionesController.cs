@@ -988,7 +988,18 @@ namespace SVV.Controllers
                 await _context.SaveChangesAsync();
             }
         }
+        //METODO BASE
+        private string ObtenerBaseUrl()
+        {
+            var baseUrl = _configuration["AppBaseUrl"];
 
+            if (string.IsNullOrEmpty(baseUrl))
+            {
+                baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+            }
+
+            return baseUrl.TrimEnd('/');
+        }
         // NOTIFICACIÓN A FINANZAS SOBRE CORRECCIONES COMPLETADAS
         private async Task NotificarFinanzasCorreccionCompletada(ComprobacionesViaje comprobacion, int gastosCorregidos)
         {
@@ -1020,7 +1031,6 @@ namespace SVV.Controllers
                 _logger.LogError(ex, "Error al notificar a Finanzas");
             }
         }
-
         // CREACIÓN DE NOTIFICACIONES EN SISTEMA CON PRIORIDAD DINÁMICA
         private async Task CrearNotificacion(int empleadoId, string titulo, string mensaje, string tipo, int? referenciaId)
         {
@@ -1132,16 +1142,16 @@ namespace SVV.Controllers
 
         // ENVÍO DE CORREO ELECTRÓNICO A FINANZAS SOBRE NUEVA COMPROBACIÓN
         private async Task EnviarCorreoFinanzasComprobacionEnviada(
-            Empleados usuarioFinanzas,
-            ComprobacionesViaje comprobacion,
-            Empleados empleado,
-            int gastosConDocumentos,
-            int totalGastos,
-            decimal montoTotal)
+         Empleados usuarioFinanzas,
+         ComprobacionesViaje comprobacion,
+         Empleados empleado,
+         int gastosConDocumentos,
+         int totalGastos,
+         decimal montoTotal)
         {
             try
             {
-                var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                var baseUrl = ObtenerBaseUrl();
 
                 _queue.Enqueue(new Services.NotificationItem
                 {
@@ -1182,7 +1192,7 @@ namespace SVV.Controllers
                 var empleado = comprobacion.SolicitudViaje.Empleado;
                 if (empleado == null || string.IsNullOrEmpty(empleado.Email)) return;
 
-                var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+                var baseUrl = ObtenerBaseUrl();
 
                 _queue.Enqueue(new Services.NotificationItem
                 {
