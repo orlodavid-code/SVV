@@ -615,7 +615,7 @@
                     mostrarLoading('Procesando aprobación...');
 
                     $.ajax({
-                        url: '/Finanzas/AprobarRevisionJP',
+                        url: window.BASE_URL + '/Finanzas/AprobarRevisionJP',
                         type: 'POST',
                         headers: {
                             'RequestVerificationToken': token
@@ -775,7 +775,7 @@
                     mostrarLoading('Enviando correcciones...');
 
                     $.ajax({
-                        url: '/Finanzas/RechazarRevisionJP',
+                        url: window.BASE_URL + '/Finanzas/RechazarRevisionJP',
                         type: 'POST',
                         headers: {
                             'RequestVerificationToken': token
